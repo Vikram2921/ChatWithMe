@@ -118,8 +118,8 @@ public class ChatRoom extends AppCompatActivity {
     private Message getDefaultObject() {
         Message message = new Message();
         message.setMessageId(MessageMaker.createMessageId(myUsername));
-        message.setReceiver(myUsername);
-        message.setSender(username);
+        message.setReceiver(username);
+        message.setSender(myUsername);
         message.setRoomId(roomid);
         return message;
     }

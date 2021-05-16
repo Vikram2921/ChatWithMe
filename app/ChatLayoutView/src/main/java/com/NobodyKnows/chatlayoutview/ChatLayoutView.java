@@ -57,7 +57,6 @@ public class ChatLayoutView extends RelativeLayout {
     private MessageConfiguration rightMessageConfiguration;
     private int sentSoundEffect = R.raw.message_added;
     private int receivedSoundEffect = R.raw.message_received;
-    private ImageView backgroundImage;
     private int blurRadius = 70;
 
     public ChatLayoutView(Context context) {
@@ -79,7 +78,6 @@ public class ChatLayoutView extends RelativeLayout {
         this.context = context;
         layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         root = (RelativeLayout) layoutInflater.inflate(R.layout.chatlayout,this,true);
-        backgroundImage = root.findViewById(R.id.background);
         recyclerView = root.findViewById(R.id.recyclerview);
         leftMessageConfiguration = new MessageConfiguration();
         rightMessageConfiguration = new MessageConfiguration();
@@ -227,39 +225,11 @@ public class ChatLayoutView extends RelativeLayout {
         if(message.getSender().equals(myUsername)) {
             return rightMessageConfiguration;
         } else {
-            if(playSentAndReceivedSoundEffect) {
+            if(playSentAndReceivedSoundEffect && message.getMessageStatus() != MessageStatus.SEEN) {
                 MediaPlayer.create(getContext(),receivedSoundEffect).start();
             }
             return leftMessageConfiguration;
         }
-    }
-
-    public void setBackgroundImage(String url) {
-        Glide.with(getContext()).load(url).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(int resource) {
-        Glide.with(getContext()).load(resource).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(Uri uri) {
-        Glide.with(getContext()).load(uri).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(File file) {
-        Glide.with(getContext()).load(file).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(byte[] bytes) {
-        Glide.with(getContext()).load(bytes).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(Bitmap bitmap) {
-        Glide.with(getContext()).load(bitmap).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
-    }
-
-    public void setBackgroundImage(Drawable drawable) {
-        Glide.with(getContext()).load(drawable).transform(new BlurTransformation(blurRadius)).into(backgroundImage);
     }
 
     private String getFormattedDate(Date date) {

@@ -12,9 +12,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.bumptech.glide.Glide;
+import com.github.tamir7.contacts.Contacts;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
@@ -31,12 +34,14 @@ public class Dashboard extends AppCompatActivity {
     private CircleImageView profile;
     private TextView name,status;
     private ViewPager viewPager;
+    private ImageView addChat,addConnection;
     private TabLayout tabLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         getSupportActionBar().hide();
+        Contacts.initialize(getApplicationContext());
         init();
     }
 
@@ -44,7 +49,7 @@ public class Dashboard extends AppCompatActivity {
         profile = findViewById(R.id.profile);
         name = findViewById(R.id.name);
         status = findViewById(R.id.status);
-
+        addChat = findViewById(R.id.addchat);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         DashboardFragment dashboardFragment = new DashboardFragment(getSupportFragmentManager());
@@ -54,6 +59,15 @@ public class Dashboard extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         loadInfo();
+        addChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(tabLayout.getSelectedTabPosition() == 0) {
+                    Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
+                    startActivity(intent);
+                }
+            }
+        });
     }
 
     private void loadInfo() {
