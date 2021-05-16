@@ -25,7 +25,7 @@ public class Message {
     private Date seenAt;
     private Boolean isRepliedMessage = false;
     private String repliedMessageId = "";
-    private MessageStatus messageStatus = MessageStatus.SENDING;
+    private MessageStatus messageStatus = MessageStatus.SENT;
     private MessageConfiguration messageConfiguration;
     private View replyMessageView;
     private View customView;

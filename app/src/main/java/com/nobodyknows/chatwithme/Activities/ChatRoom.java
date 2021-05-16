@@ -1,7 +1,9 @@
 package com.nobodyknows.chatwithme.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,16 +11,26 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.NobodyKnows.chatlayoutview.ChatLayoutView;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+
+import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -38,6 +50,7 @@ public class ChatRoom extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
         username = getIntent().getStringExtra("username");
+        username = "Testing";
         name = getIntent().getStringExtra("name");
         lastOnlineStatus = getIntent().getStringExtra("lastOnlineStatus");
         profile = getIntent().getStringExtra("profile");
@@ -66,6 +79,21 @@ public class ChatRoom extends AppCompatActivity {
         updateNameView();
         setupChatLayoutView();
         setupMessageBoxWork();
+        startListening();
+    }
+
+    private void startListening() {
+        firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()) {
+                    for(DocumentSnapshot documentSnapshot:task.getResult().getDocuments()) {
+                        chatLayoutView.addMessage(documentSnapshot.toObject(Message.class));
+                    }
+                } else {
+                }
+            }
+        });
     }
 
     private void setupMessageBoxWork() {
@@ -90,18 +118,18 @@ public class ChatRoom extends AppCompatActivity {
     private Message getDefaultObject() {
         Message message = new Message();
         message.setMessageId(MessageMaker.createMessageId(myUsername));
-        message.setSender(myUsername);
-        message.setReceiver(username);
+        message.setReceiver(myUsername);
+        message.setSender(username);
         message.setRoomId(roomid);
         return message;
     }
 
     private void sendNow(Message message) {
-        Log.d("TAGMESS", "sendNow: "+roomid+" "+message.getMessageId());
+        chatLayoutView.addMessage(message);
         firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                chatLayoutView.updateMessageStatus(message.getMessageId(), MessageStatus.SENT);
+                chatLayoutView.updateMessageStatus(message.getMessageId(), message.getMessageStatus());
             }
         });
     }
@@ -117,7 +145,27 @@ public class ChatRoom extends AppCompatActivity {
             public void onUploadRetry(Message message) {
 
             }
+
+            @Override
+            public void onMessageSeen(Message message) {
+                message.setMessageStatus(MessageStatus.SEEN);
+                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        chatLayoutView.updateMessageStatus(message.getMessageId(), message.getMessageStatus());
+                    }
+                });
+            }
         });
+        User user1 = new User();
+        user1.setName("Vikram");
+        user1.setUserId(myUsername);
+        chatLayoutView.addUser(user1);
+
+        User user2 = new User();
+        user2.setName("Vikram");
+        user2.setUserId(username);
+        chatLayoutView.addUser(user2);
     }
 
     private void updateNameView() {

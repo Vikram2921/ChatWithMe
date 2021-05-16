@@ -1,7 +1,6 @@
 package com.NobodyKnows.chatlayoutview.Adapters;
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,8 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
-import com.NobodyKnows.chatlayoutview.ViewHolders.DateAndInfoView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.InfoView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewRight;
 
@@ -29,7 +29,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Map<MessageType,String> downloadPath;
 
     //*************EXTRAS **************//
-    private final int DATE_AND_INFO_MESSAGE = 00;
+    private final int INFO_MESSAGE = 00;
+    private final int DATE_MESSAGE = 2921;
     private final int WARNNIG_MESSAGE = 01;
     //***********TEXT ***************//
     private final int SENT_TEXT_MESSAGE = 11;
@@ -82,9 +83,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         View item = null;
         RecyclerView.ViewHolder  viewHolder = null;
         switch (viewType) {
-            case DATE_AND_INFO_MESSAGE:
+            case INFO_MESSAGE:
                 item = layoutInflater.inflate(R.layout.infoview,parent,false);
-                viewHolder = new DateAndInfoView(item);
+                viewHolder = new InfoView(item);
+                break;
+            case DATE_MESSAGE:
+                item = layoutInflater.inflate(R.layout.dateview,parent,false);
+                viewHolder = new DateView(item);
                 break;
 //            case WARNNIG_MESSAGE:
 //                item = layoutInflater.inflate(R.layout.warning_view,parent,false);
@@ -197,8 +202,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         Message message = messages.get(position);
         holder.setIsRecyclable(true);
         switch (holder.getItemViewType()){
-            case DATE_AND_INFO_MESSAGE:
-                ((DateAndInfoView) holder).initalize(message.getMessage());
+            case INFO_MESSAGE:
+                ((InfoView) holder).initalize(message.getMessage());
+                break;
+            case DATE_MESSAGE:
+                ((DateView) holder).initalize(message.getMessage());
                 break;
 //            case WARNNIG_MESSAGE:
 //                ((WarningView) holder).initalize(message.getMessage());
@@ -283,8 +291,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemViewType(int position) {
        Message message = messages.get(position);
-       if(message.getMessageType() == MessageType.DATE || message.getMessageType() == MessageType.INFO) {
-           return DATE_AND_INFO_MESSAGE;
+       if(message.getMessageType() == MessageType.INFO) {
+           return INFO_MESSAGE;
+       } else if(message.getMessageType() == MessageType.DATE) {
+           return DATE_MESSAGE;
        } else if(message.getMessageType() == MessageType.WARNING) {
            return WARNNIG_MESSAGE;
        } else {

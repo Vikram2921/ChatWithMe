@@ -111,7 +111,7 @@
     </com.NobodyKnows.chatlayoutview.ChatLayoutView>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottompane"
-        android:background="@color/purple_500"
+        android:background="@drawable/messageinput"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -120,21 +120,23 @@
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/emoji"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:rotation="0"
+            app:layout_constraintTop_toTopOf="@id/send"
             app:layout_constraintRight_toLeftOf="@id/mb"
             android:src="@drawable/ic_baseline_emoji_emotions_24"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/send"
             app:layout_constraintLeft_toLeftOf="parent"></ImageView>
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mb"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/send"
             app:layout_constraintRight_toLeftOf="@id/send"
             app:layout_constraintLeft_toRightOf="@id/emoji"
-            app:layout_constraintTop_toTopOf="parent"
-            android:background="@drawable/messageinput"
+            android:elevation="4dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content">
             <EditText
@@ -142,6 +144,8 @@
                 android:textColor="#000"
                 android:background="#fff"
                 android:maxLines="3"
+                android:hint="Type your message"
+                android:focusable="true"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -155,8 +159,7 @@
             android:id="@+id/send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:rotation="0"
+            android:background="@drawable/sendbackground"
             android:src="@drawable/ic_baseline_send_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/mb"

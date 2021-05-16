@@ -165,12 +165,13 @@ public class ChatLayoutView extends RelativeLayout {
     public void addMessage(Message message) {
         if(!helper.messageIdExists(message.getMessageId())) {
             message = correctMessage(message);
-            helper.addMessageId(message.getMessageId());
             checkForDate(message);
-            messages.add(message);
             notifyAdapter(true);
             if(saveToDatabase) {
                 saveToDatabaseTable(message);
+            }
+            if(!message.getSender().equals(myUsername) && message.getMessageStatus() != MessageStatus.SEEN) {
+                chatLayoutListener.onMessageSeen(message);
             }
         }
     }
