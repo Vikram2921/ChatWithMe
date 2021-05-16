@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1041642278634",
+    "project_id": "chatwithme-97538",
+    "storage_bucket": "chatwithme-97538.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041642278634:android:7542942c81a0148098d193",
+        "android_client_info": {
+          "package_name": "com.nobodyknows.chatwithme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041642278634-vqgl21s396cfhvkunimlloq4mu8dq4hl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyxpkykgvQyZpdyYNQy6NoUvqk9XySNJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041642278634-vqgl21s396cfhvkunimlloq4mu8dq4hl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

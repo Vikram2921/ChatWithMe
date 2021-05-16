@@ -1,0 +1,3 @@
+include ':app:ChatLayoutView'
+include ':app'
+rootProject.name = "ChatWithMe"
