@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -16,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.Continuation;
@@ -26,13 +26,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.UploadTask;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard;
 import com.nobodyknows.chatwithme.Activities.Login;
-import com.nobodyknows.chatwithme.MainActivity;
-import com.nobodyknows.chatwithme.Models.Users;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 
 import java.io.File;
-import java.time.LocalDateTime;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -101,7 +98,7 @@ public class CreateUser extends AppCompatActivity {
     private void createUser(String fullname,String password) {
         continueButton.setText("Creating account...");
         continueButton.setEnabled(false);
-        Users users = new Users();
+        User users = new User();
         users.setName(fullname);
         users.setContactNumber(number);
         users.setPassword(password);
@@ -147,8 +144,8 @@ public class CreateUser extends AppCompatActivity {
         }
     }
 
-    private void patch(Users users) {
-        firebaseService.saveToFireStore("Users").document(users.getContactNumber()).set(users).addOnSuccessListener(new OnSuccessListener<Void>() {
+    private void patch(User users) {
+        firebaseService.saveToFireStore("Users").document(users.getContactNumber()).collection("AccountInfo").document("PersonalInfo").set(users).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(getApplicationContext(),"Account created !",Toast.LENGTH_SHORT).show();

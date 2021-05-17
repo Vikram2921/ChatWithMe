@@ -66,7 +66,7 @@ public class Login extends AppCompatActivity {
     private void validContact(String number) {
         continueButton.setText("Checking");
         continueButton.setEnabled(false);
-        firebaseService.readFromFireStore("Users").document(number).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        firebaseService.readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {

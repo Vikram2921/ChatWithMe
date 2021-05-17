@@ -51,7 +51,7 @@
         android:drawablePadding="5dp"
         android:maxWidth="120pt"
         app:layout_constraintRight_toLeftOf="@id/unreadmessagecount"
-        android:text="this is my last message sdf df dsfds f dsf sdf ds f df d f df df ds fd fds fd sf"
+        android:text=""
         android:textSize="12dp"
         app:layout_constraintBottom_toBottomOf="@id/circleImageView"
         app:layout_constraintStart_toEndOf="@id/status"

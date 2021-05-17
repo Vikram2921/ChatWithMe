@@ -52,7 +52,7 @@ public class ChatLayoutView extends RelativeLayout {
     private ArrayList<String> dates =new ArrayList<>();
     private Map<MessageType,String> downloadPaths = new HashMap<>();
     private ChatLayoutListener chatLayoutListener;
-    private Boolean playSentAndReceivedSoundEffect = true,saveToDatabase = false;
+    private Boolean playSentAndReceivedSoundEffect = false,saveToDatabase = false;
     private MessageConfiguration leftMessageConfiguration;
     private MessageConfiguration rightMessageConfiguration;
     private int sentSoundEffect = R.raw.message_added;
@@ -168,7 +168,17 @@ public class ChatLayoutView extends RelativeLayout {
             if(saveToDatabase) {
                 saveToDatabaseTable(message);
             }
-            if(!message.getSender().equals(myUsername) && message.getMessageStatus() != MessageStatus.SEEN) {
+            checkForSeen(message,null);
+        }
+    }
+
+    private void checkForSeen(Message message,Message oldMessage) {
+        if(message.getSender().equals(myUsername) && oldMessage != null) {
+            if(message.getMessageStatus() == MessageStatus.SEEN && oldMessage.getMessageStatus() != MessageStatus.SEEN) {
+                chatLayoutListener.onMessageSeenConfirmed(message);
+            }
+        } else {
+            if(message.getMessageStatus() != MessageStatus.SEEN) {
                 chatLayoutListener.onMessageSeen(message);
             }
         }
@@ -189,16 +199,16 @@ public class ChatLayoutView extends RelativeLayout {
     private void removeFromDatabase(Message message) {
     }
 
-    public void updateMessageStatus(String messageId, MessageStatus newStatus) {
-        if(helper.messageIdExists(messageId)) {
-            int index = helper.getMessageIdPositon(messageId);
-            Message message = messages.get(index);
-            if(message.getMessageStatus() != newStatus) {
-                message.setMessageStatus(newStatus);
+    public void updateMessage(Message message) {
+        if(helper.messageIdExists(message.getMessageId())) {
+            int index = helper.getMessageIdPositon(message.getMessageId());
+            Message messageOld = messages.get(index);
+            if(messageOld.getMessageStatus() != message.getMessageStatus()) {
                 messages.remove(index);
                 messages.add(index,message);
                 recyclerViewAdapter.notifyItemChanged(index);
-                if(playSentAndReceivedSoundEffect && newStatus == MessageStatus.SENT && message.getSender().equalsIgnoreCase(myUsername)) {
+                checkForSeen(message,messageOld);
+                if(playSentAndReceivedSoundEffect && message.getMessageStatus() == MessageStatus.SENT && message.getSender().equalsIgnoreCase(myUsername)) {
                     MediaPlayer.create(getContext(),sentSoundEffect).start();
                 }
                 if(saveToDatabase) {
@@ -225,7 +235,7 @@ public class ChatLayoutView extends RelativeLayout {
         if(message.getSender().equals(myUsername)) {
             return rightMessageConfiguration;
         } else {
-            if(playSentAndReceivedSoundEffect && message.getMessageStatus() != MessageStatus.SEEN) {
+            if(playSentAndReceivedSoundEffect && message.getMessageStatus() == MessageStatus.SENT) {
                 MediaPlayer.create(getContext(),receivedSoundEffect).start();
             }
             return leftMessageConfiguration;

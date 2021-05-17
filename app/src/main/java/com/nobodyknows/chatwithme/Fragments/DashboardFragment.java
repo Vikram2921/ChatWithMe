@@ -17,9 +17,9 @@ public class DashboardFragment extends FragmentPagerAdapter {
             case 0: // Fragment # 0 - This will show FirstFragment
                 return new ChatFragment();
             case 1: // Fragment # 0 - This will show FirstFragment different title
-                return new ChatFragment();
+                return new StoriesFragment();
             case 2: // Fragment # 1 - This will show SecondFragment
-                return new ChatFragment();
+                return new SettingFragment();
             default:
                 return null;
         }

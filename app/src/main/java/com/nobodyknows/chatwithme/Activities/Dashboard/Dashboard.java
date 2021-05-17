@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.R;
 
@@ -36,12 +37,15 @@ public class Dashboard extends AppCompatActivity {
     private ViewPager viewPager;
     private ImageView addChat,addConnection;
     private TabLayout tabLayout;
+    public static DatabaseHelper databaseHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         getSupportActionBar().hide();
         Contacts.initialize(getApplicationContext());
+        databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelper.createTable();
         init();
     }
 

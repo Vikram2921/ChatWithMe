@@ -1,6 +1,7 @@
 package com.nobodyknows.chatwithme.Activities;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -22,7 +23,10 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
@@ -31,6 +35,7 @@ import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -45,12 +50,12 @@ public class ChatRoom extends AppCompatActivity {
     private Boolean isVerfied = false;
     private String myUsername = "",roomid = "";
     private FirebaseService firebaseService;
+    private ImageView backgroundImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
         username = getIntent().getStringExtra("username");
-        username = "Testing";
         name = getIntent().getStringExtra("name");
         lastOnlineStatus = getIntent().getStringExtra("lastOnlineStatus");
         profile = getIntent().getStringExtra("profile");
@@ -59,12 +64,12 @@ public class ChatRoom extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
         getSupportActionBar().hide();
-        roomid = "Testing";
         firebaseService = new FirebaseService();
         init();
     }
 
     private void init() {
+        backgroundImage = findViewById(R.id.background);
         chatLayoutView = findViewById(R.id.chatlayoutview);
         profileView = findViewById(R.id.profile);
         nameView = findViewById(R.id.name);
@@ -83,14 +88,24 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void startListening() {
-        firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()) {
-                    for(DocumentSnapshot documentSnapshot:task.getResult().getDocuments()) {
-                        chatLayoutView.addMessage(documentSnapshot.toObject(Message.class));
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(error == null) {
+                    for(DocumentChange doc:value.getDocumentChanges()) {
+                        Message message = doc.getDocument().toObject(Message.class);
+                        switch (doc.getType()) {
+                            case ADDED:
+                                chatLayoutView.addMessage(message);
+                                break;
+                            case MODIFIED:
+                                chatLayoutView.updateMessage(message);
+                                break;
+                            case REMOVED:
+                                chatLayoutView.deleteMessage(message);
+                                break;
+                        }
                     }
-                } else {
                 }
             }
         });
@@ -129,7 +144,8 @@ public class ChatRoom extends AppCompatActivity {
         firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                chatLayoutView.updateMessageStatus(message.getMessageId(), message.getMessageStatus());
+                chatLayoutView.updateMessage(message);
+                firebaseService.updateLastMessage(myUsername,username,message);
             }
         });
     }
@@ -147,25 +163,32 @@ public class ChatRoom extends AppCompatActivity {
             }
 
             @Override
+            public void onMessageSeenConfirmed(Message message) {
+                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete();
+            }
+
+            @Override
             public void onMessageSeen(Message message) {
                 message.setMessageStatus(MessageStatus.SEEN);
+                message.setSeenAt(new Date());
                 firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        chatLayoutView.updateMessageStatus(message.getMessageId(), message.getMessageStatus());
+                        chatLayoutView.updateMessage(message);
                     }
                 });
             }
         });
         User user1 = new User();
         user1.setName("Vikram");
-        user1.setUserId(myUsername);
+        user1.setContactNumber(myUsername);
         chatLayoutView.addUser(user1);
 
         User user2 = new User();
         user2.setName("Vikram");
-        user2.setUserId(username);
+        user2.setCurrentStatus(username);
         chatLayoutView.addUser(user2);
+        Glide.with(getApplicationContext()).load(R.drawable.background).into(backgroundImage);
     }
 
     private void updateNameView() {
@@ -178,4 +201,5 @@ public class ChatRoom extends AppCompatActivity {
             verified.setVisibility(View.VISIBLE);
         }
     }
+
 }

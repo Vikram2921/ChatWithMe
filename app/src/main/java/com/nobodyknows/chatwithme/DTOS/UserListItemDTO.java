@@ -1,20 +1,18 @@
 package com.nobodyknows.chatwithme.DTOS;
 
-import com.nobodyknows.chatwithme.Models.Message;
+import com.NobodyKnows.chatlayoutview.Model.Message;
+
+import java.util.Date;
 
 public class UserListItemDTO {
-    private String name = "DUMMY";
-    private String contactNumber = "8290879124";
-    private String profile = "NO_PROFILE";
+    private String name;
+    private String status;
+    private String contactNumber;
+    private String profileUrl;
+    private Boolean verified = false;
+    private Date lastOnline = new Date();
+    private String currentStatus = "Offline";
     private Message lastMessage;
-
-    public String getContactNumber() {
-        return contactNumber;
-    }
-
-    public void setContactNumber(String contactNumber) {
-        this.contactNumber = contactNumber;
-    }
 
     public String getName() {
         return name;
@@ -24,12 +22,52 @@ public class UserListItemDTO {
         this.name = name;
     }
 
-    public String getProfile() {
-        return profile;
+    public String getStatus() {
+        return status;
     }
 
-    public void setProfile(String profile) {
-        this.profile = profile;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
+
+    public Boolean getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
+    }
+
+    public Date getLastOnline() {
+        return lastOnline;
+    }
+
+    public void setLastOnline(Date lastOnline) {
+        this.lastOnline = lastOnline;
+    }
+
+    public String getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(String currentStatus) {
+        this.currentStatus = currentStatus;
     }
 
     public Message getLastMessage() {

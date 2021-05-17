@@ -5,31 +5,20 @@
     android:elevation="2dp"
     android:layout_marginLeft="5dp"
     android:layout_marginBottom="3dp"
-    android:padding="5dp"
+    android:padding="8dp"
     android:layout_marginRight="25dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <TextView
         android:text="Hello "
-        android:textColor="#000000"
-        android:textSize="14dp"
+        android:textColor="#E4E4E4"
+        android:textSize="18dp"
+        android:textColorLink="#FFC107"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/datetext"
         app:layout_constraintBottom_toBottomOf="parent"
         android:id="@+id/messagetext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </TextView>
-    <TextView
-        android:textSize="12dp"
-        android:id="@+id/datetext"
-        android:layout_marginRight="10dp"
-        app:layout_constraintTop_toBottomOf="@id/messagetext"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:text="08:30 PM"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
     </TextView>

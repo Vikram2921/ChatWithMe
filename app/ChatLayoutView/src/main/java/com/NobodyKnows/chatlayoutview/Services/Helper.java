@@ -106,7 +106,7 @@ public class Helper {
     }
 
     public void addUser(User user) {
-        this.userMap.put(user.getUserId(),user);
+        this.userMap.put(user.getContactNumber(),user);
     }
 
     public User getUser(String userID) {
@@ -144,7 +144,7 @@ public class Helper {
             preview.setVisibility(GONE);
         } else {
             User user =getUser(message.getSender());
-            senderName.setTextColor(user.getColor());
+            senderName.setTextColor(user.getColorCode());
             if(message.getSender().equalsIgnoreCase(myId)) {
                 senderName.setText("You");
             } else {
@@ -203,7 +203,7 @@ public class Helper {
                 preview.setVisibility(GONE);
                 messageview.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
             }
-            bar.setBackgroundColor(user.getColor());
+            bar.setBackgroundColor(user.getColorCode());
         }
         view.setOnClickListener(new View.OnClickListener() {
             @Override

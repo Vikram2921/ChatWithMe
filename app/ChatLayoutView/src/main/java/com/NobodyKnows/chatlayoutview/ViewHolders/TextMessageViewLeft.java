@@ -23,9 +23,7 @@ public class TextMessageViewLeft extends RecyclerView.ViewHolder {
 
     public void initalize(Message message, User user) {
         TextView messageText = view.findViewById(R.id.messagetext);
-        TextView messageTime = view.findViewById(R.id.datetext);
         messageText.setAutoLinkMask(Linkify.ALL);
         messageText.setText(message.getMessage());
-        messageTime.setText(LayoutService.getFormatedDate("hh:mm aa", message.getSentAt()));
     }
 }

@@ -6,14 +6,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.NobodyKnows.chatlayoutview.Model.User;
-import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,12 +19,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
+import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Adapters.ContactsRecyclerViewAdapter;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.SelectListener;
-import com.nobodyknows.chatwithme.Fragments.Adapters.RecyclerViewAdapter;
-import com.nobodyknows.chatwithme.Models.Users;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
+import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
 public class AddNewChat extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private ArrayList<Users> contacts = new ArrayList<>();
+    private ArrayList<User> contacts = new ArrayList<>();
     private ArrayList<String> contactsAdded = new ArrayList<>();
     private ContactsRecyclerViewAdapter recyclerViewAdapter;
     private FirebaseService firebaseService;
@@ -70,19 +68,23 @@ public class AddNewChat extends AppCompatActivity {
     private void init() {
         firebaseService = new FirebaseService();
         recyclerView = findViewById(R.id.contactList);
-        recyclerViewAdapter = new ContactsRecyclerViewAdapter(getApplicationContext(), contacts, firebaseService, new SelectListener() {
+        recyclerViewAdapter = new ContactsRecyclerViewAdapter(getApplicationContext(), contacts, new SelectListener() {
             @Override
-            public void onContactSelected(List<Users> selectedContacts) {
-                Log.d("TAGCON", "onPermissionGranted: "+selectedContacts.size());
-                if(selectedContacts.size() > 0 ){
-                    if(selectedContacts.size() == 1) {
-                        getSupportActionBar().setTitle("1 contact selected");
-                    } else {
-                        getSupportActionBar().setTitle(selectedContacts.size()+" contacts selected");
-                    }
-                } else {
-                    getSupportActionBar().setTitle("Add New Chat");
-                }
+            public void onContactSelected(List<User> selectedContacts) {
+
+            }
+
+            @Override
+            public void onStartChat(User user) {
+                Intent intent = new Intent(getApplicationContext(), ChatRoom.class);
+                intent.putExtra("username",user.getContactNumber());
+                intent.putExtra("name",user.getName());
+                intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
+                intent.putExtra("verified",user.getVerified());
+                intent.putExtra("roomid", MessageMaker.createRoomId(getApplicationContext(),user.getContactNumber()));
+                intent.putExtra("profile",user.getProfileUrl());
+                startActivity(intent);
+                finish();
             }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
@@ -124,12 +126,12 @@ public class AddNewChat extends AppCompatActivity {
             }
         }
         if(number != null && number.length() > 0) {
-            firebaseService.readFromFireStore("Users").document(number).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            firebaseService.readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if(task.isSuccessful()) {
                         if(task.getResult().exists()) {
-                            Users users = task.getResult().toObject(Users.class);
+                            User users = task.getResult().toObject(User.class);
                             if(!contactsAdded.contains(users.getContactNumber())) {
                                 contacts.add(users);
                                 contactsAdded.add(users.getContactNumber());

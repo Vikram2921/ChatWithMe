@@ -17,6 +17,7 @@ import com.github.curioustechizen.ago.RelativeTimeTextView;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
+import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 
@@ -46,15 +47,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         UserListItemDTO user = users.get(position);
+        holder.unreadMessageCount.setVisibility(View.GONE);
         if(user.getName() != null && user.getName().length() > 0) {
             holder.name.setText(user.getName());
         } else {
             holder.name.setText(user.getContactNumber());
         }
-        if(user.getProfile() != null && user.getProfile().length() > 0 && !user.getProfile().equalsIgnoreCase("NO_PROFILE")){
-            Glide.with(context).load(user.getProfile()).placeholder(R.drawable.profile).override(200).into(holder.profile);
+        if(user.getProfileUrl() != null && user.getProfileUrl().length() > 0 && !user.getProfileUrl().equalsIgnoreCase("NO_PROFILE")){
+            Glide.with(context).load(user.getProfileUrl()).placeholder(R.drawable.profile).override(200).into(holder.profile);
         } else {
             Glide.with(context).load(R.drawable.profile).into(holder.profile);
+        }
+        if(user.getLastMessage() != null) {
+            holder.lastMessage.setText(user.getLastMessage().getMessage());
+            holder.lastDate.setReferenceTime(user.getLastMessage().getSentAt().getTime());
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,10 +68,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 Intent intent = new Intent(context, ChatRoom.class);
                 intent.putExtra("username",user.getContactNumber());
                 intent.putExtra("name",user.getName());
-                intent.putExtra("lastOnlineStatus","Online");
-                intent.putExtra("verified",true);
-                intent.putExtra("roomid","roomiddefault");
-                intent.putExtra("profile",user.getProfile());
+                intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
+                intent.putExtra("verified",user.getVerified());
+                intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
+                intent.putExtra("profile",user.getProfileUrl());
                 context.startActivity(intent);
             }
         });
@@ -81,7 +87,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public CircleImageView profile;
         public TextView name;
-        public TextView lasteMessage;
+        public TextView lastMessage;
         public TextView unreadMessageCount;
         public ImageView status;
         public RelativeTimeTextView lastDate;
@@ -89,7 +95,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             super(itemView);
             this.profile = itemView.findViewById(R.id.circleImageView);
             this.name = itemView.findViewById(R.id.name);
-            this.lasteMessage = itemView.findViewById(R.id.lastemessage);
+            this.lastMessage = itemView.findViewById(R.id.lastemessage);
             this.lastDate = itemView.findViewById(R.id.lastdate);
             this.status = itemView.findViewById(R.id.status);
             this.unreadMessageCount = itemView.findViewById(R.id.unreadmessagecount);

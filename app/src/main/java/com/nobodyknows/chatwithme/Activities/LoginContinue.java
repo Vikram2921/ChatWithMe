@@ -1,6 +1,5 @@
 package com.nobodyknows.chatwithme.Activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,12 +10,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard;
-import com.nobodyknows.chatwithme.Models.Users;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 
@@ -55,11 +52,11 @@ public class LoginContinue extends AppCompatActivity {
     private void checkLogin(String pass, String number) {
         continueLogin.setText("Checking");
         continueLogin.setEnabled(false);
-        firebaseService.readFromFireStore("Users").document(number).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        firebaseService.readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot != null) {
-                    Users users = documentSnapshot.toObject(Users.class);
+                    User users = documentSnapshot.toObject(User.class);
                     if(users.getPassword().equals(pass)) {
                         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -13,44 +13,31 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="wrap_content"
-        android:padding="5dp"
+        android:id="@+id/box"
+        android:padding="8dp"
         android:background="@drawable/right_message_background"
         android:layout_height="wrap_content">
-
         <TextView
             android:id="@+id/messagetext"
             android:layout_width="wrap_content"
+            android:textColorLink="#3F51B5"
             android:layout_height="wrap_content"
             android:text="Hello"
-            android:textColor="#FFFFFF"
-            android:textSize="14dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/datetext"
+            android:textColor="#000000"
+            android:textSize="18dp"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"></TextView>
-
-        <TextView
-            app:layout_constraintTop_toBottomOf="@id/messagetext"
-            android:textSize="12dp"
-            android:id="@+id/datetext"
-            android:textColor="#E3E3E3"
-            app:layout_constraintRight_toLeftOf="@id/status"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:text="08:30 PM"
-            android:layout_marginRight="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </TextView>
-        <ImageView
-            android:id="@+id/status"
-            android:src="@drawable/check_sent"
-            android:layout_marginRight="5dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_width="15dp"
-            android:layout_height="15dp">
-        </ImageView>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/box"
+        android:text="Seen"
+        android:visibility="gone"
+        android:id="@+id/status"
+        android:textColor="#ECECEC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </TextView>
 </androidx.constraintlayout.widget.ConstraintLayout>

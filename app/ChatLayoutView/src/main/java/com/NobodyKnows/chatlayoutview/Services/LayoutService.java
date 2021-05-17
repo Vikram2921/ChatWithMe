@@ -1,15 +1,19 @@
 package com.NobodyKnows.chatlayoutview.Services;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Environment;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.TextView;
+
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.ContactParceable;
+import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.R;
 import java.io.File;
@@ -17,6 +21,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,20 +33,22 @@ public class LayoutService {
 
 
     public static String getFormatedDate(String pattern, Date date) {
+        if(date == null) {
+            return "";
+        }
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         String currentTime = sdf.format(date);
         return currentTime.toUpperCase();
     }
 
-    public static void updateMessageStatus(MessageStatus status, ImageView imageView) {
-        if(status == MessageStatus.SEEN) {
-            imageView.setImageResource(R.drawable.seen);
-        } else if(status == MessageStatus.RECEIVED) {
-            imageView.setImageResource(R.drawable.received);
-        }  else if(status == MessageStatus.SENT) {
-            imageView.setImageResource(R.drawable.check_sent);
-        } else if(status == MessageStatus.SENDING) {
-            imageView.setImageResource(R.drawable.waiting); //TODO Change icon
+    public static void updateMessageStatus(Message message, TextView textView) {
+        MessageStatus status = message.getMessageStatus();
+        if(status == MessageStatus.SEEN && message.getSeenAt() != null) {
+            textView.setText("Seen at "+getFormatedDate("hh:mm a",message.getSeenAt()));
+        } else if(status == MessageStatus.RECEIVED && message.getReceivedAt() != null) {
+            textView.setText("Received at "+getFormatedDate("hh:mm a",message.getReceivedAt()));
+        }  else if(status == MessageStatus.SENT && message.getSentAt() != null) {
+            textView.setText("Sent at "+getFormatedDate("hh:mm a",message.getSentAt()));
         }
     }
 
@@ -307,5 +314,17 @@ public class LayoutService {
         return (int) (((double) progress / (double) size) * 100);
     }
 
+
+    public static int generateUserColorCode() {
+        final Random mRandom = new Random(System.currentTimeMillis());
+        final int baseColor = Color.WHITE;
+        final int baseRed = Color.red(baseColor);
+        final int baseGreen = Color.green(baseColor);
+        final int baseBlue = Color.blue(baseColor);
+        final int red = (baseRed + mRandom.nextInt(256)) / 2;
+        final int green = (baseGreen + mRandom.nextInt(256)) / 2;
+        final int blue = (baseBlue + mRandom.nextInt(256)) / 2;
+        return Color.rgb(red, green, blue);
+    }
 
 }

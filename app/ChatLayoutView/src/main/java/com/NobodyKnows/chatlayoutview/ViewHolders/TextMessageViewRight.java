@@ -23,11 +23,19 @@ public class TextMessageViewRight extends RecyclerView.ViewHolder {
 
     public void initalize(Message message) {
         TextView messageText = view.findViewById(R.id.messagetext);
-        TextView messageTime = view.findViewById(R.id.datetext);
+        TextView status = view.findViewById(R.id.status);
         messageText.setAutoLinkMask(Linkify.ALL);
         messageText.setText(message.getMessage());
-        messageTime.setText(LayoutService.getFormatedDate("hh:mm aa", message.getSentAt()));
-        ImageView messageStatus = view.findViewById(R.id.status);
-        LayoutService.updateMessageStatus(message.getMessageStatus(),messageStatus);
+        LayoutService.updateMessageStatus(message,status);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(status.getVisibility() == View.VISIBLE) {
+                    status.setVisibility(View.GONE);
+                } else {
+                    status.setVisibility(View.VISIBLE);
+                }
+            }
+        });
     }
 }

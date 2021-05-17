@@ -31,16 +31,6 @@
         app:layout_constraintBottom_toBottomOf="@id/circleImageView"
         app:layout_constraintStart_toEndOf="@+id/circleImageView"
         app:layout_constraintTop_toTopOf="@id/circleImageView"></TextView>
-    <ImageView
-        android:visibility="gone"
-        android:src="@drawable/ic_baseline_check_circle_24"
-        app:layout_constraintTop_toTopOf="@id/circleImageView"
-        app:layout_constraintBottom_toBottomOf="@id/circleImageView"
-        app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/selected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </ImageView>
     <LinearLayout
         android:background="#1D5C5C5C"
         android:layout_marginLeft="70dp"
