@@ -193,6 +193,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return user;
     }
 
+    public ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + UsersDB.getTableName();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        User user  = null;
+        if (cursor.moveToFirst()) {
+            do {
+                user = convertToUser(cursor);
+                users.add(user);
+            } while (cursor.moveToNext());
+        }
+        db.close();
+        return users;
+    }
+
     private User convertToUser(Cursor cursor) {
         User user = new User();
         user.setContactNumber(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_CONTACT_NUMBER)));
@@ -205,6 +221,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         user.setCurrentStatus(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_CURRENT_STATUS)));
         return user;
     }
+
 
     //USER DB CRUD STOP HERE
 

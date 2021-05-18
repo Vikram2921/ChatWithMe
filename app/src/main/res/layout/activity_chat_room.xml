@@ -17,103 +17,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </ImageView>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:id="@+id/toppane"
-        android:background="@color/purple_500"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_height="70dp">
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
-            android:src="@drawable/profile"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_width="40dp"
-            android:layout_height="40dp">
-        </de.hdodenhof.circleimageview.CircleImageView>
-        <LinearLayout
-            app:layout_constraintLeft_toRightOf="@id/profile"
-            android:layout_centerVertical="true"
-            app:layout_constraintTop_toTopOf="@id/profile"
-            app:layout_constraintBottom_toBottomOf="@id/profile"
-            android:orientation="vertical"
-            app:layout_constraintRight_toLeftOf="@id/verified"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content">
-            <TextView
-                android:singleLine="true"
-                android:textColor="#fff"
-                android:textStyle="bold"
-                android:id="@+id/name"
-                android:layout_marginLeft="10dp"
-                android:textSize="16dp"
-                android:text="Vikram Singh Rawat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </TextView>
-            <TextView
-                android:singleLine="true"
-                android:textColor="#fff"
-                android:id="@+id/status"
-                android:layout_marginLeft="10dp"
-                android:textSize="12dp"
-                android:text=""
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </TextView>
-        </LinearLayout>
-        <ImageView
-            android:id="@+id/verified"
-            android:src="@drawable/verified"
-            android:layout_centerVertical="true"
-            android:visibility="gone"
-            app:layout_constraintRight_toLeftOf="@id/audiocall"
-            app:layout_constraintTop_toTopOf="@id/profile"
-            app:layout_constraintBottom_toBottomOf="@id/profile"
-            android:layout_marginRight="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </ImageView>
-        <ImageView
-            android:id="@+id/audiocall"
-            android:src="@drawable/audio"
-            android:layout_centerVertical="true"
-            app:layout_constraintRight_toLeftOf="@id/videocall"
-            app:layout_constraintTop_toTopOf="@id/profile"
-            app:layout_constraintBottom_toBottomOf="@id/profile"
-            android:layout_marginRight="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </ImageView>
-        <ImageView
-            android:id="@+id/videocall"
-            android:src="@drawable/video"
-            app:layout_constraintRight_toLeftOf="@id/more"
-            app:layout_constraintTop_toTopOf="@id/profile"
-            app:layout_constraintBottom_toBottomOf="@id/profile"
-            android:layout_marginRight="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </ImageView>
-        <ImageView
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/profile"
-            app:layout_constraintBottom_toBottomOf="@id/profile"
-            android:id="@+id/more"
-            android:src="@drawable/more_menu"
-            android:layout_marginRight="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </ImageView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.NobodyKnows.chatlayoutview.ChatLayoutView
         android:id="@+id/chatlayoutview"
-        app:layout_constraintTop_toBottomOf="@id/toppane"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottompane"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

@@ -1,24 +1,24 @@
 package com.nobodyknows.chatwithme.Activities.Dashboard;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
@@ -37,24 +37,54 @@ public class Dashboard extends AppCompatActivity {
     private ViewPager viewPager;
     private ImageView addChat,addConnection;
     private TabLayout tabLayout;
+    private View actionbarview;
     public static DatabaseHelper databaseHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        getSupportActionBar().hide();
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setCustomView(R.layout.dashboard_toolbar_view);
+        actionbarview = getSupportActionBar().getCustomView();
+        getSupportActionBar().setElevation(0);
         Contacts.initialize(getApplicationContext());
         databaseHelper = new DatabaseHelper(getApplicationContext());
         databaseHelper.createTable();
         init();
     }
 
-    private void init() {
-        profile = findViewById(R.id.profile);
-        name = findViewById(R.id.name);
-        status = findViewById(R.id.status);
-        addChat = findViewById(R.id.addchat);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add_dashboard, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_chat:
+                menuAddChatClick();
+                break;
+            case R.id.menu_nearby_chat:
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    private void menuAddChatClick() {
+        if(tabLayout.getSelectedTabPosition() == 0) {
+            Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
+            startActivity(intent);
+        }
+    }
+
+    private void init() {
+        profile = actionbarview.findViewById(R.id.profile);
+        name = actionbarview.findViewById(R.id.name);
+        status = actionbarview.findViewById(R.id.status);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         DashboardFragment dashboardFragment = new DashboardFragment(getSupportFragmentManager());
         int limit = (dashboardFragment.getCount() > 1 ? dashboardFragment.getCount() - 1 : 1);
@@ -63,15 +93,6 @@ public class Dashboard extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         loadInfo();
-        addChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(tabLayout.getSelectedTabPosition() == 0) {
-                    Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
-                    startActivity(intent);
-                }
-            }
-        });
     }
 
     private void loadInfo() {

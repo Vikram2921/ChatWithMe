@@ -148,15 +148,15 @@ public class CreateUser extends AppCompatActivity {
         firebaseService.saveToFireStore("Users").document(users.getContactNumber()).collection("AccountInfo").document("PersonalInfo").set(users).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Toast.makeText(getApplicationContext(),"Account created !",Toast.LENGTH_SHORT).show();
                 SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("number",users.getContactNumber());
                 editor.putString("name",users.getName());
                 editor.putString("profile",users.getProfileUrl());
                 editor.putString("status",users.getStatus());
-                editor.commit();
-                Intent intent = new Intent(getApplicationContext(), Dashboard.class);
+                editor.putBoolean("setupDone",false);
+                editor.apply();
+                Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);
                 startActivity(intent);
                 finish();
             }

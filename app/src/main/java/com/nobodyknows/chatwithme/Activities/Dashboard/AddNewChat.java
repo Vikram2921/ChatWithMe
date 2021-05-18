@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -29,6 +30,8 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+
 public class AddNewChat extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -44,26 +47,6 @@ public class AddNewChat extends AppCompatActivity {
         init();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_new_chat, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_menu_done:
-               createChatRoom();
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
-
-    private void createChatRoom() {
-    }
 
     private void init() {
         firebaseService = new FirebaseService();
@@ -96,6 +79,7 @@ public class AddNewChat extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);
+        loadUsers();
         PermissionListener permissionlistener = new PermissionListener() {
             @Override
             public void onPermissionGranted() {
@@ -115,6 +99,18 @@ public class AddNewChat extends AppCompatActivity {
                 .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
                 .setPermissions(Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_CONTACTS)
                 .check();
+    }
+
+    private void loadUsers() {
+        contacts.clear();
+        ArrayList<User> contactsTemp  = databaseHelper.getAllUsers();
+        for(User user:contactsTemp) {
+            if(!contactsAdded.contains(user.getContactNumber())) {
+                contacts.add(user);
+                contactsAdded.add(user.getContactNumber());
+                recyclerViewAdapter.notifyItemInserted(contacts.size() -1);
+            }
+        }
     }
 
     private void checkAndAdd(Contact contact) {

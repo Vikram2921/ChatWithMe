@@ -14,6 +14,7 @@ import com.NobodyKnows.chatlayoutview.Model.User;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard;
+import com.nobodyknows.chatwithme.Activities.Signup.CreatingSetup;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 
@@ -64,8 +65,8 @@ public class LoginContinue extends AppCompatActivity {
                         editor.putString("name",users.getName());
                         editor.putString("profile",users.getProfileUrl());
                         editor.putString("status",users.getStatus());
-                        editor.commit();
-                        Intent intent = new Intent(getApplicationContext(), Dashboard.class);
+                        editor.apply();
+                        Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);
                         startActivity(intent);
                         finish();
                     } else {

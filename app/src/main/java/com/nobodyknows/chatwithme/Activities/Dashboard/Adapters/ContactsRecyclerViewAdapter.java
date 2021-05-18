@@ -47,6 +47,10 @@ public class ContactsRecyclerViewAdapter extends RecyclerView.Adapter<ContactsRe
         } else {
             holder.name.setText(user.getContactNumber());
         }
+        if(user.getStatus() != null && user.getStatus().length() > 0) {
+            holder.status.setVisibility(View.VISIBLE);
+            holder.status.setText(user.getStatus());
+        }
         if(user.getProfileUrl() != null && user.getProfileUrl().length() > 0 && !user.getProfileUrl().equals("NO_PROFILE")){
             Glide.with(context).load(user.getProfileUrl()).placeholder(R.drawable.profile).override(200).into(holder.profile);
         } else {
@@ -71,10 +75,12 @@ public class ContactsRecyclerViewAdapter extends RecyclerView.Adapter<ContactsRe
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public CircleImageView profile;
         public TextView name;
+        public TextView status;
         public ViewHolder(View itemView) {
             super(itemView);
             this.profile = itemView.findViewById(R.id.circleImageView);
             this.name = itemView.findViewById(R.id.name);
+            this.status = itemView.findViewById(R.id.status);
         }
     }
 }

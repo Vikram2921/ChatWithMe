@@ -19,6 +19,11 @@ public class MessageMaker {
         return sharedPreferences.getString(key,"");
     }
 
+    public static Boolean getFromSharedPrefrencesBoolean(Context context, String key) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+        return sharedPreferences.getBoolean(key,false);
+    }
+
     public static String createRoomId(Context context, String freindusername) {
         String myusername = getFromSharedPrefrences(context,"number");
         String sub1=myusername.substring(myusername.length() - 5);

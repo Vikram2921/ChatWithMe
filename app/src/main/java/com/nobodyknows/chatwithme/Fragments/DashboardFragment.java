@@ -1,6 +1,5 @@
 package com.nobodyknows.chatwithme.Fragments;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -19,7 +18,9 @@ public class DashboardFragment extends FragmentPagerAdapter {
             case 1: // Fragment # 0 - This will show FirstFragment different title
                 return new StoriesFragment();
             case 2: // Fragment # 1 - This will show SecondFragment
-                return new SettingFragment();
+                return new CallsFragment();
+            case 3: // Fragment # 1 - This will show SecondFragment
+                return new FreindsFragment();
             default:
                 return null;
         }
@@ -27,7 +28,7 @@ public class DashboardFragment extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -38,7 +39,9 @@ public class DashboardFragment extends FragmentPagerAdapter {
             case 1: // Fragment # 0 - This will show FirstFragment different title
                 return "Stories";
             case 2: // Fragment # 1 - This will show SecondFragment
-                return "Settings";
+                return "Calls";
+            case 3: // Fragment # 1 - This will show SecondFragment
+                return "Freinds";
             default:
                 return null;
         }

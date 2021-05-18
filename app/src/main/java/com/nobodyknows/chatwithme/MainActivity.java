@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard;
 import com.nobodyknows.chatwithme.Activities.Login;
+import com.nobodyknows.chatwithme.Activities.Signup.CreatingSetup;
 import com.nobodyknows.chatwithme.services.MessageHelper;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,9 +20,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         if(sharedPreferences.contains("number")) {
-            Intent intent = new Intent(getApplicationContext(), Dashboard.class);
-            startActivity(intent);
-            finish();
+            if(sharedPreferences.getBoolean("setupDone",false)) {
+                Intent intent = new Intent(getApplicationContext(), Dashboard.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);
+                startActivity(intent);
+                finish();
+            }
         } else {
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
