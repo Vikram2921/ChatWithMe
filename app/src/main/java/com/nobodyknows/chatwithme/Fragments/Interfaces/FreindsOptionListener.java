@@ -8,4 +8,5 @@ import java.util.List;
 public interface FreindsOptionListener {
     public void onConfirm(FreindRequestDTO freindRequestDTO);
     public void onDelete(FreindRequestDTO freindRequestDTO);
+    public void onSendFreindRequest(User user);
 }

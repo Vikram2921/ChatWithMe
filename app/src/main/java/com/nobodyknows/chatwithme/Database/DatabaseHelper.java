@@ -165,6 +165,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    public Boolean isUserExist(String username) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        return isUserExist(username,db);
+    }
+
     private ContentValues getUserContentValue(User user) {
         ContentValues values = new ContentValues();
         values.put(UsersDB.COLUMN_CONTACT_NUMBER,user.getContactNumber());

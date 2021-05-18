@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatRoom extends AppCompatActivity {
 
     private String username,name,profile,lastOnlineStatus;
@@ -55,7 +55,6 @@ public class ChatRoom extends AppCompatActivity {
     private EditText messageBox;
     private Boolean isVerfied = false;
     private String myUsername = "",roomid = "";
-    private FirebaseService firebaseService;
     private ImageView backgroundImage;
     private View actionBarView;
     @Override
@@ -76,7 +75,6 @@ public class ChatRoom extends AppCompatActivity {
         isVerfied = getIntent().getBooleanExtra("verified",false);
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
-        firebaseService = new FirebaseService();
         init();
     }
 

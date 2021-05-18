@@ -34,14 +34,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatFragment extends Fragment {
 
     private View view;
     private RecyclerView recyclerView;
     private ArrayList<UserListItemDTO> userListItems = new ArrayList<>();
     private RecyclerViewAdapter recyclerViewAdapter;
-    private FirebaseService firebaseService;
     private String myNumber = "";
     private Map<String,UserListItemDTO> userListItemDTOMap = new HashMap<>();
     @Override
@@ -54,7 +53,6 @@ public class ChatFragment extends Fragment {
     }
 
     private void init() {
-        firebaseService = new FirebaseService();
         setupRecyclerView();
         startListener();
     }

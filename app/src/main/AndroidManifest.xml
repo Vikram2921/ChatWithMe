@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatWithMe">
-        <activity android:name=".Activities.Signup.CreatingSetup"></activity>
+        <activity android:name=".Activities.SyncContacts"></activity>
+        <activity android:name=".Activities.SearchFreinds" />
+        <activity android:name=".Activities.Signup.CreatingSetup" />
         <activity android:name=".Activities.ChatRoom">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

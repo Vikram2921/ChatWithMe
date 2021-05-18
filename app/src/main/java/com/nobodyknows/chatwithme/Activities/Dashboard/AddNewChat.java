@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.github.tamir7.contacts.Contact;
@@ -23,6 +25,8 @@ import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Adapters.ContactsRecyclerViewAdapter;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.SelectListener;
+import com.nobodyknows.chatwithme.Activities.SearchFreinds;
+import com.nobodyknows.chatwithme.Activities.SyncContacts;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -38,19 +42,63 @@ public class AddNewChat extends AppCompatActivity {
     private ArrayList<User> contacts = new ArrayList<>();
     private ArrayList<String> contactsAdded = new ArrayList<>();
     private ContactsRecyclerViewAdapter recyclerViewAdapter;
-    private FirebaseService firebaseService;
+    private Button search,sync;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_chat);
-        getSupportActionBar().setTitle("Add New Chat");
+        getSupportActionBar().setTitle(getIntent().getStringExtra("title"));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         init();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
 
     private void init() {
-        firebaseService = new FirebaseService();
         recyclerView = findViewById(R.id.contactList);
+        sync = findViewById(R.id.synccontact);
+        search = findViewById(R.id.searchFreind);
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SearchFreinds.class);
+                startActivity(intent);
+            }
+        });
+
+        sync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PermissionListener permissionlistener = new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        Intent intent = new Intent(getApplicationContext(), SyncContacts.class);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onPermissionDenied(List<String> deniedPermissions) {
+                        finish();
+                    }
+                };
+                TedPermission.with(getApplicationContext())
+                        .setPermissionListener(permissionlistener)
+                        .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                        .setPermissions(Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_CONTACTS)
+                        .check();
+            }
+        });
         recyclerViewAdapter = new ContactsRecyclerViewAdapter(getApplicationContext(), contacts, new SelectListener() {
             @Override
             public void onContactSelected(List<User> selectedContacts) {
@@ -80,63 +128,18 @@ public class AddNewChat extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);
         loadUsers();
-        PermissionListener permissionlistener = new PermissionListener() {
-            @Override
-            public void onPermissionGranted() {
-                List<Contact> contacts = Contacts.getQuery().find();
-                for(Contact contact:contacts) {
-                    checkAndAdd(contact);
-                }
-            }
 
-            @Override
-            public void onPermissionDenied(List<String> deniedPermissions) {
-                finish();
-            }
-        };
-        TedPermission.with(this)
-                .setPermissionListener(permissionlistener)
-                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
-                .setPermissions(Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_CONTACTS)
-                .check();
     }
 
     private void loadUsers() {
         contacts.clear();
-        ArrayList<User> contactsTemp  = databaseHelper.getAllUsers();
-        for(User user:contactsTemp) {
-            if(!contactsAdded.contains(user.getContactNumber())) {
+        ArrayList<User> contactsTemp = databaseHelper.getAllUsers();
+        for (User user : contactsTemp) {
+            if (!contactsAdded.contains(user.getContactNumber())) {
                 contacts.add(user);
                 contactsAdded.add(user.getContactNumber());
-                recyclerViewAdapter.notifyItemInserted(contacts.size() -1);
+                recyclerViewAdapter.notifyItemInserted(contacts.size() - 1);
             }
-        }
-    }
-
-    private void checkAndAdd(Contact contact) {
-        String number =  "";
-        if(contact.getPhoneNumbers() != null && contact.getPhoneNumbers().size() > 0 ){
-            number = contact.getPhoneNumbers().get(0).getNormalizedNumber();
-            if(number != null && number.charAt(0) == '+') {
-                number = number.replace("+91","");
-            }
-        }
-        if(number != null && number.length() > 0) {
-            firebaseService.readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if(task.isSuccessful()) {
-                        if(task.getResult().exists()) {
-                            User users = task.getResult().toObject(User.class);
-                            if(!contactsAdded.contains(users.getContactNumber())) {
-                                contacts.add(users);
-                                contactsAdded.add(users.getContactNumber());
-                                recyclerViewAdapter.notifyItemInserted(contacts.size() -1);
-                            }
-                        }
-                    }
-                }
-            });
         }
     }
 }

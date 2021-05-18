@@ -28,6 +28,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.AddNewChat;
+import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Activities.Signup.CreatingSetup;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestDTO;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
@@ -42,15 +43,16 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class FreindsFragment extends Fragment {
 
     private View view;
     private Button search,see;
     private TextView count;
-    private FirebaseService firebaseService;
     private RecyclerView recyclerView;
     private FreindsRequestRecyclerViewAdapter recyclerViewAdapter;
+    private ArrayList<String> added = new ArrayList<>();
     private ArrayList<FreindRequestDTO> freindRequestDTOS = new ArrayList<>();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,7 +63,6 @@ public class FreindsFragment extends Fragment {
     }
 
     private void init() {
-        firebaseService = new FirebaseService();
         count = view.findViewById(R.id.requestcount);
         search = view.findViewById(R.id.searchnewfreind);
         see = view.findViewById(R.id.seeallfreinds);
@@ -70,6 +71,14 @@ public class FreindsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), AddNewChat.class);
+                intent.putExtra("title","All Freinds");
+                startActivity(intent);
+            }
+        });
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), SearchFreinds.class);
                 startActivity(intent);
             }
         });
@@ -81,6 +90,11 @@ public class FreindsFragment extends Fragment {
             @Override
             public void onConfirm(FreindRequestDTO freindRequestDTO) {
                 confirmFreind(freindRequestDTO);
+            }
+
+            @Override
+            public void onSendFreindRequest(User user) {
+
             }
 
             @Override
@@ -157,14 +171,6 @@ public class FreindsFragment extends Fragment {
     }
 
     private void loadPrevious() {
-        FreindRequestDTO freindRequestDTO = new FreindRequestDTO();
-        freindRequestDTO.setContactNumber("8290879124");
-        freindRequestDTOS.add(freindRequestDTO);
-        freindRequestDTOS.add(freindRequestDTO);
-        freindRequestDTOS.add(freindRequestDTO);
-        freindRequestDTOS.add(freindRequestDTO);
-        freindRequestDTOS.add(freindRequestDTO);
-        recyclerViewAdapter.notifyDataSetChanged();
         syncOnline();
     }
 
@@ -179,18 +185,55 @@ public class FreindsFragment extends Fragment {
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
                     for(DocumentChange documentChange:value.getDocumentChanges()) {
+                        FreindRequestSaveDTO freindRequestSaveDTO = documentChange.getDocument().toObject(FreindRequestSaveDTO.class);
                         switch (documentChange.getType()) {
                             case ADDED:
+                                addRequest(freindRequestSaveDTO);
                                 break;
                             case MODIFIED:
                                 break;
                             case REMOVED:
+                                removeFromList(freindRequestSaveDTO);
                                 break;
                         }
                     }
                 }
             }
         });
+    }
+
+    private void removeFromList(FreindRequestSaveDTO freindRequestSaveDTO) {
+        int index = added.indexOf(freindRequestSaveDTO.getContactNumber());
+        freindRequestDTOS.remove(index);
+        recyclerViewAdapter.notifyItemRemoved(index);
+        updateCount();
+    }
+
+    private void addRequest(FreindRequestSaveDTO freindRequestSaveDTO) {
+        if(!added.contains(freindRequestSaveDTO.getContactNumber())) {
+            added.add(freindRequestSaveDTO.getContactNumber());
+            FreindRequestDTO freindRequestDTO = new FreindRequestDTO();
+            freindRequestDTO.setContactNumber(freindRequestSaveDTO.getContactNumber());
+            freindRequestDTO.setRequestSentAt(freindRequestSaveDTO.getRequestSentAt());
+            firebaseService.readFromFireStore("Users").document(freindRequestSaveDTO.getContactNumber()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()) {
+                        if(task.getResult().exists()) {
+                            User user = task.getResult().toObject(User.class);
+                            freindRequestDTO.setName(user.getName());
+                            freindRequestDTO.setVerified(user.getVerified());
+                            freindRequestDTO.setStatus(user.getStatus());
+                            freindRequestDTO.setProfileUrl(user.getProfileUrl());
+                            freindRequestDTOS.add(freindRequestDTO);
+                            recyclerViewAdapter.notifyItemInserted(freindRequestDTOS.size() -1);
+                            updateCount();
+                        }
+                    }
+                }
+            });
+        }
+
     }
 
     private void readSent() {

@@ -23,6 +23,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.R;
+import com.nobodyknows.chatwithme.services.FirebaseService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class Dashboard extends AppCompatActivity {
     private ImageView addChat,addConnection;
     private TabLayout tabLayout;
     private View actionbarview;
+    public static FirebaseService firebaseService;
     public static DatabaseHelper databaseHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class Dashboard extends AppCompatActivity {
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
         Contacts.initialize(getApplicationContext());
+        firebaseService = new FirebaseService();
         databaseHelper = new DatabaseHelper(getApplicationContext());
         databaseHelper.createTable();
         init();
@@ -77,6 +80,7 @@ public class Dashboard extends AppCompatActivity {
     private void menuAddChatClick() {
         if(tabLayout.getSelectedTabPosition() == 0) {
             Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
+            intent.putExtra("title","Add New Chat");
             startActivity(intent);
         }
     }

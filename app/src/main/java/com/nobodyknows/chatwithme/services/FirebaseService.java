@@ -9,10 +9,11 @@ import androidx.annotation.NonNull;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -30,11 +31,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class FirebaseService {
     private FirebaseFirestore firebaseFirestore;
     private FirebaseStorage firebaseStorage;
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
     private StorageReference storageReference;
     public FirebaseService() {
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
+        firebaseDatabase = FirebaseDatabase.getInstance("https://chatwithme-97538-default-rtdb.firebaseio.com/");
+        databaseReference = firebaseDatabase.getReference();
     }
 
     public CollectionReference saveToFireStore(String collectionName) {
@@ -117,6 +122,10 @@ public class FirebaseService {
 
     private Task<Void> uploadLastMessage(String sender, String receiver, Message message) {
         return saveToFireStore("Users").document(sender).collection("AccountInfo").document("RecentChats").collection("History").document(receiver).set(message);
+    }
+
+    public DatabaseReference getDatabaseRef(String bucket) {
+        return databaseReference.child(bucket);
     }
 
     //https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict?district_id=507&date=17-05-2021
