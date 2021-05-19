@@ -2,6 +2,7 @@ package com.nobodyknows.chatwithme.Activities.Dashboard;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.github.tamir7.contacts.Contact;
 import com.github.tamir7.contacts.Contacts;
@@ -43,6 +45,7 @@ public class AddNewChat extends AppCompatActivity {
     private ArrayList<String> contactsAdded = new ArrayList<>();
     private ContactsRecyclerViewAdapter recyclerViewAdapter;
     private Button search,sync;
+    private ConstraintLayout notfound;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +70,7 @@ public class AddNewChat extends AppCompatActivity {
 
     private void init() {
         recyclerView = findViewById(R.id.contactList);
+        notfound = findViewById(R.id.notfound);
         sync = findViewById(R.id.synccontact);
         search = findViewById(R.id.searchFreind);
         search.setOnClickListener(new View.OnClickListener() {
@@ -134,11 +138,14 @@ public class AddNewChat extends AppCompatActivity {
     private void loadUsers() {
         contacts.clear();
         ArrayList<User> contactsTemp = databaseHelper.getAllUsers();
-        for (User user : contactsTemp) {
-            if (!contactsAdded.contains(user.getContactNumber())) {
-                contacts.add(user);
-                contactsAdded.add(user.getContactNumber());
-                recyclerViewAdapter.notifyItemInserted(contacts.size() - 1);
+        if(contactsTemp.size() > 0) {
+            MessageMaker.hideNotFound(notfound);
+            for (User user : contactsTemp) {
+                if (!contactsAdded.contains(user.getContactNumber())) {
+                    contacts.add(user);
+                    contactsAdded.add(user.getContactNumber());
+                    recyclerViewAdapter.notifyItemInserted(contacts.size() - 1);
+                }
             }
         }
     }

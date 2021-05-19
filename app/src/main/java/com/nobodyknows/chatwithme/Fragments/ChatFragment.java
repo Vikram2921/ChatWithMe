@@ -1,12 +1,15 @@
 package com.nobodyknows.chatwithme.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.nobodyknows.chatwithme.Activities.Dashboard.AddNewChat;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.Fragments.Adapters.RecyclerViewAdapter;
 import com.nobodyknows.chatwithme.R;
@@ -43,6 +47,8 @@ public class ChatFragment extends Fragment {
     private RecyclerViewAdapter recyclerViewAdapter;
     private String myNumber = "";
     private Map<String,UserListItemDTO> userListItemDTOMap = new HashMap<>();
+    private ConstraintLayout notfound;
+    private Button action;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
@@ -53,6 +59,16 @@ public class ChatFragment extends Fragment {
     }
 
     private void init() {
+        notfound = view.findViewById(R.id.notfound);
+        action = view.findViewById(R.id.action);
+        action.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), AddNewChat.class);
+                intent.putExtra("title","Add New Chat");
+                startActivity(intent);
+            }
+        });
         setupRecyclerView();
         startListener();
     }
@@ -145,6 +161,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void addNewChat(UserListItemDTO userListItem) {
+        MessageMaker.hideNotFound(notfound);
         if(!userListItemDTOMap.containsKey(userListItem.getContactNumber())) {
             userListItems.add(0,userListItem);
             recyclerViewAdapter.notifyItemInserted(0);

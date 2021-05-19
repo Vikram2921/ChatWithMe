@@ -2,6 +2,9 @@ package com.nobodyknows.chatwithme.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.View;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.Date;
 
@@ -65,5 +68,17 @@ public class MessageMaker {
         return "false";
     }
 
+
+    public static void showNotFound(ConstraintLayout constraintLayout) {
+        if(constraintLayout.getVisibility() == View.GONE) {
+            constraintLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public static void hideNotFound(ConstraintLayout constraintLayout) {
+        if(constraintLayout.getVisibility() == View.VISIBLE) {
+            constraintLayout.setVisibility(View.GONE);
+        }
+    }
 
 }

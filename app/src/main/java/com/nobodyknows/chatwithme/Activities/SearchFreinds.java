@@ -3,16 +3,22 @@ package com.nobodyknows.chatwithme.Activities;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -48,6 +54,10 @@ public class SearchFreinds extends AppCompatActivity {
     private ArrayList<User> users = new ArrayList<>();
     private String mynumber= "";
     private ArrayList<String> added = new ArrayList<>();
+    private ConstraintLayout notfound;
+    private ImageView icon;
+    private ProgressBar progressBar;
+    private TextView text;
     private FreindsRequestCreateRecyclerViewAdapter recyclerViewAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +82,11 @@ public class SearchFreinds extends AppCompatActivity {
     }
 
     private void init() {
+        notfound = findViewById(R.id.notfound);
+        icon = findViewById(R.id.resulticon);
+        text = findViewById(R.id.resulttext);
+        progressBar = findViewById(R.id.progress);
+
         searchbox = findViewById(R.id.searchbox);
         searchnow = findViewById(R.id.search);
         recyclerView = findViewById(R.id.searchlist);
@@ -137,6 +152,10 @@ public class SearchFreinds extends AppCompatActivity {
     private void searchFreinds(String name) {
         added.clear();
         users.clear();
+        MessageMaker.showNotFound(notfound);
+        progressBar.setVisibility(View.VISIBLE);
+        icon.setVisibility(View.GONE);
+        text.setText("Searching for '"+name+"'");
         recyclerViewAdapter.notifyDataSetChanged();
         firebaseService.getDatabaseRef("Users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -160,6 +179,13 @@ public class SearchFreinds extends AppCompatActivity {
                             });
                         }
                     }
+                }
+                if(added.size() > 0) {
+                    MessageMaker.hideNotFound(notfound);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    icon.setVisibility(View.VISIBLE);
+                    text.setText("Sorry we didn't find any results matching this search.");
                 }
             }
 

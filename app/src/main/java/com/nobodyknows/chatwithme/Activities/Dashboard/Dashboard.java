@@ -8,9 +8,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.github.tamir7.contacts.Contacts;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
+import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 
@@ -29,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import me.aflak.bluetooth.Bluetooth;
+import me.aflak.bluetooth.interfaces.BluetoothCallback;
+import me.aflak.bluetooth.interfaces.DiscoveryCallback;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -41,6 +47,7 @@ public class Dashboard extends AppCompatActivity {
     private View actionbarview;
     public static FirebaseService firebaseService;
     public static DatabaseHelper databaseHelper;
+    private Bluetooth bluetooth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +57,107 @@ public class Dashboard extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.dashboard_toolbar_view);
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
+        setupBlueTooth();
         Contacts.initialize(getApplicationContext());
         firebaseService = new FirebaseService();
         databaseHelper = new DatabaseHelper(getApplicationContext());
         databaseHelper.createTable();
         init();
+    }
+
+    private void setupBlueTooth() {
+        bluetooth = new Bluetooth(this);
+        bluetooth.setCallbackOnUI(this);
+        bluetooth.setBluetoothCallback(bluetoothCallback);
+        bluetooth.setDiscoveryCallback(new DiscoveryCallback() {
+            @Override
+            public void onDiscoveryStarted() {
+                Log.d("TAGCON", "Discovery Started");
+            }
+
+            @Override
+            public void onDiscoveryFinished() {
+                Log.d("TAGCON", "Discovery Finished");
+            }
+
+            @Override
+            public void onDeviceFound(BluetoothDevice device) {
+                Log.d("TAGCON", "onDeviceFound: "+device.getName());
+            }
+
+            @Override
+            public void onDevicePaired(BluetoothDevice device) {
+                Log.d("TAGCON", "Paired");
+            }
+
+            @Override
+            public void onDeviceUnpaired(BluetoothDevice device) {
+                Log.d("TAGCON", "Uparied");
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                Log.d("TAGCON", "error: "+errorCode);
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bluetooth.onStart();
+        if(bluetooth.isEnabled()){
+            startScanning();
+        } else {
+            bluetooth.enable();
+        }
+    }
+
+    private void startScanning() {
+        bluetooth.startScanning();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bluetooth.onStop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        bluetooth.onActivityResult(requestCode, resultCode);
+    }
+
+    private BluetoothCallback bluetoothCallback = new BluetoothCallback() {
+        @Override
+        public void onBluetoothTurningOn() {
+            startScanning();
+        }
+
+        @Override
+        public void onBluetoothOn() {
+            startScanning();
+        }
+
+        @Override
+        public void onBluetoothTurningOff() {
+            stopScanning();
+        }
+
+        @Override
+        public void onBluetoothOff() {
+            stopScanning();
+        }
+
+        @Override
+        public void onUserDeniedActivation() {
+
+        }
+    };
+
+    private void stopScanning() {
+        bluetooth.onStop();
     }
 
     @Override
@@ -71,10 +174,24 @@ public class Dashboard extends AppCompatActivity {
                 break;
             case R.id.menu_nearby_chat:
                 break;
+            case R.id.menu_signout:
+                signout();
+                break;
             default:
                 break;
         }
         return true;
+    }
+
+    private void signout() {
+        SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+        databaseHelper.deleteAll();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void menuAddChatClick() {

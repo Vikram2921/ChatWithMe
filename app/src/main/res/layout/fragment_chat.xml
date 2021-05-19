@@ -13,4 +13,46 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_height="match_parent">
     </androidx.recyclerview.widget.RecyclerView>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/notfound"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/ic_baseline_chat_24"
+                android:layout_width="60dp"
+                android:layout_gravity="center"
+                android:layout_height="60dp">
+            </ImageView>
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:text="You have no recent chat.\nStart chating with your freind by adding new chat"
+                android:textSize="14dp"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </TextView>
+            <Button
+                android:layout_gravity="center"
+                android:textAllCaps="false"
+                android:id="@+id/action"
+                android:layout_marginTop="10dp"
+                android:text="Start new chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            </Button>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

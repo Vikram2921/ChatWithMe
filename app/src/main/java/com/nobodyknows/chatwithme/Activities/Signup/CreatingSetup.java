@@ -45,26 +45,6 @@ public class CreatingSetup extends AppCompatActivity {
                         firebaseService.readFromFireStore("Users").document(myUsername).collection("AccountInfo").document("RecentChats").set(dummyMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                createFreindFolder();
-                            }
-                        });
-                    } else {
-                        createFreindFolder();
-                    }
-                }
-            }
-        });
-    }
-
-    private void createFreindFolder() {
-        firebaseService.readFromFireStore("Users").document(myUsername).collection("Freinds").document("List").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()) {
-                    if(!task.getResult().exists()) {
-                        firebaseService.readFromFireStore("Users").document(myUsername).collection("Freinds").document("List").set(dummyMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
                                 createFreindRequestFolder("Receive");
                             }
                         });
@@ -75,6 +55,7 @@ public class CreatingSetup extends AppCompatActivity {
             }
         });
     }
+
 
     private void createFreindRequestFolder(String innerFolder) {
         firebaseService.readFromFireStore("Users").document(myUsername).collection("FreindRequests").document(innerFolder).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,6 +54,7 @@ public class FreindsFragment extends Fragment {
     private RecyclerView recyclerView;
     private FreindsRequestRecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<String> added = new ArrayList<>();
+    private ConstraintLayout notfound;
     private ArrayList<FreindRequestDTO> freindRequestDTOS = new ArrayList<>();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void init() {
+        notfound = view.findViewById(R.id.notfound);
         count = view.findViewById(R.id.requestcount);
         search = view.findViewById(R.id.searchnewfreind);
         see = view.findViewById(R.id.seeallfreinds);
@@ -83,6 +86,7 @@ public class FreindsFragment extends Fragment {
             }
         });
         setupRecyclerView();
+        syncFreindList();
     }
 
     private void setupRecyclerView() {
@@ -99,7 +103,7 @@ public class FreindsFragment extends Fragment {
 
             @Override
             public void onDelete(FreindRequestDTO freindRequestDTO) {
-
+                deleteRequest(freindRequestDTO,false);
             }
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -121,7 +125,7 @@ public class FreindsFragment extends Fragment {
         fdto.setRequestSentAt(freindRequestDTO.getRequestSentAt());
         fdto.setRequestSentBy(freindRequestDTO.getContactNumber());
         fdto.setRequestAcceptedAt(new Date());
-        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document("List").collection(freindRequestDTO.getContactNumber()).document("Object").set(fdto).addOnCompleteListener(new OnCompleteListener<Void>() {
+        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(freindRequestDTO.getContactNumber()).set(fdto).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
@@ -130,11 +134,11 @@ public class FreindsFragment extends Fragment {
                     myDto.setRequestSentAt(freindRequestDTO.getRequestSentAt());
                     myDto.setRequestSentBy(freindRequestDTO.getContactNumber());
                     myDto.setRequestAcceptedAt(new Date());
-                    firebaseService.saveToFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("Freinds").document("List").collection(mynumber).document("Object").set(myDto).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    firebaseService.saveToFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("Freinds").document(mynumber).set(myDto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()) {
-                                deleteRequest(freindRequestDTO);
+                                deleteRequest(freindRequestDTO,true);
                             }
                         }
                     });
@@ -143,14 +147,16 @@ public class FreindsFragment extends Fragment {
         });
     }
 
-    private void deleteRequest(FreindRequestDTO freindRequestDTO) {
+    private void deleteRequest(FreindRequestDTO freindRequestDTO,Boolean updateInDatabase) {
         firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("FreindRequests").document("Receive").collection("List").document(freindRequestDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 firebaseService.readFromFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("FreindRequests").document("Sent").collection("List").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        updateInDatabase(freindRequestDTO.getContactNumber());
+                        if(updateInDatabase) {
+                            updateInDatabase(freindRequestDTO.getContactNumber());
+                        }
                     }
                 });
             }
@@ -163,7 +169,6 @@ public class FreindsFragment extends Fragment {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot != null) {
                     User users = documentSnapshot.toObject(User.class);
-                    Toast.makeText(getContext(),users.getName()+" is added as freind successfully",Toast.LENGTH_SHORT).show();
                     databaseHelper.insertInUser(users);
                 }
             }
@@ -175,6 +180,11 @@ public class FreindsFragment extends Fragment {
     }
 
     private void updateCount() {
+        if(freindRequestDTOS.size() > 0) {
+            MessageMaker.hideNotFound(notfound);
+        } else {
+            MessageMaker.showNotFound(notfound);
+        }
         count.setText(freindRequestDTOS.size()+"");
     }
 
@@ -244,6 +254,28 @@ public class FreindsFragment extends Fragment {
                     for(DocumentChange documentChange:value.getDocumentChanges()) {
                         switch (documentChange.getType()) {
                             case ADDED:
+                                break;
+                            case MODIFIED:
+                                break;
+                            case REMOVED:
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void syncFreindList() {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(error == null) {
+                    for(DocumentChange documentChange:value.getDocumentChanges()) {
+                        FreindRequestSaveDTO freindRequestSaveDTO = documentChange.getDocument().toObject(FreindRequestSaveDTO.class);
+                        switch (documentChange.getType()) {
+                            case ADDED:
+                                updateInDatabase(freindRequestSaveDTO.getContactNumber());
                                 break;
                             case MODIFIED:
                                 break;
