@@ -2,15 +2,49 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_audio_call"
-        android:icon="@drawable/audio"
-        android:orderInCategory="100"
-        android:title="Audio Call"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/menu_video_call"
         android:icon="@drawable/video"
         android:orderInCategory="100"
         android:title="Video Call"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_audio_call"
+        android:icon="@drawable/audio"
+        android:orderInCategory="100"
+        android:title="Audio Call"
+        app:showAsAction="ifRoom" />
+    <item android:id="@+id/menu_view_contact"
+        android:title="View Contact"
+        android:orderInCategory="100" />
+    <item android:id="@+id/menu_media"
+        android:title="Media, links, and docs"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/menu_search"
+        android:title="Search"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/menu_mute"
+        android:title="Mute Notification"
+        android:orderInCategory="100"/>
+    <item android:id="@+id/menu_wallpaper"
+        android:title="Wallpaper"
+        android:orderInCategory="100"/>
+    <item
+        android:id="@+id/item3"
+        android:title="More"
+        android:orderInCategory="100">
+        <menu>
+            <item
+                android:id="@+id/report"
+                android:title="Report" />
+            <item
+                android:id="@+id/block"
+                android:title="Block" />
+            <item
+                android:id="@+id/unfreind"
+                android:title="Unfreind" />
+            <item
+                android:id="@+id/clear"
+                android:title="Clear Chat" />
+        </menu>
+    </item>
 </menu>

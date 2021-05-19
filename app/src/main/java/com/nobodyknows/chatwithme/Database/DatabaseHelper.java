@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.MessageDB;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
@@ -18,6 +19,8 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -111,7 +114,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return values;
     }
 
-    public ArrayList<UserListItemDTO> getRecentChatUsers() {
+    public ArrayList<UserListItemDTO> getRecentChatUsers(Context context) {
         ArrayList<UserListItemDTO> recentChatList = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + RecentChats.getTableName() + " ORDER BY " +
                 RecentChats.COLUMN_LAST_MESSAGE_DATE + " DESC";
@@ -131,10 +134,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 userListItemDTO.setProfileUrl(user.getProfileUrl());
                 userListItemDTO.setCurrentStatus(user.getCurrentStatus());
                 String lastMessageId = cursor.getString(cursor.getColumnIndex(RecentChats.COLUMN_LAST_MESSAGE_ID));
+                userListItemDTO.setLastMessage(databaseHelperChat.getMessage(lastMessageId,MessageMaker.createRoomId(context,userListItemDTO.getContactNumber())));
                 recentChatList.add(userListItemDTO);
 
             } while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return recentChatList;
     }
@@ -194,6 +199,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 user = convertToUser(cursor);
             } while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return user;
     }
@@ -210,6 +216,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 users.add(user);
             } while (cursor.moveToNext());
         }
+        cursor.close();
         db.close();
         return users;
     }
@@ -225,6 +232,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         user.setLastOnline(MessageMaker.getConvertedDate(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_LAST_ONLINE))));
         user.setCurrentStatus(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_CURRENT_STATUS)));
         return user;
+    }
+
+    public void updateUserLastMessage(Message message) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+RecentChats.getTableName()+" SET "+RecentChats.COLUMN_LAST_MESSAGE_ID+" = '"+message.getMessageId()+"',"+RecentChats.COLUMN_LAST_MESSAGE_DATE+"='"+message.getSentAt().getTime()+"' WHERE "+RecentChats.COLUMN_USERNAME+" = "+ message.getReceiver();
+        db.execSQL(strSQL);
+        db.close();
     }
 
 

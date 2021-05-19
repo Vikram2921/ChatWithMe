@@ -15,8 +15,6 @@ public class Message {
     private String receiver;
     private String message;
     private String roomId;
-    private ArrayList<SharedFile> sharedFiles = new ArrayList<>();
-    private ArrayList<Contact> contacts = new ArrayList<>();
     private MessageType messageType = MessageType.TEXT;
     private Date createdTimestamp = new Date();
     private Date updateTimestamp = new Date();
@@ -29,6 +27,8 @@ public class Message {
     private MessageConfiguration messageConfiguration;
     private View replyMessageView;
     private View customView;
+    private ArrayList<SharedFile> sharedFiles = new ArrayList<>();
+    private ArrayList<Contact> contacts = new ArrayList<>();
     public String getMessageId() {
         return messageId;
     }

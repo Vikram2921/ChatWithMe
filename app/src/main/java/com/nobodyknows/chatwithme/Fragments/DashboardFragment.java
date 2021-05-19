@@ -18,9 +18,10 @@ public class DashboardFragment extends FragmentPagerAdapter {
             case 1: // Fragment # 0 - This will show FirstFragment different title
                 return new StoriesFragment();
             case 2: // Fragment # 1 - This will show SecondFragment
-                return new CallsFragment();
-            case 3: // Fragment # 1 - This will show SecondFragment
                 return new FreindsFragment();
+            case 3: // Fragment # 1 - This will show SecondFragment
+                return new CallsFragment();
+
             default:
                 return null;
         }
@@ -39,9 +40,9 @@ public class DashboardFragment extends FragmentPagerAdapter {
             case 1: // Fragment # 0 - This will show FirstFragment different title
                 return "Stories";
             case 2: // Fragment # 1 - This will show SecondFragment
-                return "Calls";
-            case 3: // Fragment # 1 - This will show SecondFragment
                 return "Freinds";
+            case 3: // Fragment # 1 - This will show SecondFragment
+                return "Calls";
             default:
                 return null;
         }

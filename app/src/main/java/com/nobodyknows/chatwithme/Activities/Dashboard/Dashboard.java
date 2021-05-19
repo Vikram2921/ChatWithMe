@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
+import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.material.tabs.TabLayout;
@@ -47,6 +49,7 @@ public class Dashboard extends AppCompatActivity {
     private View actionbarview;
     public static FirebaseService firebaseService;
     public static DatabaseHelper databaseHelper;
+    public static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper databaseHelperChat;
     private Bluetooth bluetooth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,12 @@ public class Dashboard extends AppCompatActivity {
         Contacts.initialize(getApplicationContext());
         firebaseService = new FirebaseService();
         databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
+            @Override
+            public void onLastMessageAdded(Message message, String roomid) {
+                databaseHelper.updateUserLastMessage(message);
+            }
+        });
         databaseHelper.createTable();
         init();
     }

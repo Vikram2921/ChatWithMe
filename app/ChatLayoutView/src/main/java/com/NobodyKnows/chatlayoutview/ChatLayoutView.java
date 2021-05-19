@@ -1,13 +1,9 @@
 package com.NobodyKnows.chatlayoutview;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -18,26 +14,21 @@ import com.NobodyKnows.chatlayoutview.Adapters.RecyclerViewAdapter;
 import com.NobodyKnows.chatlayoutview.Constants.MessagePosition;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.MessageConfiguration;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
-import com.bumptech.glide.Glide;
 import com.capybaralabs.swipetoreply.ISwipeControllerActions;
 import com.capybaralabs.swipetoreply.SwipeController;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
-
-import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 
 public class ChatLayoutView extends RelativeLayout {
 
@@ -58,6 +49,7 @@ public class ChatLayoutView extends RelativeLayout {
     private int sentSoundEffect = R.raw.message_added;
     private int receivedSoundEffect = R.raw.message_received;
     private int blurRadius = 70;
+    private DatabaseHelper databaseHelper;
 
     public ChatLayoutView(Context context) {
         super(context);
@@ -87,7 +79,7 @@ public class ChatLayoutView extends RelativeLayout {
         rightMessageConfiguration.setBackgroundResource(R.drawable.right_message_background);
     }
 
-    public void setup(String myUsername,String roomId,Boolean saveToDatabase,ChatLayoutListener chatLayoutListener) {
+    public void setup(String myUsername,String roomId,Boolean saveToDatabase,DatabaseHelper databaseHelper,ChatLayoutListener chatLayoutListener) {
         this.myUsername = myUsername;
         this.roomId = roomId;
         this.saveToDatabase = saveToDatabase;
@@ -95,11 +87,23 @@ public class ChatLayoutView extends RelativeLayout {
         helper = new Helper(context);
         setupRecyclerView();
         if(saveToDatabase) {
+            this.databaseHelper = databaseHelper;
+            databaseHelper.createTable(roomId);
             loadPreviousChatMessages();
         }
     }
 
     private void loadPreviousChatMessages() {
+        messages.clear();
+        ArrayList<Message> list = databaseHelper.getAllMessages(roomId);
+        for(Message message:list) {
+            if(!helper.messageIdExists(message.getMessageId())) {
+                checkForDate(message);
+                notifyAdapter(true);
+                checkForSeen(message,null);
+            }
+        }
+        notifyAdapter(true);
     }
 
     public void addUser(User user) {
@@ -187,7 +191,6 @@ public class ChatLayoutView extends RelativeLayout {
     public void deleteMessage(Message message) {
         if(helper.messageIdExists(message.getMessageId())) {
             int index = helper.getMessageIdPositon(message.getMessageId());
-            Message messageToDelet = messages.get(index);
             messages.remove(index);
             recyclerViewAdapter.notifyItemRemoved(index);
             if(saveToDatabase) {
@@ -197,6 +200,7 @@ public class ChatLayoutView extends RelativeLayout {
     }
 
     private void removeFromDatabase(Message message) {
+        databaseHelper.deleteMessage(message.getMessageId(),roomId);
     }
 
     public void updateMessage(Message message) {
@@ -219,11 +223,12 @@ public class ChatLayoutView extends RelativeLayout {
     }
 
     private void updateMessageToDatabase(Message message) {
+        databaseHelper.updateMessage(message,roomId);
     }
 
 
     private void saveToDatabaseTable(Message message) {
-
+        databaseHelper.insertInMessage(message,roomId);
     }
 
 

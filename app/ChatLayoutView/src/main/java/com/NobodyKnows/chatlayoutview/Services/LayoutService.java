@@ -327,4 +327,33 @@ public class LayoutService {
         return Color.rgb(red, green, blue);
     }
 
+    public static String getConvertedDate(Date date) {
+        if(date != null) {
+            return date.toString();
+        }
+        return "";
+    }
+
+    public static Date getConvertedDate(String date) {
+        if(date.length() > 0) {
+            Date newdate = new Date(date);
+            return newdate;
+        }
+        return null;
+    }
+
+    public static boolean convertBoolean(String value) {
+        if(value.equalsIgnoreCase("true")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String convertBoolean(Boolean value) {
+        if(value) {
+            return "true";
+        }
+        return "false";
+    }
+
 }

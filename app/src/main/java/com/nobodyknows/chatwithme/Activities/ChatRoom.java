@@ -35,6 +35,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
@@ -44,6 +45,9 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatRoom extends AppCompatActivity {
 
@@ -93,6 +97,12 @@ public class ChatRoom extends AppCompatActivity {
             case R.id.menu_video_call:
                 videoCall();
                 break;
+            case R.id.menu_view_contact:
+                openViewContact();
+                break;
+            case R.id.unfreind:
+                unfreind();
+                break;
             case android.R.id.home:
                finish();
                 break;
@@ -100,6 +110,16 @@ public class ChatRoom extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+    private void openViewContact() {
+        Intent intent = new Intent(getApplicationContext(), ViewContact.class);
+        intent.putExtra("username",username);
+        intent.putExtra("isFromChat",true);
+        startActivity(intent);
+    }
+
+    private void unfreind() {
     }
 
     private void videoCall() {
@@ -190,7 +210,7 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void setupChatLayoutView() {
-        chatLayoutView.setup(myUsername, roomid, true, new ChatLayoutListener() {
+        chatLayoutView.setup(myUsername, roomid, true,databaseHelperChat, new ChatLayoutListener() {
             @Override
             public void onSwipeToReply(Message message, View replyView) {
 
@@ -218,15 +238,12 @@ public class ChatRoom extends AppCompatActivity {
                 });
             }
         });
-        User user1 = new User();
-        user1.setName("Vikram");
-        user1.setContactNumber(myUsername);
-        chatLayoutView.addUser(user1);
-
-        User user2 = new User();
-        user2.setName("Vikram");
-        user2.setCurrentStatus(username);
-        chatLayoutView.addUser(user2);
+        User myUser = new User();
+        myUser.setName(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"name"));
+        myUser.setContactNumber(myUsername);
+        chatLayoutView.addUser(myUser);
+        User freinduser = databaseHelper.getUser(username);
+        chatLayoutView.addUser(freinduser);
         Glide.with(getApplicationContext()).load(R.drawable.background).into(backgroundImage);
     }
 

@@ -11,12 +11,10 @@
         android:icon="@drawable/connections"
         android:orderInCategory="100"
         app:showAsAction="ifRoom" />
-    <group>
-        <item android:id="@+id/menu_setting"
-            android:title="Settings"
-            android:orderInCategory="100" />
-        <item android:id="@+id/menu_signout"
-            android:title="Signout"
-            android:orderInCategory="100"/>
-    </group>
+    <item android:id="@+id/menu_setting"
+        android:title="Settings"
+        android:orderInCategory="100" />
+    <item android:id="@+id/menu_signout"
+        android:title="Signout"
+        android:orderInCategory="100"/>
 </menu>

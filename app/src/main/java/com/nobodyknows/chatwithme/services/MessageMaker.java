@@ -3,8 +3,12 @@ package com.nobodyknows.chatwithme.services;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.bumptech.glide.Glide;
+import com.nobodyknows.chatwithme.R;
 
 import java.util.Date;
 
@@ -13,7 +17,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class MessageMaker {
 
     public static String createMessageId(String myid) {
-        String id = myid+""+new Date().getTime();
+        String id =""+new Date().getTime();
         return id;
     }
 
@@ -81,4 +85,11 @@ public class MessageMaker {
         }
     }
 
+    public static void loadProfile(Context context,String profileUrl, ImageView profile) {
+        if(profileUrl != null && profileUrl.length() > 0 && !profileUrl.equalsIgnoreCase("NO_PROFILE")) {
+            Glide.with(context).load(profileUrl).into(profile);
+        } else {
+            Glide.with(context).load(R.drawable.profile).into(profile);
+        }
+    }
 }
