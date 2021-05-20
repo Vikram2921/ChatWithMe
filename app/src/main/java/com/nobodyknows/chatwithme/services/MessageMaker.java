@@ -7,6 +7,7 @@ import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.bumptech.glide.Glide;
 import com.nobodyknows.chatwithme.R;
 
@@ -91,5 +92,9 @@ public class MessageMaker {
         } else {
             Glide.with(context).load(R.drawable.profile).into(profile);
         }
+    }
+
+    public static Message filterMessage(Message message) {
+        return message;
     }
 }

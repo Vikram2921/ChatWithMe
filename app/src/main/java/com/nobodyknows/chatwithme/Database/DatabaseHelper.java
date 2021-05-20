@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
-import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.MessageDB;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
@@ -27,8 +26,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "NOBODYKNOW_CHATS";
     private String roomId;
     private Helper helper;
+    private Context context;
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context= context;
     }
 
     public void setRoomId(String roomId) {
@@ -41,6 +42,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+    }
+
+    public void deleteDatabase()  {
+        context.deleteDatabase(DATABASE_NAME);
     }
 
     public void createTable() {
@@ -60,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void delete(SQLiteDatabase db,String tableName) {
-        db.execSQL("DROP TABLE IF EXISTS " + tableName);
+        db.execSQL("DROP THistoryABLE IF EXISTS " + tableName);
     }
 
     public void clear(SQLiteDatabase db,String tableName) {
@@ -117,7 +122,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public ArrayList<UserListItemDTO> getRecentChatUsers(Context context) {
         ArrayList<UserListItemDTO> recentChatList = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + RecentChats.getTableName() + " ORDER BY " +
-                RecentChats.COLUMN_LAST_MESSAGE_DATE + " DESC";
+                RecentChats.COLUMN_LAST_MESSAGE_DATE;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         UserListItemDTO userListItemDTO  = null;
@@ -142,6 +147,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return recentChatList;
+    }
+
+    public Boolean deleteRecentChat(String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Boolean isDeleted = db.delete(RecentChats.getTableName(),RecentChats.COLUMN_USERNAME+"=?",new String[]{username}) > 0;
+        return isDeleted;
     }
 
     // Recent Chats CRUD Ends Here
@@ -183,6 +194,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(UsersDB.COLUMN_PROFILE_URL,user.getProfileUrl());
         values.put(UsersDB.COLUMN_COLOR_CODE,user.getColorCode());
         values.put(UsersDB.COLUMN_VERIFIED,MessageMaker.convertBoolean(user.getVerified()));
+        values.put(UsersDB.COLUMN_MUTED,MessageMaker.convertBoolean(user.getMuted()));
+        values.put(UsersDB.COLUMN_BLOCKED,MessageMaker.convertBoolean(user.getBlocked()));
         values.put(UsersDB.COLUMN_LAST_ONLINE, MessageMaker.getConvertedDate(user.getLastOnline()));
         values.put(UsersDB.COLUMN_CURRENT_STATUS,user.getCurrentStatus());
         return values;
@@ -229,6 +242,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         user.setProfileUrl(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_PROFILE_URL)));
         user.setColorCode(cursor.getInt(cursor.getColumnIndex(UsersDB.COLUMN_COLOR_CODE)));
         user.setVerified(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_VERIFIED))));
+        user.setMuted(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_MUTED))));
+        user.setBlocked(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_BLOCKED))));
         user.setLastOnline(MessageMaker.getConvertedDate(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_LAST_ONLINE))));
         user.setCurrentStatus(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_CURRENT_STATUS)));
         return user;
@@ -239,6 +254,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String strSQL = "UPDATE "+RecentChats.getTableName()+" SET "+RecentChats.COLUMN_LAST_MESSAGE_ID+" = '"+message.getMessageId()+"',"+RecentChats.COLUMN_LAST_MESSAGE_DATE+"='"+message.getSentAt().getTime()+"' WHERE "+RecentChats.COLUMN_USERNAME+" = "+ message.getReceiver();
         db.execSQL(strSQL);
         db.close();
+    }
+
+    public Boolean deleteUser(String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Boolean isDeleted = db.delete(UsersDB.getTableName(),UsersDB.COLUMN_CONTACT_NUMBER+"=?",new String[]{username}) > 0;
+        return isDeleted;
+    }
+
+    public void clearLastMessage(String username) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+RecentChats.getTableName()+" SET "+RecentChats.COLUMN_LAST_MESSAGE_ID+" = '',"+RecentChats.COLUMN_LAST_MESSAGE_DATE+"='' WHERE "+RecentChats.COLUMN_USERNAME+" = "+ username;
+        db.execSQL(strSQL);
+        db.close();
+
     }
 
 

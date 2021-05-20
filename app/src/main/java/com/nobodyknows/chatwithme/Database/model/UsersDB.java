@@ -12,6 +12,8 @@ public class UsersDB {
     private String verified;
     private String lastOnline;
     private String currentStatus;
+    private String muted;
+    private String blocked;
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
@@ -20,6 +22,8 @@ public class UsersDB {
     public static final String COLUMN_PROFILE_URL = "profileUrl";
     public static final String COLUMN_COLOR_CODE = "colorCode";
     public static final String COLUMN_VERIFIED = "verified";
+    public static final String COLUMN_MUTED = "muted";
+    public static final String COLUMN_BLOCKED = "blocked";
     public static final String COLUMN_LAST_ONLINE = "lastOnline";
     public static final String COLUMN_CURRENT_STATUS = "currentStatus";
 
@@ -37,6 +41,8 @@ public class UsersDB {
                 + COLUMN_PROFILE_URL +" TEXT,"
                 + COLUMN_COLOR_CODE +" INTEGER,"
                 + COLUMN_VERIFIED +" TEXT,"
+                + COLUMN_MUTED +" TEXT,"
+                + COLUMN_BLOCKED +" TEXT,"
                 + COLUMN_LAST_ONLINE +" TEXT,"
                 + COLUMN_CURRENT_STATUS +" TEXT"
                 +")";
@@ -113,5 +119,21 @@ public class UsersDB {
 
     public void setCurrentStatus(String currentStatus) {
         this.currentStatus = currentStatus;
+    }
+
+    public String getMuted() {
+        return muted;
+    }
+
+    public void setMuted(String muted) {
+        this.muted = muted;
+    }
+
+    public String getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(String blocked) {
+        this.blocked = blocked;
     }
 }

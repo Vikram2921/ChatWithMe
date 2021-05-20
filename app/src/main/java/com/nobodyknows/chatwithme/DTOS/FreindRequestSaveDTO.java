@@ -7,6 +7,24 @@ public class FreindRequestSaveDTO {
     private String requestSentBy = "";
     private Date requestSentAt = new Date();
     private Date requestAcceptedAt = new Date();
+    private Boolean blocked = false;
+    private Boolean muted = false;
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public Boolean getMuted() {
+        return muted;
+    }
+
+    public void setMuted(Boolean muted) {
+        this.muted = muted;
+    }
 
     public String getContactNumber() {
         return contactNumber;

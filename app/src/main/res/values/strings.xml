@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Chat With Me</string>
+    <string name="blockstring">Block</string>
+    <string name="unblockstring">Unblock</string>
+    <string name="unfreind">Unfreind</string>
+    <string name="clear">Clear</string>
 </resources>

@@ -282,4 +282,13 @@ public class ChatLayoutView extends RelativeLayout {
         helper.addMessageId(message.getMessageId());
     }
 
+    public void reload() {
+        messages.clear();
+        recyclerViewAdapter.notifyDataSetChanged();
+        helper.clearMessagedIds();
+        if(saveToDatabase) {
+            databaseHelper.createTable(roomId);
+            loadPreviousChatMessages();
+        }
+    }
 }

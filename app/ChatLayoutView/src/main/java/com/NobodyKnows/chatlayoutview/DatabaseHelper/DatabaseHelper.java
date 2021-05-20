@@ -21,14 +21,20 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "NOBODYKNOW_CHATS";
+    private Context context;
     private LastMessageUpdateListener lastMessageUpdateListener;
     public DatabaseHelper(@Nullable Context context,LastMessageUpdateListener lastMessageUpdateListener) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
         this.lastMessageUpdateListener = lastMessageUpdateListener;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+    }
+
+    public void deleteDatabase()  {
+        context.deleteDatabase(DATABASE_NAME);
     }
 
     public void createTable(String roomId) {
@@ -65,6 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     public long insertInMessage(Message message,String roomId) {
         SQLiteDatabase db  = this.getWritableDatabase();
+        db.execSQL(MessageDB.getCreateTableQuery(roomId));
         long id = 0;
         if(!isMessageExists(message,roomId,db)) {
             id = db.insert(MessageDB.getTableName(roomId),null, getMessageContentValue(message));
@@ -172,6 +179,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return message;
+    }
+
+    public void deleteMessagesOf(String roomid) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        delete(db,MessageDB.getTableName(roomid));
     }
 
     //Message CRUD ends HEre

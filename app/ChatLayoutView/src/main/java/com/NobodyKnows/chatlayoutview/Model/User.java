@@ -15,6 +15,8 @@ public class User {
     private String profileUrl;
     private Integer colorCode = LayoutService.generateUserColorCode();
     private Boolean verified = false;
+    private Boolean muted = false;
+    private Boolean blocked = false;
     private Date lastOnline = new Date();
     private String currentStatus = "Offline";
     private Date accountCreated = new Date();
@@ -106,5 +108,21 @@ public class User {
 
     public void setStories(List<UserStory> stories) {
         this.stories = stories;
+    }
+
+    public Boolean getMuted() {
+        return muted;
+    }
+
+    public void setMuted(Boolean muted) {
+        this.muted = muted;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
     }
 }

@@ -1,20 +1,25 @@
 package com.nobodyknows.chatwithme.Activities.Dashboard;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.vistrav.pop.Pop;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class ViewContact extends AppCompatActivity {
 
@@ -22,7 +27,7 @@ public class ViewContact extends AppCompatActivity {
     private TextView name,status,statusupdatedate,mobilenumber;
     protected ConstraintLayout report,unfreind,block;
     private String username = "";
-    private Boolean isFromChat = false;
+    private Boolean isFromChat = false,isBlocked = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +86,58 @@ public class ViewContact extends AppCompatActivity {
                     startActivity(intent);
                 }
                 finish();
+            }
+        });
+        unfreind.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Pop.on(ViewContact.this).with()
+                        .cancelable(true)
+                        .body("Are you sure you want to remove "+user.getName()+" from your freind list ?")
+                        .when(R.string.unfreind,new Pop.Yah() {
+                            @Override
+                            public void clicked(DialogInterface dialog, @Nullable View view) {
+                                firebaseService.unfreind(getApplicationContext(),username);
+                            }
+                        }).when(new Pop.Nah() {
+                                @Override
+                                public void clicked(DialogInterface dialog, @Nullable View view) {
+                                }
+                        }).show();
+            }
+        });
+        block.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isBlocked) {
+                    Pop.on(ViewContact.this).with()
+                            .cancelable(true)
+                            .body("Are you sure you want to unblock "+user.getName()+" ?")
+                            .when(R.string.unblockstring,new Pop.Yah() {
+                                @Override
+                                public void clicked(DialogInterface dialog, @Nullable View view) {
+                                    firebaseService.block(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                }
+                            }).when(new Pop.Nah() {
+                        @Override
+                        public void clicked(DialogInterface dialog, @Nullable View view) {
+                        }
+                    }).show();
+                } else {
+                    Pop.on(ViewContact.this).with()
+                            .cancelable(true)
+                            .body("Are you sure you want to block "+user.getName()+" from your freind list ?")
+                            .when(R.string.blockstring,new Pop.Yah() {
+                                @Override
+                                public void clicked(DialogInterface dialog, @Nullable View view) {
+                                    firebaseService.unblock(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                }
+                            }).when(new Pop.Nah() {
+                        @Override
+                        public void clicked(DialogInterface dialog, @Nullable View view) {
+                        }
+                    }).show();
+                }
             }
         });
     }

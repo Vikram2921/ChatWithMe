@@ -1,5 +1,6 @@
 package com.nobodyknows.chatwithme.services;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -13,20 +14,27 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class FirebaseService {
     private FirebaseFirestore firebaseFirestore;
@@ -128,5 +136,54 @@ public class FirebaseService {
         return databaseReference.child(bucket);
     }
 
-    //https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict?district_id=507&date=17-05-2021
+    public void unfreind(Context context,String username) {
+        String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
+//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        databaseHelper.deleteRecentChat(username);
+//                        databaseHelper.deleteUser(username);
+//                        databaseHelperChat.deleteMessagesOf(username);
+//                    }
+//                });
+//            }
+//        });
+    }
+
+    public void block(Context context,String username,String roomid) {
+        String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
+//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        databaseHelper.deleteRecentChat(username);
+//                        databaseHelper.deleteUser(username);
+//                        databaseHelperChat.deleteMessagesOf(username);
+//                    }
+//                });
+//            }
+//        });
+    }
+
+    public void unblock(Context context,String username,String roomid) {
+        String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
+//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        databaseHelper.deleteRecentChat(username);
+//                        databaseHelper.deleteUser(username);
+//                        databaseHelperChat.deleteMessagesOf(username);
+//                    }
+//                });
+//            }
+//        });
+    }
 }

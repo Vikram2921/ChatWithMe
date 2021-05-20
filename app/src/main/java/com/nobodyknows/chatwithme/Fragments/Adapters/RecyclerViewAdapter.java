@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.github.curioustechizen.ago.RelativeTimeTextView;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
+import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -72,6 +73,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 intent.putExtra("verified",user.getVerified());
                 intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
                 intent.putExtra("profile",user.getProfileUrl());
+                context.startActivity(intent);
+            }
+        });
+        holder.profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ViewContact.class);
+                intent.putExtra("username",user.getContactNumber());
+                intent.putExtra("isFromChat",false);
                 context.startActivity(intent);
             }
         });

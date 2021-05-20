@@ -7,8 +7,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.NavUtils;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +29,7 @@ import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -40,7 +44,9 @@ import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.vistrav.pop.Pop;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -71,6 +77,13 @@ public class ChatRoom extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.chatroom_toolbar_view);
         actionBarView = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
+
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         username = getIntent().getStringExtra("username");
         name = getIntent().getStringExtra("name");
         lastOnlineStatus = getIntent().getStringExtra("lastOnlineStatus");
@@ -103,6 +116,15 @@ public class ChatRoom extends AppCompatActivity {
             case R.id.unfreind:
                 unfreind();
                 break;
+            case R.id.menu_wallpaper:
+                changeWallpaper();
+                break;
+            case R.id.block:
+                block();
+                break;
+            case R.id.clear:
+                clearChat();
+                break;
             case android.R.id.home:
                finish();
                 break;
@@ -112,6 +134,99 @@ public class ChatRoom extends AppCompatActivity {
         return true;
     }
 
+    private void clearChat() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to clear all your chat with "+name+" ?")
+                .when(R.string.clear,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                        databaseHelperChat.clearAll(roomid);
+                        databaseHelper.clearLastMessage(username);
+                        chatLayoutView.reload();
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
+    }
+
+    private void block() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to block "+name+" from your freind list ?")
+                .when(R.string.unfreind,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                        firebaseService.block(getApplicationContext(),username,roomid);
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
+    }
+
+    private void unfreind() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to unfreind "+name+" from your freind list ?")
+                .when(R.string.unfreind,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                        firebaseService.unfreind(getApplicationContext(),username);
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
+    }
+
+    private void unblock() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to unblock "+name+" ?")
+                .when(R.string.unfreind,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                        firebaseService.unblock(getApplicationContext(),username,roomid);
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
+    }
+
+    private void changeWallpaper() {
+        ImagePicker.Companion.with(ChatRoom.this)
+                .crop()	    			//Crop image(Optional), Check Customization for more option
+                .compress(1024)			//Final image size will be less than 1 MB(Optional)
+                .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                .start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            File file = ImagePicker.Companion.getFile(data);
+            String profilePath = file.getPath();
+            SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("backgroundPath",profilePath);
+            editor.apply();
+            loadBackgroundImage();
+        } else if (resultCode == ImagePicker.RESULT_ERROR) {
+            Toast.makeText(this, "Failed to load Image", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void openViewContact() {
         Intent intent = new Intent(getApplicationContext(), ViewContact.class);
         intent.putExtra("username",username);
@@ -119,8 +234,6 @@ public class ChatRoom extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void unfreind() {
-    }
 
     private void videoCall() {
         Toast.makeText(getApplicationContext(),"This is not available right now",Toast.LENGTH_SHORT).show();
@@ -153,16 +266,19 @@ public class ChatRoom extends AppCompatActivity {
                 if(error == null) {
                     for(DocumentChange doc:value.getDocumentChanges()) {
                         Message message = doc.getDocument().toObject(Message.class);
-                        switch (doc.getType()) {
-                            case ADDED:
-                                chatLayoutView.addMessage(message);
-                                break;
-                            case MODIFIED:
-                                chatLayoutView.updateMessage(message);
-                                break;
-                            case REMOVED:
-                                chatLayoutView.deleteMessage(message);
-                                break;
+                        message = MessageMaker.filterMessage(message);
+                        if(message != null) {
+                            switch (doc.getType()) {
+                                case ADDED:
+                                    chatLayoutView.addMessage(message);
+                                    break;
+                                case MODIFIED:
+                                    chatLayoutView.updateMessage(message);
+                                    break;
+                                case REMOVED:
+                                    chatLayoutView.deleteMessage(message);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -244,7 +360,16 @@ public class ChatRoom extends AppCompatActivity {
         chatLayoutView.addUser(myUser);
         User freinduser = databaseHelper.getUser(username);
         chatLayoutView.addUser(freinduser);
-        Glide.with(getApplicationContext()).load(R.drawable.background).into(backgroundImage);
+        loadBackgroundImage();
+    }
+
+    private void loadBackgroundImage() {
+        String imageurl = MessageMaker.getFromSharedPrefrences(getApplicationContext(),"backgroundPath");
+        if(imageurl != null && imageurl.length() > 0) {
+            Glide.with(getApplicationContext()).load(imageurl).into(backgroundImage);
+        } else {
+            Glide.with(getApplicationContext()).load(R.drawable.background).into(backgroundImage);
+        }
     }
 
     private void updateNameView() {

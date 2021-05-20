@@ -60,18 +60,6 @@ public class Dashboard extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.dashboard_toolbar_view);
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
-        setupBlueTooth();
-        Contacts.initialize(getApplicationContext());
-        firebaseService = new FirebaseService();
-        databaseHelper = new DatabaseHelper(getApplicationContext());
-        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
-            @Override
-            public void onLastMessageAdded(Message message, String roomid) {
-                databaseHelper.updateUserLastMessage(message);
-            }
-        });
-        databaseHelper.createTable();
-        init();
     }
 
     private void setupBlueTooth() {
@@ -114,6 +102,18 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        setupBlueTooth();
+        Contacts.initialize(getApplicationContext());
+        firebaseService = new FirebaseService();
+        databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
+            @Override
+            public void onLastMessageAdded(Message message, String roomid) {
+                databaseHelper.updateUserLastMessage(message);
+            }
+        });
+        databaseHelper.createTable();
+        init();
         bluetooth.onStart();
         if(bluetooth.isEnabled()){
             startScanning();
@@ -197,7 +197,8 @@ public class Dashboard extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
-        databaseHelper.deleteAll();
+        databaseHelper.deleteDatabase();
+        databaseHelperChat.deleteDatabase();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();

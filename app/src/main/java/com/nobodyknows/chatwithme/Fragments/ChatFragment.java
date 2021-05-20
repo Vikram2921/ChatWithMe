@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatFragment extends Fragment {
 
@@ -57,6 +58,7 @@ public class ChatFragment extends Fragment {
         init();
         return view;
     }
+
 
     private void init() {
         notfound = view.findViewById(R.id.notfound);
@@ -153,6 +155,7 @@ public class ChatFragment extends Fragment {
                         userListItemDTO.setVerified(user.getVerified());
                         userListItemDTO.setLastOnline(user.getLastOnline());
                         databaseHelper.insertInUser(user);
+                        databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
                         addNewChat(userListItemDTO);
                     }
                 }
