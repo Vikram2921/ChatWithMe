@@ -1,6 +1,7 @@
 package com.NobodyKnows.chatlayoutview.Model;
 
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
+import com.bumptech.glide.annotation.Excludes;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,9 +18,12 @@ public class User {
     private Boolean verified = false;
     private Boolean muted = false;
     private Boolean blocked = false;
+    private String blockedBy = "";
     private Date lastOnline = new Date();
     private String currentStatus = "Offline";
     private Date accountCreated = new Date();
+    private String countryName;
+    private String countryCode;
     private List<UserStory> stories = new ArrayList<>();
 
     public String getName() {
@@ -124,5 +128,29 @@ public class User {
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public String getCountryName() {
+        return countryName;
+    }
+
+    public void setCountryName(String countryName) {
+        this.countryName = countryName;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getBlockedBy() {
+        return blockedBy;
+    }
+
+    public void setBlockedBy(String blockedBy) {
+        this.blockedBy = blockedBy;
     }
 }

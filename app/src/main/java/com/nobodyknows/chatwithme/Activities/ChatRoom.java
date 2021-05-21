@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.ColorSpace;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,6 +39,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
@@ -67,7 +69,11 @@ public class ChatRoom extends AppCompatActivity {
     private Boolean isVerfied = false,isBlocked = false;
     private String myUsername = "",roomid = "";
     private ImageView backgroundImage;
+    private ListenerRegistration listner;
     private View actionBarView;
+    private Menu menu;
+    private String blockedBy = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +89,12 @@ public class ChatRoom extends AppCompatActivity {
 
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        removeListener();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         username = getIntent().getStringExtra("username");
@@ -92,6 +104,7 @@ public class ChatRoom extends AppCompatActivity {
         roomid = getIntent().getStringExtra("roomid");
         isVerfied = getIntent().getBooleanExtra("verified",false);
         isBlocked = getIntent().getBooleanExtra("blocked",false);
+        blockedBy = getIntent().getStringExtra("blockedBy");
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
         init();
@@ -100,7 +113,23 @@ public class ChatRoom extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_chat_room, menu);
+        this.menu = menu;
+        setBlockStatus();
         return true;
+    }
+
+    private void setBlockStatus() {
+        if(menu != null) {
+            MenuItem item = menu.findItem(R.id.block);
+            if(isBlocked) {
+                if(blockedBy.equalsIgnoreCase(myUsername)) {
+                    item.setTitle("Unblock");
+                    removeListener();
+                }
+            } else {
+                item.setTitle("Block");
+            }
+        }
     }
 
     @Override
@@ -124,7 +153,11 @@ public class ChatRoom extends AppCompatActivity {
             case R.id.menu_mute:
                 muteNotification();
             case R.id.block:
-                block();
+                if(item.getTitle().equals("Unblock")) {
+                    unblock();
+                } else {
+                    block();
+                }
                 break;
             case R.id.clear:
                 clearChat();
@@ -172,6 +205,13 @@ public class ChatRoom extends AppCompatActivity {
         }).show();
     }
 
+    private void removeListener() {
+        if(listner != null) {
+            listner.remove();
+            Toast.makeText(getApplicationContext(),"Listener Stopped",Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void block() {
         Pop.on(ChatRoom.this).with()
                 .cancelable(true)
@@ -181,6 +221,7 @@ public class ChatRoom extends AppCompatActivity {
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.block(getApplicationContext(),username,roomid);
                         isBlocked = true;
+                        setBlockStatus();
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -214,6 +255,10 @@ public class ChatRoom extends AppCompatActivity {
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.unblock(getApplicationContext(),username,roomid);
                         isBlocked = false;
+                        if(listner == null) {
+                            startListening();
+                        }
+                        setBlockStatus();
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -281,39 +326,46 @@ public class ChatRoom extends AppCompatActivity {
         startListening();
     }
 
+
     private void startListening() {
-        firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(error == null) {
-                    for(DocumentChange doc:value.getDocumentChanges()) {
-                        Message message = doc.getDocument().toObject(Message.class);
-                        Message messageUpdate = MessageMaker.filterMessage(message);
-                        if(messageUpdate != null) {
-                            switch (doc.getType()) {
-                                case ADDED:
-                                    chatLayoutView.addMessage(messageUpdate);
-                                    break;
-                                case MODIFIED:
-                                    chatLayoutView.updateMessage(messageUpdate);
-                                    break;
-                                case REMOVED:
-                                    chatLayoutView.deleteMessage(messageUpdate);
-                                    break;
-                            }
-                        } else {
-                            if(message.getMessageType() == MessageType.BLOCKED) {
-                                isBlocked = true;
-                            } else if(message.getMessageType() == MessageType.UNBLOCKED) {
-                                isBlocked = false;
-                            } else if(message.getMessageType() == MessageType.UNFREIND) {
-                                finish();
+        if(!isBlocked || (isBlocked && !blockedBy.equalsIgnoreCase(myUsername))) {
+            Toast.makeText(getApplicationContext(),"Listener Started",Toast.LENGTH_SHORT).show();
+            listner = firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                    if(error == null) {
+                        for(DocumentChange doc:value.getDocumentChanges()) {
+                            Message message = doc.getDocument().toObject(Message.class);
+                            Message messageUpdate = MessageMaker.filterMessage(message);
+                            if(messageUpdate != null) {
+                                switch (doc.getType()) {
+                                    case ADDED:
+                                        chatLayoutView.addMessage(messageUpdate);
+                                        break;
+                                    case MODIFIED:
+                                        chatLayoutView.updateMessage(messageUpdate);
+                                        break;
+                                    case REMOVED:
+                                        chatLayoutView.deleteMessage(messageUpdate);
+                                        break;
+                                }
+                            } else {
+                                if(message.getMessageType() == MessageType.BLOCKED) {
+                                    isBlocked = true;
+                                    setBlockStatus();
+                                } else if(message.getMessageType() == MessageType.UNBLOCKED) {
+                                    isBlocked = false;
+                                    setBlockStatus();
+                                } else if(message.getMessageType() == MessageType.UNFREIND) {
+                                    finish();
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+
+        }
     }
 
     private void setupMessageBoxWork() {
@@ -371,19 +423,28 @@ public class ChatRoom extends AppCompatActivity {
 
             @Override
             public void onMessageSeenConfirmed(Message message) {
-                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete();
+                if(!isBlocked) {
+                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
+                        }
+                    });
+                }
             }
 
             @Override
             public void onMessageSeen(Message message) {
-                message.setMessageStatus(MessageStatus.SEEN);
-                message.setSeenAt(new Date());
-                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        chatLayoutView.updateMessage(message);
-                    }
-                });
+                if(!isBlocked) {
+                    message.setMessageStatus(MessageStatus.SEEN);
+                    message.setSeenAt(new Date());
+                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            chatLayoutView.updateMessage(message);
+                        }
+                    });
+                }
             }
         });
         User myUser = new User();

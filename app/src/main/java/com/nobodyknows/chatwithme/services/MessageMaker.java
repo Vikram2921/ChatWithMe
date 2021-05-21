@@ -141,6 +141,8 @@ public class MessageMaker {
         intent.putExtra("blocked",user.getBlocked());
         intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
         intent.putExtra("profile",user.getProfileUrl());
+        intent.putExtra("blockedBy",user.getBlockedBy());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 }

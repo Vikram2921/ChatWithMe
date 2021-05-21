@@ -148,18 +148,20 @@ public class ChatFragment extends Fragment {
     private void updateItem(String username,Message message) {
         int index = userListItems.indexOf(userListItemDTOMap.get(username));
         UserListItemDTO userListItemDTO = userListItems.get(index);
-        userListItemDTO.setLastMessage(message);
-        userListItems.remove(index);
-        userListItems.add(0,userListItemDTO);
-        recyclerViewAdapter.notifyItemMoved(index,0);
-        if(message.getMessageStatus() == MessageStatus.SENT && !message.getSender().equalsIgnoreCase(myNumber)) {
-            message.setMessageStatus(MessageStatus.RECEIVED);
-            message.setReceivedAt(new Date());
-            firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                }
-            });
+        if(!userListItemDTO.isBlocked()) {
+            userListItemDTO.setLastMessage(message);
+            userListItems.remove(index);
+            userListItems.add(0,userListItemDTO);
+            recyclerViewAdapter.notifyItemMoved(index,0);
+            if(message.getMessageStatus() == MessageStatus.SENT && !message.getSender().equalsIgnoreCase(myNumber)) {
+                message.setMessageStatus(MessageStatus.RECEIVED);
+                message.setReceivedAt(new Date());
+                firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                    }
+                });
+            }
         }
     }
 
@@ -167,25 +169,40 @@ public class ChatFragment extends Fragment {
         UserListItemDTO userListItemDTO = new UserListItemDTO();
         userListItemDTO.setContactNumber(username);
         userListItemDTO.setLastMessage(lastMessage);
-        firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()) {
-                    if(task.getResult().exists()) {
-                        User user = task.getResult().toObject(User.class);
-                        userListItemDTO.setCurrentStatus(user.getCurrentStatus());
-                        userListItemDTO.setName(user.getName());
-                        userListItemDTO.setProfileUrl(user.getProfileUrl());
-                        userListItemDTO.setStatus(user.getStatus());
-                        userListItemDTO.setVerified(user.getVerified());
-                        userListItemDTO.setLastOnline(user.getLastOnline());
-                        databaseHelper.insertInUser(user);
-                        databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
-                        addNewChat(userListItemDTO);
+        User user = databaseHelper.getUser(username);
+        if(user == null) {
+            firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()) {
+                        if(task.getResult().exists()) {
+                            User user = task.getResult().toObject(User.class);
+                            userListItemDTO.setCurrentStatus(user.getCurrentStatus());
+                            userListItemDTO.setName(user.getName());
+                            userListItemDTO.setProfileUrl(user.getProfileUrl());
+                            userListItemDTO.setStatus(user.getStatus());
+                            userListItemDTO.setVerified(user.getVerified());
+                            userListItemDTO.setLastOnline(user.getLastOnline());
+                            userListItemDTO.setBlocked(user.getBlocked());
+                            databaseHelper.insertInUser(user);
+                            databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
+                            addNewChat(userListItemDTO);
+                        }
                     }
                 }
-            }
-        });
+            });
+        } else {
+            userListItemDTO.setCurrentStatus(user.getCurrentStatus());
+            userListItemDTO.setName(user.getName());
+            userListItemDTO.setProfileUrl(user.getProfileUrl());
+            userListItemDTO.setStatus(user.getStatus());
+            userListItemDTO.setVerified(user.getVerified());
+            userListItemDTO.setLastOnline(user.getLastOnline());
+            userListItemDTO.setBlocked(user.getBlocked());
+            userListItemDTO.setMuted(user.getMuted());
+            databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
+            addNewChat(userListItemDTO);
+        }
     }
 
     private void addNewChat(UserListItemDTO userListItem) {

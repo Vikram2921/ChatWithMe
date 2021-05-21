@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,37 +36,47 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class CreateUser extends AppCompatActivity {
 
-    ImageView back,info;
-    EditText name,password;
+    private EditText name,password;
     private FirebaseService firebaseService;
-    CircleImageView profilepic;
+    private CircleImageView profilepic;
     private String profilePath = "NO_PROFILE";
-    private String number = "";
+    private String number = "",country ="",countryCode = "";
     private Button continueButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user);
-        getSupportActionBar().hide();
+        getSupportActionBar().setTitle("Create Account");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setElevation(0);
         number = getIntent().getStringExtra("number");
+        country = getIntent().getStringExtra("country");
+        countryCode = getIntent().getStringExtra("countryCode");
         firebaseService = new FirebaseService();
         init();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(getApplicationContext(),Login.class);
+                intent.putExtra("number",number);
+                intent.putExtra("country",country);
+                intent.putExtra("countryCode",countryCode);
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
     private void init() {
         Activity activity = this;
-        back = findViewById(R.id.backtomain);
-        info = findViewById(R.id.info);
         name = findViewById(R.id.name);
         password = findViewById(R.id.password);
         profilepic = findViewById(R.id.profilepic);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Login.class);
-                startActivity(intent);
-                finish();
-            }
-        });
         continueButton = findViewById(R.id.continuelogin);
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +111,8 @@ public class CreateUser extends AppCompatActivity {
         continueButton.setEnabled(false);
         User users = new User();
         users.setName(fullname);
+        users.setCountryName(country);
+        users.setCountryCode(countryCode);
         users.setContactNumber(number);
         users.setPassword(password);
         if(!profilePath.equalsIgnoreCase("NO_PROFILE")) {

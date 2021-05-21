@@ -63,6 +63,15 @@ public class Dashboard extends AppCompatActivity {
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
         MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
+        firebaseService = new FirebaseService();
+        databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
+            @Override
+            public void onLastMessageAdded(Message message, String roomid) {
+                databaseHelper.updateUserLastMessage(message);
+            }
+        });
+        databaseHelper.createTable();
     }
 
     private void setupBlueTooth() {
@@ -107,15 +116,6 @@ public class Dashboard extends AppCompatActivity {
         super.onStart();
         setupBlueTooth();
         Contacts.initialize(getApplicationContext());
-        firebaseService = new FirebaseService();
-        databaseHelper = new DatabaseHelper(getApplicationContext());
-        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
-            @Override
-            public void onLastMessageAdded(Message message, String roomid) {
-                databaseHelper.updateUserLastMessage(message);
-            }
-        });
-        databaseHelper.createTable();
         init();
         bluetooth.onStart();
         if(bluetooth.isEnabled()){

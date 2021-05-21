@@ -13,6 +13,8 @@ public class UserListItemDTO {
     private Date lastOnline = new Date();
     private String currentStatus = "Offline";
     private Message lastMessage;
+    private boolean blocked = false;
+    private boolean muted = false;
 
     public String getName() {
         return name;
@@ -76,5 +78,21 @@ public class UserListItemDTO {
 
     public void setLastMessage(Message lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 }

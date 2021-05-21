@@ -139,12 +139,12 @@ public class FirebaseService {
     }
 
     public void block(Context context,String username,String roomid) {
-        String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
-        saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).update("blocked",true).addOnCompleteListener(new OnCompleteListener<Void>() {
+        String mynumber = MessageMaker.getMyNumber();
+        saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).update("blocked",true).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
+            public void onSuccess(Void aVoid) {
                 Message message  = new Message();
-                message.setMessageId(MessageMaker.createMessageId(mynumber));
+                message.setMessageId("BLOCKED_"+username);
                 message.setReceiver(username);
                 message.setSender(mynumber);
                 message.setRoomId(roomid);
@@ -167,7 +167,7 @@ public class FirebaseService {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 Message message  = new Message();
-                message.setMessageId(MessageMaker.createMessageId(mynumber));
+                message.setMessageId("UNBLOCKED_"+username);
                 message.setReceiver(username);
                 message.setSender(mynumber);
                 message.setRoomId(roomid);
