@@ -270,6 +270,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public void setBlockStatus(String blockNumber, String blockBy,Boolean blockStatus) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+UsersDB.getTableName()+" SET "+UsersDB.COLUMN_BLOCKED+" = '"+MessageMaker.convertBoolean(blockStatus)+"',"+UsersDB.COLUMN_BLOCKED_BY+"='"+blockBy+"' WHERE "+UsersDB.COLUMN_CONTACT_NUMBER+" = "+ blockNumber;
+        db.execSQL(strSQL);
+        db.close();
+    }
+
 
     //USER DB CRUD STOP HERE
 

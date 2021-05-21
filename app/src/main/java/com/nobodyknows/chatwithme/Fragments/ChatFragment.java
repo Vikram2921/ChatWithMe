@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
+import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -97,16 +98,40 @@ public class ChatFragment extends Fragment {
                 if(error == null) {
                     for(DocumentChange doc:value.getDocumentChanges()) {
                         Message message = doc.getDocument().toObject(Message.class);
-                        switch (doc.getType()) {
-                            case ADDED:
-                                addNewItem(doc.getDocument().getId(),message);
-                                break;
-                            case MODIFIED:
-                                updateItem(doc.getDocument().getId(),message);
-                                break;
-                            case REMOVED:
-                                break;
+                        Message messageUpdate = MessageMaker.filterMessage(message);
+                        if(messageUpdate != null) {
+                            switch (doc.getType()) {
+                                case ADDED:
+                                    addNewItem(doc.getDocument().getId(),message);
+                                    break;
+                                case MODIFIED:
+                                    updateItem(doc.getDocument().getId(),message);
+                                    break;
+                                case REMOVED:
+                                    break;
+                            }
+                        } else {
+                            if(message.getMessageType() == MessageType.UNFREIND) {
+                                String number="";
+                                if(!message.getSender().equalsIgnoreCase(myNumber)) {
+                                    number = message.getSender();
+                                } else {
+                                    number = message.getReceiver();
+                                }
+                                String finalNumber = number;
+                                firebaseService.readFromFireStore("Users").document(myNumber).collection("AccountInfo").document("RecentChats").collection("History").document(number).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        int index = userListItems.indexOf(userListItemDTOMap.get(finalNumber));
+                                        userListItemDTOMap.remove(finalNumber);
+                                        userListItems.remove(index);
+                                        recyclerViewAdapter.notifyItemRemoved(index);
+                                    }
+                                });
+
+                            }
                         }
+
                     }
                 }
             }

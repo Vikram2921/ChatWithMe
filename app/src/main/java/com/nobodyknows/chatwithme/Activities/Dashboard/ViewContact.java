@@ -76,14 +76,7 @@ public class ViewContact extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!isFromChat) {
-                    Intent intent = new Intent(getApplicationContext(), ChatRoom.class);
-                    intent.putExtra("username",user.getContactNumber());
-                    intent.putExtra("name",user.getName());
-                    intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
-                    intent.putExtra("verified",user.getVerified());
-                    intent.putExtra("roomid", MessageMaker.createRoomId(getApplicationContext(),user.getContactNumber()));
-                    intent.putExtra("profile",user.getProfileUrl());
-                    startActivity(intent);
+                    MessageMaker.startChatroom(getApplicationContext(),user.getContactNumber());
                 }
                 finish();
             }
@@ -97,7 +90,7 @@ public class ViewContact extends AppCompatActivity {
                         .when(R.string.unfreind,new Pop.Yah() {
                             @Override
                             public void clicked(DialogInterface dialog, @Nullable View view) {
-                                firebaseService.unfreind(getApplicationContext(),username);
+                                firebaseService.unfreind(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
                             }
                         }).when(new Pop.Nah() {
                                 @Override

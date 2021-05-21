@@ -66,14 +66,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ChatRoom.class);
-                intent.putExtra("username",user.getContactNumber());
-                intent.putExtra("name",user.getName());
-                intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
-                intent.putExtra("verified",user.getVerified());
-                intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
-                intent.putExtra("profile",user.getProfileUrl());
-                context.startActivity(intent);
+                MessageMaker.startChatroom(context,user.getContactNumber());
             }
         });
         holder.profile.setOnClickListener(new View.OnClickListener() {

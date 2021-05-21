@@ -7,8 +7,11 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
+import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
+import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -89,43 +92,8 @@ public class FirebaseService {
 
 
     public void updateLastMessage(String myUsername,String fusernam,Message message) {
-        Map<String ,Object> dummyMap= new HashMap<>();
         uploadLastMessage(myUsername,fusernam,message);
         uploadLastMessage(fusernam,myUsername,message);
-        firebaseFirestore.collection("Users").document(myUsername).collection("AccountInfo").document("RecentChats").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if(task.isSuccessful()) {
-                    if(!task.getResult().exists()) {
-                        firebaseFirestore.collection("Users").document(myUsername).collection("AccountInfo").document("RecentChats").set(dummyMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                uploadLastMessage(myUsername,fusernam,message);
-                            }
-                        });
-                    } else {
-                        uploadLastMessage(myUsername,fusernam,message);
-                        firebaseFirestore.collection("Users").document(fusernam).collection("AccountInfo").document("RecentChats").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if(task.isSuccessful()) {
-                                    if(!task.getResult().exists()) {
-                                        firebaseFirestore.collection("Users").document(fusernam).collection("AccountInfo").document("RecentChats").set(dummyMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                uploadLastMessage(fusernam,myUsername,message);
-                                            }
-                                        });
-                                    } else {
-                                        uploadLastMessage(fusernam,myUsername,message);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        });
     }
 
     private Task<Void> uploadLastMessage(String sender, String receiver, Message message) {
@@ -136,54 +104,86 @@ public class FirebaseService {
         return databaseReference.child(bucket);
     }
 
-    public void unfreind(Context context,String username) {
+    public void unfreind(Context context,String username,String roomid) {
         String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
-//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        databaseHelper.deleteRecentChat(username);
-//                        databaseHelper.deleteUser(username);
-//                        databaseHelperChat.deleteMessagesOf(username);
-//                    }
-//                });
-//            }
-//        });
+        saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Message message  = new Message();
+                        message.setMessageId(MessageMaker.createMessageId(mynumber));
+                        message.setReceiver(username);
+                        message.setSender(mynumber);
+                        message.setRoomId(roomid);
+                        message.setMessage("UNFREINDED BY "+mynumber);
+                        message.setMessageType(MessageType.UNFREIND);
+                        saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                firebaseService.updateLastMessage(mynumber,username,message);
+                                try {
+                                    databaseHelper.deleteUser(username);
+                                    databaseHelperChat.deleteMessagesOf(message.getRoomId());
+                                    databaseHelper.deleteRecentChat(username);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     public void block(Context context,String username,String roomid) {
         String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
-//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        databaseHelper.deleteRecentChat(username);
-//                        databaseHelper.deleteUser(username);
-//                        databaseHelperChat.deleteMessagesOf(username);
-//                    }
-//                });
-//            }
-//        });
+        saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).update("blocked",true).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Message message  = new Message();
+                message.setMessageId(MessageMaker.createMessageId(mynumber));
+                message.setReceiver(username);
+                message.setSender(mynumber);
+                message.setRoomId(roomid);
+                message.setMessage("BLOCKED BY "+mynumber);
+                message.setMessageType(MessageType.BLOCKED);
+                saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        databaseHelper.setBlockStatus(username,mynumber,true);
+                        firebaseService.updateLastMessage(mynumber,username,message);
+                    }
+                });
+            }
+        });
     }
 
     public void unblock(Context context,String username,String roomid) {
         String mynumber = MessageMaker.getFromSharedPrefrences(context,"number");
-//        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                firebaseService.saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).set(mynumber).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        databaseHelper.deleteRecentChat(username);
-//                        databaseHelper.deleteUser(username);
-//                        databaseHelperChat.deleteMessagesOf(username);
-//                    }
-//                });
-//            }
-//        });
+        saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).update("blocked",false).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Message message  = new Message();
+                message.setMessageId(MessageMaker.createMessageId(mynumber));
+                message.setReceiver(username);
+                message.setSender(mynumber);
+                message.setRoomId(roomid);
+                message.setMessage("UNBLOCKED BY "+mynumber);
+                message.setMessageType(MessageType.UNBLOCKED);
+                saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        databaseHelper.setBlockStatus(username,mynumber,false);
+                        firebaseService.updateLastMessage(mynumber,username,message);
+                    }
+                });
+            }
+        });
+    }
+
+    public void muteChat(String username) {
     }
 }

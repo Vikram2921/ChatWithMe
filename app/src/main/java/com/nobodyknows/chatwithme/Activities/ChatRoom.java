@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.NobodyKnows.chatlayoutview.ChatLayoutView;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
+import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -63,7 +64,7 @@ public class ChatRoom extends AppCompatActivity {
     private TextView nameView,statusView;
     private ImageView verified,emoji,send;
     private EditText messageBox;
-    private Boolean isVerfied = false;
+    private Boolean isVerfied = false,isBlocked = false;
     private String myUsername = "",roomid = "";
     private ImageView backgroundImage;
     private View actionBarView;
@@ -90,6 +91,7 @@ public class ChatRoom extends AppCompatActivity {
         profile = getIntent().getStringExtra("profile");
         roomid = getIntent().getStringExtra("roomid");
         isVerfied = getIntent().getBooleanExtra("verified",false);
+        isBlocked = getIntent().getBooleanExtra("blocked",false);
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
         init();
@@ -119,6 +121,8 @@ public class ChatRoom extends AppCompatActivity {
             case R.id.menu_wallpaper:
                 changeWallpaper();
                 break;
+            case R.id.menu_mute:
+                muteNotification();
             case R.id.block:
                 block();
                 break;
@@ -132,6 +136,22 @@ public class ChatRoom extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+    private void muteNotification() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to mute all notification from chat with "+name+" ?")
+                .when(R.string.mute,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                       firebaseService.muteChat(username);
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
     }
 
     private void clearChat() {
@@ -156,10 +176,11 @@ public class ChatRoom extends AppCompatActivity {
         Pop.on(ChatRoom.this).with()
                 .cancelable(true)
                 .body("Are you sure you want to block "+name+" from your freind list ?")
-                .when(R.string.unfreind,new Pop.Yah() {
+                .when(R.string.blockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.block(getApplicationContext(),username,roomid);
+                        isBlocked = true;
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -175,7 +196,7 @@ public class ChatRoom extends AppCompatActivity {
                 .when(R.string.unfreind,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.unfreind(getApplicationContext(),username);
+                        firebaseService.unfreind(getApplicationContext(),username,roomid);
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -188,10 +209,11 @@ public class ChatRoom extends AppCompatActivity {
         Pop.on(ChatRoom.this).with()
                 .cancelable(true)
                 .body("Are you sure you want to unblock "+name+" ?")
-                .when(R.string.unfreind,new Pop.Yah() {
+                .when(R.string.unblockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.unblock(getApplicationContext(),username,roomid);
+                        isBlocked = false;
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -266,18 +288,26 @@ public class ChatRoom extends AppCompatActivity {
                 if(error == null) {
                     for(DocumentChange doc:value.getDocumentChanges()) {
                         Message message = doc.getDocument().toObject(Message.class);
-                        message = MessageMaker.filterMessage(message);
-                        if(message != null) {
+                        Message messageUpdate = MessageMaker.filterMessage(message);
+                        if(messageUpdate != null) {
                             switch (doc.getType()) {
                                 case ADDED:
-                                    chatLayoutView.addMessage(message);
+                                    chatLayoutView.addMessage(messageUpdate);
                                     break;
                                 case MODIFIED:
-                                    chatLayoutView.updateMessage(message);
+                                    chatLayoutView.updateMessage(messageUpdate);
                                     break;
                                 case REMOVED:
-                                    chatLayoutView.deleteMessage(message);
+                                    chatLayoutView.deleteMessage(messageUpdate);
                                     break;
+                            }
+                        } else {
+                            if(message.getMessageType() == MessageType.BLOCKED) {
+                                isBlocked = true;
+                            } else if(message.getMessageType() == MessageType.UNBLOCKED) {
+                                isBlocked = false;
+                            } else if(message.getMessageType() == MessageType.UNFREIND) {
+                                finish();
                             }
                         }
                     }
@@ -316,13 +346,15 @@ public class ChatRoom extends AppCompatActivity {
 
     private void sendNow(Message message) {
         chatLayoutView.addMessage(message);
-        firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                chatLayoutView.updateMessage(message);
-                firebaseService.updateLastMessage(myUsername,username,message);
-            }
-        });
+        if(!isBlocked) {
+            firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    chatLayoutView.updateMessage(message);
+                    firebaseService.updateLastMessage(myUsername,username,message);
+                }
+            });
+        }
     }
 
     private void setupChatLayoutView() {

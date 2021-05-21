@@ -1,25 +1,40 @@
 package com.nobodyknows.chatwithme.services;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.R;
 
 import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 
 public class MessageMaker {
 
+    private static String myNumber ="";
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
         return id;
+    }
+
+    public static String getMyNumber() {
+        return myNumber;
+    }
+
+    public static void setMyNumber(String myNumber) {
+        MessageMaker.myNumber = myNumber;
     }
 
     public static String getFromSharedPrefrences(Context context, String key) {
@@ -95,6 +110,37 @@ public class MessageMaker {
     }
 
     public static Message filterMessage(Message message) {
+        if(message.getMessageType() == MessageType.BLOCKED) {
+            if(!message.getSender().equalsIgnoreCase(myNumber)) {
+                databaseHelper.setBlockStatus(message.getSender(),message.getSender(),true);
+            }
+            return null;
+        } else if(message.getMessageType() == MessageType.UNBLOCKED) {
+            if(!message.getSender().equalsIgnoreCase(myNumber)) {
+                databaseHelper.setBlockStatus(message.getSender(),message.getSender(),false);
+            }
+            return null;
+        } else if(message.getMessageType() == MessageType.UNFREIND) {
+            if(!message.getSender().equalsIgnoreCase(myNumber)) {
+                databaseHelper.deleteUser(message.getSender());
+                databaseHelperChat.deleteMessagesOf(message.getRoomId());
+                databaseHelper.deleteRecentChat(message.getSender());
+            }
+            return null;
+        }
         return message;
+    }
+
+    public static void startChatroom(Context context, String username) {
+        User user =databaseHelper.getUser(username);
+        Intent intent = new Intent(context, ChatRoom.class);
+        intent.putExtra("username",user.getContactNumber());
+        intent.putExtra("name",user.getName());
+        intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
+        intent.putExtra("verified",user.getVerified());
+        intent.putExtra("blocked",user.getBlocked());
+        intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
+        intent.putExtra("profile",user.getProfileUrl());
+        context.startActivity(intent);
     }
 }

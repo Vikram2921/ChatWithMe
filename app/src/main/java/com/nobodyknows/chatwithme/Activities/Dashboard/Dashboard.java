@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.bumptech.glide.Glide;
@@ -29,6 +30,7 @@ import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
+import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,7 @@ public class Dashboard extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.dashboard_toolbar_view);
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
+        MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
     }
 
     private void setupBlueTooth() {

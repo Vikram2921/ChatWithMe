@@ -153,7 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ArrayList<Message> messages = new ArrayList<>();
         SQLiteDatabase db  = this.getWritableDatabase();
         String selectQuery = "SELECT  * FROM " + MessageDB.getTableName(roomid) + " ORDER BY " +
-                MessageDB.COLUMN_ID;
+                MessageDB.COLUMN_MESSAGE_ID;
         Cursor cursor = db.rawQuery(selectQuery, null);
         if(cursor.moveToFirst()) {
             do{

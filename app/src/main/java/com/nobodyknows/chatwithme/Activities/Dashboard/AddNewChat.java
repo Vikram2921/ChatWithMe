@@ -111,14 +111,7 @@ public class AddNewChat extends AppCompatActivity {
 
             @Override
             public void onStartChat(User user) {
-                Intent intent = new Intent(getApplicationContext(), ChatRoom.class);
-                intent.putExtra("username",user.getContactNumber());
-                intent.putExtra("name",user.getName());
-                intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
-                intent.putExtra("verified",user.getVerified());
-                intent.putExtra("roomid", MessageMaker.createRoomId(getApplicationContext(),user.getContactNumber()));
-                intent.putExtra("profile",user.getProfileUrl());
-                startActivity(intent);
+                MessageMaker.startChatroom(getApplicationContext(),user.getContactNumber());
                 finish();
             }
         });
