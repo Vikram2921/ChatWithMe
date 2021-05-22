@@ -31,6 +31,8 @@ import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.vanniktech.emoji.EmojiManager;
+import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +74,10 @@ public class Dashboard extends AppCompatActivity {
             }
         });
         databaseHelper.createTable();
+        EmojiManager.install(new GoogleEmojiProvider());
+      //  setupBlueTooth();
+        Contacts.initialize(getApplicationContext());
+        init();
     }
 
     private void setupBlueTooth() {
@@ -114,15 +120,12 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        setupBlueTooth();
-        Contacts.initialize(getApplicationContext());
-        init();
-        bluetooth.onStart();
-        if(bluetooth.isEnabled()){
-            startScanning();
-        } else {
-            bluetooth.enable();
-        }
+//        bluetooth.onStart();
+//        if(bluetooth.isEnabled()){
+//            startScanning();
+//        } else {
+//            bluetooth.enable();
+//        }
     }
 
     private void startScanning() {
@@ -132,13 +135,13 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        bluetooth.onStop();
+        //bluetooth.onStop();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        bluetooth.onActivityResult(requestCode, resultCode);
+       // bluetooth.onActivityResult(requestCode, resultCode);
     }
 
     private BluetoothCallback bluetoothCallback = new BluetoothCallback() {

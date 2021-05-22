@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/root"
     android:background="#36C8C8C8"
     android:keepScreenOn="true"
     tools:context=".Activities.ChatRoom">
@@ -40,7 +41,7 @@
         <ImageView
             android:id="@+id/emoji"
             android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_height="0dp"
             android:rotation="0"
             app:layout_constraintTop_toTopOf="@id/send"
             app:layout_constraintRight_toLeftOf="@id/mb"
@@ -58,11 +59,12 @@
             android:elevation="4dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content">
-            <EditText
+            <com.vanniktech.emoji.EmojiEditText
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:textColor="#FFFFFF"
                 android:background="@null"
                 android:textColorHint="#CBFFFFFF"
+                app:emojiSize="24dp"
                 android:maxLines="3"
                 android:hint="Type your message"
                 android:focusable="true"
@@ -73,7 +75,7 @@
                 android:layout_width="0dp"
                 android:id="@+id/messagebox"
                 android:layout_height="match_parent">
-            </EditText>
+            </com.vanniktech.emoji.EmojiEditText>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageView

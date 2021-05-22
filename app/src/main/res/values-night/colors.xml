@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="selected_emoji">#673AB7</color>
+    <color name="emojiconbackground">#C0C0C0</color>
+    <color name="emojicondivider">#FF5B4F</color>
+</resources>

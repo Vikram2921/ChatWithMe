@@ -1,10 +1,12 @@
 package com.nobodyknows.chatwithme.Activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,17 +23,38 @@ import com.nobodyknows.chatwithme.services.FirebaseService;
 public class LoginContinue extends AppCompatActivity {
 
     private FirebaseService firebaseService;
-    private String number;
+    private String number="",country ="",countryCode = "";
     private EditText password;
     private Button continueLogin;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_continue);
-        getSupportActionBar().hide();
+        getSupportActionBar().setTitle("Chat With Me");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setElevation(0);
         number = getIntent().getStringExtra("number");
+        country = getIntent().getStringExtra("country");
+        countryCode = getIntent().getStringExtra("countryCode");
         firebaseService = new FirebaseService();
         init();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(getApplicationContext(),Login.class);
+                intent.putExtra("number",number);
+                intent.putExtra("country",country);
+                intent.putExtra("countryCode",countryCode);
+                startActivity(intent);
+                finish();
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     public void init() {

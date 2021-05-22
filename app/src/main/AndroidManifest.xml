@@ -21,7 +21,7 @@
         <activity android:name=".Activities.SyncContacts" />
         <activity android:name=".Activities.SearchFreinds" />
         <activity android:name=".Activities.Signup.CreatingSetup" />
-        <activity android:name=".Activities.ChatRoom">
+        <activity android:name=".Activities.ChatRoom" android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.Dashboard.Dashboard" />

@@ -65,6 +65,7 @@ public class CreateUser extends AppCompatActivity {
                 intent.putExtra("country",country);
                 intent.putExtra("countryCode",countryCode);
                 startActivity(intent);
+                finish();
                 break;
             default:
                 break;

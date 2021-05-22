@@ -177,9 +177,11 @@ public class ChatLayoutView extends RelativeLayout {
     }
 
     private void checkForSeen(Message message,Message oldMessage) {
-        if(message.getSender().equals(myUsername) && oldMessage != null) {
-            if(message.getMessageStatus() == MessageStatus.SEEN && oldMessage.getMessageStatus() != MessageStatus.SEEN) {
-                chatLayoutListener.onMessageSeenConfirmed(message);
+        if(message.getSender().equals(myUsername)) {
+            if(oldMessage != null) {
+                if(message.getMessageStatus() == MessageStatus.SEEN && oldMessage.getMessageStatus() != MessageStatus.SEEN) {
+                    chatLayoutListener.onMessageSeenConfirmed(message);
+                }
             }
         } else {
             if(message.getMessageStatus() != MessageStatus.SEEN) {
@@ -270,7 +272,7 @@ public class ChatLayoutView extends RelativeLayout {
             dateMessage.setMessageId("DATE_"+message.getCreatedTimestamp());
             dateMessage.setMessage(formattedText+"");
             messages.add(dateMessage);
-            helper.addMessageId("DATE_"+message.getCreatedTimestamp());
+            helper.addMessageId(dateMessage.getMessageId());
         }
         if(message.getIsRepliedMessage()) {
             if(message.getReplyMessageView() == null) {

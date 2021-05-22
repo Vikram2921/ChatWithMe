@@ -4,47 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/purple_500"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
     tools:context=".Activities.LoginContinue">
-    <ImageView
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/back"
-        android:padding="10dp"
-        android:id="@+id/backtomain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </ImageView>
-    <TextView
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="Chat With Me"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:padding="5dp"
-        android:textAlignment="center"
-        android:layout_marginLeft="5dp"
-        app:layout_constraintBottom_toBottomOf="@id/backtomain"
-        app:layout_constraintRight_toLeftOf="@id/info"
-        app:layout_constraintLeft_toRightOf="@id/backtomain"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
-    </TextView>
-    <ImageView
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/info"
-        android:padding="10dp"
-        android:id="@+id/info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-    </ImageView>
     <ScrollView
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="20dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/backtomain"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginRight="20dp"
         app:layout_constraintBottom_toTopOf="@id/buttonLayout"
         android:layout_width="match_parent"
@@ -57,6 +25,7 @@
                 android:paddingTop="30dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
+                android:textColor="#fff"
                 android:textStyle="bold"
                 android:id="@+id/numbertext"
                 android:textSize="16dp"
@@ -70,6 +39,7 @@
                 android:id="@+id/password"
                 android:inputType="textPassword"
                 android:textSize="18dp"
+                android:textCursorDrawable="@null"
                 android:textStyle="bold"
                 android:textColor="#000"
                 android:background="@drawable/inputbox1"
@@ -93,6 +63,7 @@
             android:id="@+id/continuelogin"
             android:text="Let me in"
             android:textColor="#000"
+            android:padding="15dp"
             android:backgroundTint="#FFFFFF"
             android:textAllCaps="false"
             android:layout_width="match_parent"

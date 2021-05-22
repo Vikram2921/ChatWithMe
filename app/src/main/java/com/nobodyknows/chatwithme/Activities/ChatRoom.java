@@ -47,6 +47,10 @@ import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.vanniktech.emoji.EmojiEditText;
+import com.vanniktech.emoji.EmojiPopup;
+import com.vanniktech.emoji.emoji.Emoji;
+import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 import com.vistrav.pop.Pop;
 
 import java.io.File;
@@ -65,13 +69,15 @@ public class ChatRoom extends AppCompatActivity {
     private CircleImageView profileView;
     private TextView nameView,statusView;
     private ImageView verified,emoji,send;
-    private EditText messageBox;
+    private EmojiEditText messageBox;
     private Boolean isVerfied = false,isBlocked = false;
     private String myUsername = "",roomid = "";
     private ImageView backgroundImage;
     private ListenerRegistration listner;
+    private EmojiPopup emojiPopup;
     private View actionBarView;
     private Menu menu;
+    private View rootView;
     private String blockedBy = "";
 
     @Override
@@ -83,8 +89,24 @@ public class ChatRoom extends AppCompatActivity {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.chatroom_toolbar_view);
         actionBarView = getSupportActionBar().getCustomView();
+        actionBarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openViewContact();
+            }
+        });
         getSupportActionBar().setElevation(0);
-
+        username = getIntent().getStringExtra("username");
+        name = getIntent().getStringExtra("name");
+        lastOnlineStatus = getIntent().getStringExtra("lastOnlineStatus");
+        profile = getIntent().getStringExtra("profile");
+        roomid = getIntent().getStringExtra("roomid");
+        isVerfied = getIntent().getBooleanExtra("verified",false);
+        isBlocked = getIntent().getBooleanExtra("blocked",false);
+        blockedBy = getIntent().getStringExtra("blockedBy");
+        SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+        myUsername = sharedPreferences.getString("number","0000000000");
+        init();
     }
 
 
@@ -97,17 +119,6 @@ public class ChatRoom extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        username = getIntent().getStringExtra("username");
-        name = getIntent().getStringExtra("name");
-        lastOnlineStatus = getIntent().getStringExtra("lastOnlineStatus");
-        profile = getIntent().getStringExtra("profile");
-        roomid = getIntent().getStringExtra("roomid");
-        isVerfied = getIntent().getBooleanExtra("verified",false);
-        isBlocked = getIntent().getBooleanExtra("blocked",false);
-        blockedBy = getIntent().getStringExtra("blockedBy");
-        SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
-        myUsername = sharedPreferences.getString("number","0000000000");
-        init();
     }
 
     @Override
@@ -208,6 +219,7 @@ public class ChatRoom extends AppCompatActivity {
     private void removeListener() {
         if(listner != null) {
             listner.remove();
+            listner = null;
             Toast.makeText(getApplicationContext(),"Listener Stopped",Toast.LENGTH_SHORT).show();
         }
     }
@@ -221,6 +233,7 @@ public class ChatRoom extends AppCompatActivity {
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.block(getApplicationContext(),username,roomid);
                         isBlocked = true;
+                        blockedBy = myUsername;
                         setBlockStatus();
                     }
                 }).when(new Pop.Nah() {
@@ -255,6 +268,7 @@ public class ChatRoom extends AppCompatActivity {
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                         firebaseService.unblock(getApplicationContext(),username,roomid);
                         isBlocked = false;
+                        blockedBy = myUsername;
                         if(listner == null) {
                             startListening();
                         }
@@ -314,21 +328,49 @@ public class ChatRoom extends AppCompatActivity {
         backgroundImage = findViewById(R.id.background);
         chatLayoutView = findViewById(R.id.chatlayoutview);
         profileView = actionBarView.findViewById(R.id.profile);
+        rootView = findViewById(R.id.root);
         nameView = actionBarView.findViewById(R.id.name);
         statusView = actionBarView.findViewById(R.id.status);
         verified = actionBarView.findViewById(R.id.verified);
         emoji = findViewById(R.id.emoji);
         send = findViewById(R.id.send);
         messageBox = findViewById(R.id.messagebox);
+        emojiPopup = EmojiPopup.Builder.fromRootView(rootView)
+                .setSelectedIconColor(getResources().getColor(R.color.purple_500))
+                .setOnSoftKeyboardCloseListener(new OnSoftKeyboardCloseListener() {
+                    @Override
+                    public void onKeyboardClose() {
+                        dismissKeyboard();
+                    }
+                }).build(messageBox);
+        emoji.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(emojiPopup.isShowing()) {
+                    emoji.setImageResource(R.drawable.ic_baseline_emoji_emotions_24);
+                } else {
+                    emoji.setImageResource(R.drawable.ic_baseline_keyboard_24);
+                }
+                emojiPopup.toggle();
+
+            }
+        });
         updateNameView();
         setupChatLayoutView();
         setupMessageBoxWork();
         startListening();
     }
 
+    private void dismissKeyboard() {
+        if(emojiPopup.isShowing()) {
+            emojiPopup.toggle();
+            emoji.setImageResource(R.drawable.ic_baseline_emoji_emotions_24);
+        }
+    }
+
 
     private void startListening() {
-        if(!isBlocked || (isBlocked && !blockedBy.equalsIgnoreCase(myUsername))) {
+        if(listner == null && (!isBlocked || (isBlocked && !blockedBy.equalsIgnoreCase(myUsername)))) {
             Toast.makeText(getApplicationContext(),"Listener Started",Toast.LENGTH_SHORT).show();
             listner = firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
@@ -352,9 +394,11 @@ public class ChatRoom extends AppCompatActivity {
                             } else {
                                 if(message.getMessageType() == MessageType.BLOCKED) {
                                     isBlocked = true;
+                                    blockedBy = message.getSender();
                                     setBlockStatus();
                                 } else if(message.getMessageType() == MessageType.UNBLOCKED) {
                                     isBlocked = false;
+                                    blockedBy = message.getSender();
                                     setBlockStatus();
                                 } else if(message.getMessageType() == MessageType.UNFREIND) {
                                     finish();

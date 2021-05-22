@@ -33,7 +33,7 @@
     <TextView
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/box"
-        android:text="Seen"
+        android:text="Sent"
         android:visibility="gone"
         android:id="@+id/status"
         android:textColor="#ECECEC"
