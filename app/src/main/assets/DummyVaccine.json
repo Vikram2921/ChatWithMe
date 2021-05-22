@@ -1,0 +1,1351 @@
+{
+  "centers": [
+    {
+      "center_id": 553244,
+      "name": "UPHC Shreenagar Road Site 1",
+      "address": "UPHC Shreenagar Road",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "4c6e2085-a1c1-450e-8e03-4742d5f75ad6",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179690,
+      "name": "UPHC Diggi Bazar Site 1",
+      "address": "Diggi Bazar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "fe57a7f3-1dc5-4ad4-8092-f84cf8f06a02",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 609771,
+      "name": "PHC Junia Site 1",
+      "address": "PHC Junia",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kekri",
+      "pincode": 305406,
+      "lat": 26,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "d681513a-1bf5-4a1a-9bc2-608db599c7bc",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553248,
+      "name": "PHC Bhamolav Site 1",
+      "address": "Bhamolav",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Arain",
+      "pincode": 305813,
+      "lat": 26,
+      "long": 26,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "c7d96d74-3492-4e5f-b34f-4fab468d1e46",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 609594,
+      "name": "ESI Dispensary Beawar",
+      "address": "ESI Dispensary Beawar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Jawaja",
+      "pincode": 305901,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "97ddba1b-265b-4569-a9fe-ea23f0bbb525",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 694284,
+      "name": "UPHC Kotra Site 45",
+      "address": "UPHC Kotra",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "5eebe03f-d56d-4181-9c37-be0dc24fc346",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 181285,
+      "name": "SC ANDHERI DEVRI Site 1",
+      "address": "SC ANDHERI DEVRI",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Masuda",
+      "pincode": 305623,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "e88abe3e-0cf7-4f37-b0d8-413d41b336b8",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 687962,
+      "name": "PHC Kishanpura Site 2",
+      "address": "PHC Kishanpura",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Jawaja",
+      "pincode": 305927,
+      "lat": 26,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "5f60104e-a763-4b51-ad45-ce6f3d7a3797",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 703339,
+      "name": "Y N Kishangarh Site 18 To 44",
+      "address": "Kishangarh",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kishangarh",
+      "pincode": 305801,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "03ff0d04-f7a1-471f-a5c8-5859bbf52545",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 181789,
+      "name": "CHC SHRINAGAR SITE 1",
+      "address": "CHC SHRINAGAR",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Shri Nagar",
+      "pincode": 305025,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "7029ab27-2eaa-4c3e-b906-3004eea52367",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 180511,
+      "name": "AKH BEAWAR SITE 1",
+      "address": "Govt Amrit Kaur Hospital Beawar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Jawaja",
+      "pincode": 305901,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "84d80616-1037-4527-8206-3157a29aefdc",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179643,
+      "name": "UPHC RAMGANJ Site 1",
+      "address": "UPHC RAMGANJ",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "2f13eb2e-4246-49ef-9c06-109ffc5a42a2",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 688701,
+      "name": "CHC Tantoti Site 2",
+      "address": "CHC Tantoti",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Bhinay",
+      "pincode": 305627,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "d2b1a820-9613-441e-b421-bcea3241d49a",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553299,
+      "name": "UCHC Panchsheel Site 1",
+      "address": "Panchsheel Nagar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305004,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "cda1922f-9453-44cf-87f9-a6950e4711ee",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        },
+        {
+          "session_id": "f91c43de-f375-4cf4-baa3-b2e025cf669f",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 607741,
+      "name": "UPHC Kasturba Site 1",
+      "address": "UPHC Kasturba",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "12d264b8-97cb-446e-8ed5-e2e38cccd7a3",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179841,
+      "name": "CHC BORADA Site 1",
+      "address": "CHC BORADA",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Arain",
+      "pincode": 305412,
+      "lat": 26,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "8dd154b3-f8e0-4c1e-93b3-7d3994ffbb2a",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179704,
+      "name": "UPHC Gadi Maliyan Site 1",
+      "address": "UPHC Gadi Maliyan",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "8701e553-d2d5-432f-b936-888914eed77f",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553258,
+      "name": "Y N Kishangarh Site 1",
+      "address": "Y N Hospital Kishangarh",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kishangarh",
+      "pincode": 305801,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "0c695675-2202-4812-9f4a-2c825b60cb4c",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 605788,
+      "name": "CHC Gagwana Site 1",
+      "address": "CHC Gagwana",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Shri Nagar",
+      "pincode": 305023,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "17e7bb4f-a630-45f2-ac2a-1bc294b1a5b2",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 181209,
+      "name": "PHC Kharwa Site 1",
+      "address": "PHC Kharwa",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Masuda",
+      "pincode": 305202,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "7cf1d04d-c9ac-4cb3-9ff0-7f03579c30a3",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553240,
+      "name": "UPHC Anderkot Site 1",
+      "address": "Anderkot",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "3e989ebd-eb0c-4e16-b311-5f3c38e30643",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 632106,
+      "name": "Housing Board UPHC Site- 1",
+      "address": "Housing Board Kisangarh",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kishangarh",
+      "pincode": 305802,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "4d9fa6d4-4ca8-4cfc-b7ac-fc14e1828b40",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 181047,
+      "name": "UPHC KRISHNAPURI Site 1",
+      "address": "UPHC KRISHNAPURI",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kishangarh",
+      "pincode": 305801,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "392841a3-535b-44d2-ae1f-8d191a8c69e9",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 652938,
+      "name": "PHC Gothiyana Site 1",
+      "address": "Gothiyana",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Arain",
+      "pincode": 305813,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "e9b35e94-412c-4984-a688-d9562ed64480",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 180826,
+      "name": "UPHC BAJRANG COLONY Sire 1",
+      "address": "UPHC BAJRANG COLONY",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kishangarh",
+      "pincode": 305801,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "dc815856-6a0d-4ad4-92f8-ed4e8b840d3e",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 686754,
+      "name": "PHC Rajiyawas Site 2",
+      "address": "PHC RAJIYAWAS",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Jawaja",
+      "pincode": 305925,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "8b40c892-6864-4965-a8f8-02e57b898d4e",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 180755,
+      "name": "PHC Dhoondhari Site 1",
+      "address": "PHC Dhoondhari",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kekri",
+      "pincode": 305404,
+      "lat": 25,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "3baae462-4187-4031-afeb-a9e01fa2ea15",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 691832,
+      "name": "UPHC Panchsheel Site 1",
+      "address": "Panchsheel Nagar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305004,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "b867b762-9a3d-49b6-9905-00a49380d1fd",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 695048,
+      "name": "UPHC Paharganj Site 18 To 44",
+      "address": "UPHC Paharganj",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 26,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "d08c6355-9c2d-418a-b5c4-13b9c51884c3",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        },
+        {
+          "session_id": "85f1d1c5-da4d-4e67-8147-45e308857f47",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 703301,
+      "name": "CHC Arain 18 To 44",
+      "address": "Arain",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Arain",
+      "pincode": 305813,
+      "lat": 26,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "5b138ff5-e4f9-4d62-9707-62505c9943e4",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 180737,
+      "name": "PHC Para Site 1",
+      "address": "PHC Para",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kekri",
+      "pincode": 305404,
+      "lat": 25,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "1c2cfd25-9c0f-4917-9278-c14a52606ed4",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179790,
+      "name": "UPHC RAMNAGAR SITE 1",
+      "address": "UPHC RAMNAGAR",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305004,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "b7bb7de4-8e7c-4827-9160-24db2c7bc5d3",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        },
+        {
+          "session_id": "50add88a-bfb3-4873-b042-6a6d1158ebe8",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 694303,
+      "name": "UPHC RAMNAGAR SITE 45",
+      "address": "UPHC RAMNAGAR",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305004,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "28a91ed9-3b80-41cc-a0a5-a20fbfd1360f",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553288,
+      "name": "PHC Saradhana Site 1",
+      "address": "PHC Saradhana",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Pisangan",
+      "pincode": 305207,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "18:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "073d5e9d-62cb-4f4c-a140-e93de595b08a",
+          "date": "22-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 45,
+          "vaccine": "COVAXIN",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-06:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553380,
+      "name": "UPHC JP Nagar Site 1",
+      "address": "UPHC JP Nagar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305007,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "33147f1f-4183-4944-88cf-58a0aca9f664",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553242,
+      "name": "UPHC Kotra Site 1",
+      "address": "UPHC Kotra",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "9e8ad5d3-60db-437e-8530-dcf2786ffcc0",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 181834,
+      "name": "GH NASIRABAD SITE 1",
+      "address": "Govt. Hospital Nasirabad",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Shri Nagar",
+      "pincode": 305601,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "09b1699e-ebbe-4aa0-b2a3-ab376a01cf59",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 553245,
+      "name": "UPHC Vaishali Nagar Site 1",
+      "address": "UPHC Vaishali Nagar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "de35be37-76d8-4dda-ad41-c832099dcad1",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179645,
+      "name": "JLN Hospital Site 1",
+      "address": "Urology Dept. JLN Hospital",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "7fc58336-b8a2-4efb-bf27-a540331014d1",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 179646,
+      "name": "UCHC Chandraverdai Site 1",
+      "address": "UCHC Chandraverdai Nagar",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "157186f2-9ae9-488d-a35c-a4a248e84759",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 585585,
+      "name": "Disp. Police Line Site 1",
+      "address": "Dispensary Police Line",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Ajmer Urban",
+      "pincode": 305001,
+      "lat": 26,
+      "long": 74,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "b8a42a17-ed4f-440c-8e5b-ec78173377cf",
+          "date": "23-05-2021",
+          "available_capacity": 0,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    },
+    {
+      "center_id": 180815,
+      "name": "Govt Hospital Kekri Site 18",
+      "address": "Govt Hospital DH Kekri",
+      "state_name": "Rajasthan",
+      "district_name": "Ajmer",
+      "block_name": "Kekri",
+      "pincode": 305404,
+      "lat": 25,
+      "long": 75,
+      "from": "09:00:00",
+      "to": "17:00:00",
+      "fee_type": "Free",
+      "sessions": [
+        {
+          "session_id": "0cbd7999-762a-46f2-9457-d0cf6a940aaf",
+          "date": "23-05-2021",
+          "available_capacity": 100,
+          "min_age_limit": 18,
+          "vaccine": "COVISHIELD",
+          "slots": [
+            "09:00AM-11:00AM",
+            "11:00AM-01:00PM",
+            "01:00PM-03:00PM",
+            "03:00PM-05:00PM"
+          ],
+          "available_capacity_dose1": 0,
+          "available_capacity_dose2": 0
+        }
+      ]
+    }
+  ]
+}

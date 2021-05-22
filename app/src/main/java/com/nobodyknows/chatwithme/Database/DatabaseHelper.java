@@ -137,9 +137,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 userListItemDTO.setLastOnline(user.getLastOnline());
                 userListItemDTO.setStatus(user.getStatus());
                 userListItemDTO.setProfileUrl(user.getProfileUrl());
+                userListItemDTO.setMuted(user.getMuted());
+                userListItemDTO.setBlocked(user.getBlocked());
                 userListItemDTO.setCurrentStatus(user.getCurrentStatus());
                 String lastMessageId = cursor.getString(cursor.getColumnIndex(RecentChats.COLUMN_LAST_MESSAGE_ID));
-                userListItemDTO.setLastMessage(databaseHelperChat.getMessage(lastMessageId,MessageMaker.createRoomId(context,userListItemDTO.getContactNumber())));
+                userListItemDTO.setLastMessage(databaseHelperChat.getMessage(lastMessageId,MessageMaker.createRoomId(userListItemDTO.getContactNumber())));
                 recentChatList.add(userListItemDTO);
 
             } while (cursor.moveToNext());
@@ -274,6 +276,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void setBlockStatus(String blockNumber, String blockBy,Boolean blockStatus) {
         SQLiteDatabase db  = this.getWritableDatabase();
         String strSQL = "UPDATE "+UsersDB.getTableName()+" SET "+UsersDB.COLUMN_BLOCKED+" = '"+MessageMaker.convertBoolean(blockStatus)+"',"+UsersDB.COLUMN_BLOCKED_BY+"='"+blockBy+"' WHERE "+UsersDB.COLUMN_CONTACT_NUMBER+" = "+ blockNumber;
+        db.execSQL(strSQL);
+        db.close();
+    }
+
+    public void setMuteStatus(String username,Boolean muted) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+UsersDB.getTableName()+" SET "+UsersDB.COLUMN_MUTED+" = '"+MessageMaker.convertBoolean(muted)+"' WHERE "+UsersDB.COLUMN_CONTACT_NUMBER+" = "+ username;
         db.execSQL(strSQL);
         db.close();
     }

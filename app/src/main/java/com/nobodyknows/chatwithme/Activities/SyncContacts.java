@@ -55,7 +55,7 @@ public class SyncContacts extends AppCompatActivity {
         getSupportActionBar().setTitle("Freinds From Contacts");
         getSupportActionBar().setElevation(0);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mynumber = MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number");
+        mynumber = MessageMaker.getMyNumber();
         init();
     }
 

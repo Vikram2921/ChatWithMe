@@ -44,7 +44,7 @@ public class ContactsRecyclerViewAdapter extends RecyclerView.Adapter<ContactsRe
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = contacts.get(position);
         if(user.getName() != null && user.getName().length() > 0) {
-            if(user.getContactNumber().equals(MessageMaker.getFromSharedPrefrences(context,"number"))) {
+            if(user.getContactNumber().equals(MessageMaker.getMyNumber())) {
                 holder.name.setText(user.getName()+" ( You )");
             } else {
                 holder.name.setText(user.getName());

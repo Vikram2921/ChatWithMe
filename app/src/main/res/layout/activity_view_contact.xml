@@ -269,6 +269,7 @@
                     app:layout_constraintLeft_toRightOf="@id/blockicon"
                     app:layout_constraintRight_toRightOf="parent"
                     android:text="Block"
+                    android:id="@+id/blocktext"
                     android:textColor="@color/red"
                     android:layout_marginLeft="20dp"
                     android:textSize="18dp"

@@ -45,17 +45,17 @@ public class ChatFragment extends Fragment {
 
     private View view;
     private RecyclerView recyclerView;
-    private ArrayList<UserListItemDTO> userListItems = new ArrayList<>();
-    private RecyclerViewAdapter recyclerViewAdapter;
+    public static ArrayList<UserListItemDTO> userListItems = new ArrayList<>();
+    public static RecyclerViewAdapter recyclerViewAdapter;
     private String myNumber = "";
-    private Map<String,UserListItemDTO> userListItemDTOMap = new HashMap<>();
-    private ConstraintLayout notfound;
+    public static Map<String,UserListItemDTO> userListItemDTOMap = new HashMap<>();
+    public static ConstraintLayout notfound;
     private Button action;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         this.view = view;
-        myNumber = MessageMaker.getFromSharedPrefrences(getContext(),"number");
+        myNumber = MessageMaker.getMyNumber();
         init();
         return view;
     }
@@ -140,6 +140,7 @@ public class ChatFragment extends Fragment {
 
     private void loadPrevioudUsers() {
         ArrayList<UserListItemDTO> list = databaseHelper.getRecentChatUsers(getContext());
+        User user;
         for(UserListItemDTO userListItemDTO:list) {
             addNewChat(userListItemDTO);
         }

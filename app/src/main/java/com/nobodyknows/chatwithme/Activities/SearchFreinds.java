@@ -65,7 +65,7 @@ public class SearchFreinds extends AppCompatActivity {
         setContentView(R.layout.activity_search_freinds);
         getSupportActionBar().setTitle("Search new freinds");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        mynumber = MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number");
+        mynumber = MessageMaker.getMyNumber();
         init();
     }
 

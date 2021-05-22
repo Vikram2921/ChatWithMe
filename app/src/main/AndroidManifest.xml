@@ -3,8 +3,10 @@
     package="com.nobodyknows.chatwithme">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -17,11 +19,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatWithMe">
-        <activity android:name=".Activities.Dashboard.ViewContact"></activity>
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        <activity android:name=".Activities.BookVaccine"></activity>
+        <activity android:name=".Activities.Dashboard.ViewContact" />
         <activity android:name=".Activities.SyncContacts" />
         <activity android:name=".Activities.SearchFreinds" />
         <activity android:name=".Activities.Signup.CreatingSetup" />
-        <activity android:name=".Activities.ChatRoom" android:windowSoftInputMode="adjustResize">
+        <activity
+            android:name=".Activities.ChatRoom"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.Dashboard.Dashboard" />

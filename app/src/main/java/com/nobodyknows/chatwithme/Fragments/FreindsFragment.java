@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class FreindsFragment extends Fragment {
@@ -119,7 +120,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void confirmFreind(FreindRequestDTO freindRequestDTO) {
-        String mynumber= MessageMaker.getFromSharedPrefrences(getContext(),"number");
+        String mynumber= MessageMaker.getMyNumber();
         FreindRequestSaveDTO fdto = new FreindRequestSaveDTO();
         fdto.setContactNumber(freindRequestDTO.getContactNumber());
         fdto.setRequestSentAt(freindRequestDTO.getRequestSentAt());
@@ -148,10 +149,10 @@ public class FreindsFragment extends Fragment {
     }
 
     private void deleteRequest(FreindRequestDTO freindRequestDTO,Boolean updateInDatabase) {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("FreindRequests").document("Receive").collection("List").document(freindRequestDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").document(freindRequestDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                firebaseService.readFromFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("FreindRequests").document("Sent").collection("List").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                firebaseService.readFromFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("FreindRequests").document("Sent").collection("List").document(MessageMaker.getMyNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(updateInDatabase) {
@@ -190,7 +191,7 @@ public class FreindsFragment extends Fragment {
 
     private void syncOnline() {
         updateCount();
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("FreindRequests").document("Receive").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -247,7 +248,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void readSent() {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("FreindRequests").document("Sent").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Sent").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -267,7 +268,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void syncFreindList() {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getFromSharedPrefrences(getContext(),"number")).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -280,12 +281,31 @@ public class FreindsFragment extends Fragment {
                             case MODIFIED:
                                 break;
                             case REMOVED:
+                                removeFreind(freindRequestSaveDTO);
                                 break;
                         }
                     }
                 }
             }
         });
+    }
+
+    private void removeFreind(FreindRequestSaveDTO freindRequestSaveDTO) {
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("RecentChats").collection("History").document(freindRequestSaveDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                firebaseService.saveToFireStore("Chats").document(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber())).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        databaseHelperChat.deleteMessagesOf(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
+                        databaseHelper.deleteRecentChat(freindRequestSaveDTO.getContactNumber());
+                        databaseHelper.deleteUser(freindRequestSaveDTO.getContactNumber());
+                        MessageMaker.removeFromRecentChatUI(freindRequestSaveDTO.getContactNumber());
+                    }
+                });
+            }
+        });
+
     }
 
 }

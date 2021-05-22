@@ -13,6 +13,7 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
+import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
 
 import java.util.Date;
@@ -20,6 +21,10 @@ import java.util.Date;
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
+import static com.nobodyknows.chatwithme.Fragments.ChatFragment.notfound;
+import static com.nobodyknows.chatwithme.Fragments.ChatFragment.recyclerViewAdapter;
+import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItemDTOMap;
+import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItems;
 
 public class MessageMaker {
 
@@ -47,16 +52,15 @@ public class MessageMaker {
         return sharedPreferences.getBoolean(key,false);
     }
 
-    public static String createRoomId(Context context, String freindusername) {
-        String myusername = getFromSharedPrefrences(context,"number");
-        String sub1=myusername.substring(myusername.length() - 5);
+    public static String createRoomId(String freindusername) {
+        String sub1=myNumber.substring(myNumber.length() - 5);
         String sub2=freindusername.substring(freindusername.length() - 5);
         int mn= Integer.parseInt(sub1);
         int fn= Integer.parseInt(sub2);
         if(fn<mn) {
-            return freindusername+myusername;
+            return freindusername+myNumber;
         }
-        return myusername+freindusername;
+        return myNumber+freindusername;
     }
 
     public static String getConvertedDate(Date date) {
@@ -120,14 +124,7 @@ public class MessageMaker {
                 databaseHelper.setBlockStatus(message.getSender(),message.getSender(),false);
             }
             return null;
-        } else if(message.getMessageType() == MessageType.UNFREIND) {
-            if(!message.getSender().equalsIgnoreCase(myNumber)) {
-                databaseHelper.deleteUser(message.getSender());
-                databaseHelperChat.deleteMessagesOf(message.getRoomId());
-                databaseHelper.deleteRecentChat(message.getSender());
-            }
-            return null;
-        }
+        } 
         return message;
     }
 
@@ -139,10 +136,35 @@ public class MessageMaker {
         intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
         intent.putExtra("verified",user.getVerified());
         intent.putExtra("blocked",user.getBlocked());
-        intent.putExtra("roomid", MessageMaker.createRoomId(context,user.getContactNumber()));
+        intent.putExtra("muted",user.getMuted());
+        intent.putExtra("roomid", createRoomId(username));
         intent.putExtra("profile",user.getProfileUrl());
         intent.putExtra("blockedBy",user.getBlockedBy());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static void removeFromRecentChatUI(String username) {
+        int index = userListItems.indexOf(userListItemDTOMap.get(username));
+        if(index >= 0) {
+            userListItems.remove(userListItemDTOMap.get(username));
+            userListItemDTOMap.remove(username);
+            recyclerViewAdapter.notifyItemRemoved(index);
+            if(userListItems.size() == 0) {
+                showNotFound(notfound);
+            }
+        }
+    }
+
+    public static void muteFromRecentChatUI(String username,Boolean muted) {
+        int index = userListItems.indexOf(userListItemDTOMap.get(username));
+        if(index >= 0) {
+            UserListItemDTO userListItemDTO = userListItems.get(index);
+            userListItemDTO.setMuted(muted);
+            userListItems.remove(index);
+            userListItems.add(index,userListItemDTO);
+            userListItemDTOMap.put(username,userListItemDTO);
+            recyclerViewAdapter.notifyItemChanged(index);
+        }
     }
 }

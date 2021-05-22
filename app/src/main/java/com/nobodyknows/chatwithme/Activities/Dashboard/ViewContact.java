@@ -28,6 +28,7 @@ public class ViewContact extends AppCompatActivity {
     protected ConstraintLayout report,unfreind,block;
     private String username = "";
     private Boolean isFromChat = false,isBlocked = false;
+    private TextView blocktext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +53,7 @@ public class ViewContact extends AppCompatActivity {
         report = findViewById(R.id.report);
         unfreind = findViewById(R.id.unfreind);
         block = findViewById(R.id.block);
+        blocktext = findViewById(R.id.blocktext);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,6 +65,10 @@ public class ViewContact extends AppCompatActivity {
 
     private void load() {
         User user = databaseHelper.getUser(username);
+        isBlocked = user.getBlocked();
+        if(isBlocked && user.getBlockedBy().equalsIgnoreCase(MessageMaker.getMyNumber())) {
+            blocktext.setText("Unblock");
+        }
         name.setText(user.getName());
         status.setText(user.getStatus());
         mobilenumber.setText(user.getContactNumber());
@@ -90,7 +96,7 @@ public class ViewContact extends AppCompatActivity {
                         .when(R.string.unfreind,new Pop.Yah() {
                             @Override
                             public void clicked(DialogInterface dialog, @Nullable View view) {
-                                firebaseService.unfreind(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                firebaseService.unfreind(username,ViewContact.this);
                             }
                         }).when(new Pop.Nah() {
                                 @Override
@@ -102,14 +108,15 @@ public class ViewContact extends AppCompatActivity {
         block.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isBlocked) {
+                if(blocktext.getText().equals("Unblock")) {
                     Pop.on(ViewContact.this).with()
                             .cancelable(true)
                             .body("Are you sure you want to unblock "+user.getName()+" ?")
                             .when(R.string.unblockstring,new Pop.Yah() {
                                 @Override
                                 public void clicked(DialogInterface dialog, @Nullable View view) {
-                                    firebaseService.block(username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                    firebaseService.unblock(username, MessageMaker.createRoomId(username));
+                                    blocktext.setText("Block");
                                 }
                             }).when(new Pop.Nah() {
                         @Override
@@ -123,7 +130,8 @@ public class ViewContact extends AppCompatActivity {
                             .when(R.string.blockstring,new Pop.Yah() {
                                 @Override
                                 public void clicked(DialogInterface dialog, @Nullable View view) {
-                                    firebaseService.unblock(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                    firebaseService.block(username, MessageMaker.createRoomId(username));
+                                    blocktext.setText("Unblock");
                                 }
                             }).when(new Pop.Nah() {
                         @Override

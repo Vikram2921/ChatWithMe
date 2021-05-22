@@ -80,6 +80,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 context.startActivity(intent,activityOptionsCompat.toBundle());
             }
         });
+        if(user.isMuted())  {
+            holder.muted.setVisibility(View.VISIBLE);
+        } else {
+            holder.muted.setVisibility(View.GONE);
+        }
     }
 
 
@@ -94,7 +99,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public TextView name;
         public TextView lastMessage;
         public TextView unreadMessageCount;
-        public ImageView status;
+        public ImageView status,muted;
         public RelativeTimeTextView lastDate;
         public ViewHolder(View itemView) {
             super(itemView);
@@ -103,6 +108,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             this.lastMessage = itemView.findViewById(R.id.lastemessage);
             this.lastDate = itemView.findViewById(R.id.lastdate);
             this.status = itemView.findViewById(R.id.status);
+            this.muted = itemView.findViewById(R.id.muteicon);
             this.unreadMessageCount = itemView.findViewById(R.id.unreadmessagecount);
         }
     }

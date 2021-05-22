@@ -80,6 +80,7 @@ public class ChatRoom extends AppCompatActivity {
     private Menu menu;
     private View rootView;
     private String blockedBy = "";
+    private boolean isMuted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +105,7 @@ public class ChatRoom extends AppCompatActivity {
         roomid = getIntent().getStringExtra("roomid");
         isVerfied = getIntent().getBooleanExtra("verified",false);
         isBlocked = getIntent().getBooleanExtra("blocked",false);
+        isMuted = getIntent().getBooleanExtra("muted",false);
         blockedBy = getIntent().getStringExtra("blockedBy");
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
@@ -120,6 +122,20 @@ public class ChatRoom extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        User user = databaseHelper.getUser(username);
+        if(user == null) {
+            finish();
+        } else {
+            isBlocked = user.getBlocked();
+            blockedBy = user.getBlockedBy();
+            setBlockStatus();
+        }
     }
 
     @Override
@@ -127,6 +143,7 @@ public class ChatRoom extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_chat_room, menu);
         this.menu = menu;
         setBlockStatus();
+        setMuteStatus();
         return true;
     }
 
@@ -141,6 +158,18 @@ public class ChatRoom extends AppCompatActivity {
             } else {
                 item.setTitle("Block");
             }
+        }
+    }
+
+    private void setMuteStatus() {
+        if(menu != null) {
+            MenuItem item = menu.findItem(R.id.menu_mute);
+            if(isMuted) {
+                item.setTitle("Unmute");
+            } else {
+                item.setTitle("Mute Notification");
+            }
+            MessageMaker.muteFromRecentChatUI(username,isMuted);
         }
     }
 
@@ -163,7 +192,11 @@ public class ChatRoom extends AppCompatActivity {
                 changeWallpaper();
                 break;
             case R.id.menu_mute:
-                muteNotification();
+                if(item.getTitle().equals("Unmute")) {
+                    unmuteNotification();
+                } else {
+                    muteNotification();
+                }
                 break;
             case R.id.block:
                 if(item.getTitle().equals("Unblock")) {
@@ -192,6 +225,26 @@ public class ChatRoom extends AppCompatActivity {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
                        firebaseService.muteChat(username);
+                       isMuted = true;
+                       setMuteStatus();
+                    }
+                }).when(new Pop.Nah() {
+            @Override
+            public void clicked(DialogInterface dialog, @Nullable View view) {
+            }
+        }).show();
+    }
+
+    private void unmuteNotification() {
+        Pop.on(ChatRoom.this).with()
+                .cancelable(true)
+                .body("Are you sure you want to unmute all notification from chat with "+name+" ?")
+                .when(R.string.unmute,new Pop.Yah() {
+                    @Override
+                    public void clicked(DialogInterface dialog, @Nullable View view) {
+                        firebaseService.unmuteChat(username);
+                        isMuted = false;
+                        setMuteStatus();
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -251,7 +304,7 @@ public class ChatRoom extends AppCompatActivity {
                 .when(R.string.unfreind,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.unfreind(getApplicationContext(),username,roomid);
+                        firebaseService.unfreind(username,ChatRoom.this);
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -270,7 +323,7 @@ public class ChatRoom extends AppCompatActivity {
                         firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document("BLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                firebaseService.unblock(getApplicationContext(),username,roomid);
+                                firebaseService.unblock(username,roomid);
                                 isBlocked = false;
                                 blockedBy = myUsername;
                                 if(listner == null) {
@@ -411,8 +464,6 @@ public class ChatRoom extends AppCompatActivity {
 
                                         }
                                     });
-                                } else if(message.getMessageType() == MessageType.UNFREIND) {
-                                    finish();
                                 }
                             }
                         }

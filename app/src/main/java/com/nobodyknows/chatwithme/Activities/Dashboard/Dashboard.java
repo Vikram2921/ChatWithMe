@@ -25,6 +25,7 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.material.tabs.TabLayout;
+import com.nobodyknows.chatwithme.Activities.BookVaccine;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
@@ -188,6 +189,10 @@ public class Dashboard extends AppCompatActivity {
                 menuAddChatClick();
                 break;
             case R.id.menu_nearby_chat:
+                break;
+            case R.id.menu_book_vacine:
+                Intent intent = new Intent(getApplicationContext(), BookVaccine.class);
+                startActivity(intent);
                 break;
             case R.id.menu_signout:
                 signout();
