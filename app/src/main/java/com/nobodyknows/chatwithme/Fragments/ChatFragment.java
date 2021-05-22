@@ -105,7 +105,7 @@ public class ChatFragment extends Fragment {
                                     addNewItem(doc.getDocument().getId(),message);
                                     break;
                                 case MODIFIED:
-                                    updateItem(doc.getDocument().getId(),message);
+                                    //updateItem(doc.getDocument().getId(),message);
                                     break;
                                 case REMOVED:
                                     break;
@@ -156,11 +156,11 @@ public class ChatFragment extends Fragment {
             if(message.getMessageStatus() == MessageStatus.SENT && !message.getSender().equalsIgnoreCase(myNumber)) {
                 message.setMessageStatus(MessageStatus.RECEIVED);
                 message.setReceivedAt(new Date());
-                firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                    }
-                });
+//                firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                    }
+//                });
             }
         }
     }

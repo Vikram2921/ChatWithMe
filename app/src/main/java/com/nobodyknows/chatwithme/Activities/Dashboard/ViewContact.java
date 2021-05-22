@@ -109,7 +109,7 @@ public class ViewContact extends AppCompatActivity {
                             .when(R.string.unblockstring,new Pop.Yah() {
                                 @Override
                                 public void clicked(DialogInterface dialog, @Nullable View view) {
-                                    firebaseService.block(getApplicationContext(),username, MessageMaker.createRoomId(getApplicationContext(),username));
+                                    firebaseService.block(username, MessageMaker.createRoomId(getApplicationContext(),username));
                                 }
                             }).when(new Pop.Nah() {
                         @Override

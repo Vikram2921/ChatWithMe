@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.NavUtils;
 
 import android.app.Activity;
@@ -163,6 +164,7 @@ public class ChatRoom extends AppCompatActivity {
                 break;
             case R.id.menu_mute:
                 muteNotification();
+                break;
             case R.id.block:
                 if(item.getTitle().equals("Unblock")) {
                     unblock();
@@ -220,7 +222,6 @@ public class ChatRoom extends AppCompatActivity {
         if(listner != null) {
             listner.remove();
             listner = null;
-            Toast.makeText(getApplicationContext(),"Listener Stopped",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -231,7 +232,7 @@ public class ChatRoom extends AppCompatActivity {
                 .when(R.string.blockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.block(getApplicationContext(),username,roomid);
+                        firebaseService.block(username,roomid);
                         isBlocked = true;
                         blockedBy = myUsername;
                         setBlockStatus();
@@ -266,13 +267,18 @@ public class ChatRoom extends AppCompatActivity {
                 .when(R.string.unblockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.unblock(getApplicationContext(),username,roomid);
-                        isBlocked = false;
-                        blockedBy = myUsername;
-                        if(listner == null) {
-                            startListening();
-                        }
-                        setBlockStatus();
+                        firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document("BLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                firebaseService.unblock(getApplicationContext(),username,roomid);
+                                isBlocked = false;
+                                blockedBy = myUsername;
+                                if(listner == null) {
+                                    startListening();
+                                }
+                                setBlockStatus();
+                            }
+                        });
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -283,9 +289,9 @@ public class ChatRoom extends AppCompatActivity {
 
     private void changeWallpaper() {
         ImagePicker.Companion.with(ChatRoom.this)
-                .crop()	    			//Crop image(Optional), Check Customization for more option
-                .compress(1024)			//Final image size will be less than 1 MB(Optional)
-                .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                .crop()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
                 .start();
     }
 
@@ -298,7 +304,7 @@ public class ChatRoom extends AppCompatActivity {
             String profilePath = file.getPath();
             SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("backgroundPath",profilePath);
+            editor.putString("backgroundPath"+username,profilePath);
             editor.apply();
             loadBackgroundImage();
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
@@ -312,7 +318,8 @@ public class ChatRoom extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), ViewContact.class);
         intent.putExtra("username",username);
         intent.putExtra("isFromChat",true);
-        startActivity(intent);
+        ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,profileView,"profile");
+        startActivity(intent,activityOptionsCompat.toBundle());
     }
 
 
@@ -371,7 +378,6 @@ public class ChatRoom extends AppCompatActivity {
 
     private void startListening() {
         if(listner == null && (!isBlocked || (isBlocked && !blockedBy.equalsIgnoreCase(myUsername)))) {
-            Toast.makeText(getApplicationContext(),"Listener Started",Toast.LENGTH_SHORT).show();
             listner = firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -388,7 +394,6 @@ public class ChatRoom extends AppCompatActivity {
                                         chatLayoutView.updateMessage(messageUpdate);
                                         break;
                                     case REMOVED:
-                                        chatLayoutView.deleteMessage(messageUpdate);
                                         break;
                                 }
                             } else {
@@ -400,6 +405,12 @@ public class ChatRoom extends AppCompatActivity {
                                     isBlocked = false;
                                     blockedBy = message.getSender();
                                     setBlockStatus();
+                                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document("UNBLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                        }
+                                    });
                                 } else if(message.getMessageType() == MessageType.UNFREIND) {
                                     finish();
                                 }
@@ -480,6 +491,9 @@ public class ChatRoom extends AppCompatActivity {
             @Override
             public void onMessageSeen(Message message) {
                 if(!isBlocked) {
+                    if(message.getReceivedAt() == null) {
+                        message.setReceivedAt(new Date());
+                    }
                     message.setMessageStatus(MessageStatus.SEEN);
                     message.setSeenAt(new Date());
                     firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -501,7 +515,7 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void loadBackgroundImage() {
-        String imageurl = MessageMaker.getFromSharedPrefrences(getApplicationContext(),"backgroundPath");
+        String imageurl = MessageMaker.getFromSharedPrefrences(getApplicationContext(),"backgroundPath"+username);
         if(imageurl != null && imageurl.length() > 0) {
             Glide.with(getApplicationContext()).load(imageurl).into(backgroundImage);
         } else {

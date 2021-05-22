@@ -130,7 +130,7 @@ public class ChatLayoutView extends RelativeLayout {
         SwipeController controller = new SwipeController(getContext(), new ISwipeControllerActions() {
             @Override
             public void onSwipePerformed(int position) {
-                chatLayoutListener.onSwipeToReply(messages.get(position),helper.getReplyMessageView(messages.get(position)));
+                //chatLayoutListener.onSwipeToReply(messages.get(position),helper.getReplyMessageView(messages.get(position)));
             }
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(controller);
@@ -209,17 +209,15 @@ public class ChatLayoutView extends RelativeLayout {
         if(helper.messageIdExists(message.getMessageId())) {
             int index = helper.getMessageIdPositon(message.getMessageId());
             Message messageOld = messages.get(index);
-            if(messageOld.getMessageStatus() != message.getMessageStatus()) {
-                messages.remove(index);
-                messages.add(index,message);
-                recyclerViewAdapter.notifyItemChanged(index);
-                checkForSeen(message,messageOld);
-                if(playSentAndReceivedSoundEffect && message.getMessageStatus() == MessageStatus.SENT && message.getSender().equalsIgnoreCase(myUsername)) {
-                    MediaPlayer.create(getContext(),sentSoundEffect).start();
-                }
-                if(saveToDatabase) {
-                    updateMessageToDatabase(message);   
-                }
+            messages.remove(index);
+            messages.add(index,message);
+            recyclerViewAdapter.notifyItemChanged(index);
+            checkForSeen(message,messageOld);
+            if(playSentAndReceivedSoundEffect && message.getMessageStatus() == MessageStatus.SENT && message.getSender().equalsIgnoreCase(myUsername)) {
+                MediaPlayer.create(getContext(),sentSoundEffect).start();
+            }
+            if(saveToDatabase) {
+                updateMessageToDatabase(message);
             }
         }
     }

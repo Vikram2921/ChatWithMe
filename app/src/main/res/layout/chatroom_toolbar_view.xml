@@ -9,6 +9,7 @@
         android:id="@+id/profile"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:transitionName="profile"
         android:layout_centerVertical="true"
 
         android:src="@drawable/profile"

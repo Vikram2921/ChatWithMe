@@ -24,6 +24,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:src="@drawable/profile"
+                android:transitionName="profile"
                 android:scaleType="centerCrop"
                 android:id="@+id/profile"
                 android:layout_width="match_parent"

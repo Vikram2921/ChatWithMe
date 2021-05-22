@@ -138,7 +138,7 @@ public class FirebaseService {
         });
     }
 
-    public void block(Context context,String username,String roomid) {
+    public void block(String username,String roomid) {
         String mynumber = MessageMaker.getMyNumber();
         saveToFireStore("Users").document(mynumber).collection("Freinds").document(username).update("blocked",true).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
