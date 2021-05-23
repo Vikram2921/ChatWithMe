@@ -2,4 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.NobodyKnows.chatlayoutview">
 
+    <application>
+        <activity android:name=".Activities.ViewAllContacts"></activity>
+    </application>
+
 </manifest>

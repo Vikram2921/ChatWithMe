@@ -42,14 +42,14 @@ public class ChatLayoutView extends RelativeLayout {
     private Context context;
     private ArrayList<String> dates =new ArrayList<>();
     private Map<MessageType,String> downloadPaths = new HashMap<>();
-    private ChatLayoutListener chatLayoutListener;
+    public static ChatLayoutListener chatLayoutListener;
     private Boolean playSentAndReceivedSoundEffect = false,saveToDatabase = false;
     private MessageConfiguration leftMessageConfiguration;
     private MessageConfiguration rightMessageConfiguration;
     private int sentSoundEffect = R.raw.message_added;
     private int receivedSoundEffect = R.raw.message_received;
     private int blurRadius = 70;
-    private DatabaseHelper databaseHelper;
+    public static DatabaseHelper databaseHelper;
 
     public ChatLayoutView(Context context) {
         super(context);

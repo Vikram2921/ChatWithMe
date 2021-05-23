@@ -240,10 +240,15 @@ public class BookVaccine extends AppCompatActivity {
     private String getAvailabilityUrl(String districid) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        Date tomorrow = calendar.getTime();
-        String date = simpleDateFormat.format(tomorrow);
-        Log.d("TAGRESPONSE", "getAvailabilityUrl: "+date);
+        int a = calendar.get(Calendar.AM_PM);
+        String date = "";
+        if(a == Calendar.AM) {
+            date = simpleDateFormat.format(calendar.getTime());
+        } else {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            Date tomorrow = calendar.getTime();
+            date = simpleDateFormat.format(tomorrow);
+        }
         return "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id="+districid+"&date="+date;
     }
 

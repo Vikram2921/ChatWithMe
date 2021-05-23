@@ -3,6 +3,7 @@ package com.nobodyknows.chatwithme.Activities;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,8 +52,10 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
+import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -436,6 +440,14 @@ public class ChatRoom extends AppCompatActivity {
         attachemntPane = findViewById(R.id.attachmentpane);
         attachment = findViewById(R.id.attachment);
         contacts = findViewById(R.id.contact);
+        attachemntPane.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    attachemntPane.setVisibility(View.GONE);
+                }
+            }
+        });
         attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -473,7 +485,6 @@ public class ChatRoom extends AppCompatActivity {
 
                     @Override
                     public void onPermissionDenied(List<String> deniedPermissions) {
-                        finish();
                     }
                 };
                 TedPermission.with(getApplicationContext())
@@ -637,7 +648,7 @@ public class ChatRoom extends AppCompatActivity {
 
             @Override
             public void onClickAddContactFromContactMessage(Contact contact){
-
+                addContactLocal(contact);
             }
 
             @Override
@@ -678,31 +689,110 @@ public class ChatRoom extends AppCompatActivity {
         loadBackgroundImage();
     }
 
+    private void addContactLocal(Contact contact) {
+        MessageMaker.openAddContact(getApplicationContext(),contact);
+    }
+
+    private void sendRequest(User user) {
+        FreindRequestSaveDTO freindRequestSaveDTO = new FreindRequestSaveDTO();
+        freindRequestSaveDTO.setRequestSentBy(myUsername);
+        freindRequestSaveDTO.setRequestSentAt(new Date());
+        freindRequestSaveDTO.setContactNumber(user.getContactNumber());
+        firebaseService.saveToFireStore("Users").document(myUsername).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                freindRequestSaveDTO.setContactNumber(myUsername);
+                firebaseService.saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(myUsername).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(getApplicationContext(),"Freind Request Sent to "+user.getName(),Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+    }
+
     private void OpenInChat(Contact contact) {
         Boolean userExist = databaseHelper.isUserExist(contact.getContactNumbers());
         if(userExist) {
             MessageMaker.startChatroom(getApplicationContext(),contact.getContactNumbers());
             finish();
         } else {
-            firebaseService.readFromFireStore("Users").document(contact.getContactNumbers()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if(task.isSuccessful()) {
-                        if(task.getResult().exists()) {
-                            User user = task.getResult().toObject(User.class);
-                        } else {
-                            Pop.on(ChatRoom.this).with()
-                                    .cancelable(true)
-                                    .layout(R.layout.inviteuser).show(new Pop.View() {
-                                @Override
-                                public void prepare(@Nullable View view) {
-
-                                }
-                            });
+            if(!contact.getContactNumbers().equalsIgnoreCase(myUsername)) {
+                KProgressHUD popup = KProgressHUD.create(ChatRoom.this)
+                        .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                        .setLabel("Please wait")
+                        .setCancellable(false)
+                        .setAnimationSpeed(2)
+                        .setDimAmount(0.5f)
+                        .show();
+                final AlertDialog[] pop = new AlertDialog[1];
+                firebaseService.readFromFireStore("Users").document(contact.getContactNumbers()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()) {
+                            popup.dismiss();
+                            if(task.getResult().exists()) {
+                                User user = task.getResult().toObject(User.class);
+                                pop[0] = Pop.on(ChatRoom.this).with()
+                                        .cancelable(true)
+                                        .layout(R.layout.inviteuser).show(new Pop.View() {
+                                            @Override
+                                            public void prepare(@Nullable View view) {
+                                                TextView title = view.findViewById(R.id.title);
+                                                TextView desc = view.findViewById(R.id.desc);
+                                                Button invite = view.findViewById(R.id.invite);
+                                                Button cancel = view.findViewById(R.id.cancel);
+                                                invite.setText("Send Freind Request");
+                                                title.setText("Send Freind Request");
+                                                desc.setText(user.getName()+" is not in your freind list.Send freinds request to start chat.");
+                                                invite.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        sendRequest(user);
+                                                        pop[0].dismiss();
+                                                    }
+                                                });
+                                                cancel.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        pop[0].dismiss();
+                                                    }
+                                                });
+                                            }
+                                        });
+                            } else {
+                                pop[0] = Pop.on(ChatRoom.this).with()
+                                        .cancelable(true)
+                                        .layout(R.layout.inviteuser).show(new Pop.View() {
+                                            @Override
+                                            public void prepare(@Nullable View view) {
+                                                TextView title = view.findViewById(R.id.title);
+                                                TextView desc = view.findViewById(R.id.desc);
+                                                Button invite = view.findViewById(R.id.invite);
+                                                Button cancel = view.findViewById(R.id.cancel);
+                                                title.setText("Invite "+contact.getName());
+                                                desc.setText(contact.getName()+" is not on Chat With Me. Invite "+contact.getName()+" to start chat.");
+                                                invite.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        MessageMaker.invite(getApplicationContext(),contact.getContactNumbers());
+                                                        pop[0].dismiss();
+                                                    }
+                                                });
+                                                cancel.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        pop[0].dismiss();
+                                                    }
+                                                });
+                                            }
+                                        });
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
     }
 

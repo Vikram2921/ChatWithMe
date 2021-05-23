@@ -1,6 +1,7 @@
 package com.NobodyKnows.chatlayoutview.ViewHolders;
 
 import android.content.Context;
+import android.content.Intent;
 import android.text.util.Linkify;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.NobodyKnows.chatlayoutview.Activities.ViewAllContacts;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -46,7 +48,10 @@ public class ContactMultipleLeft extends RecyclerView.ViewHolder {
         viewall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(context, ViewAllContacts.class);
+                intent.putExtra("messageId",message.getMessageId());
+                intent.putExtra("roomid",message.getRoomId());
+                context.startActivity(intent);
             }
         });
         ImageView chat = view.findViewById(R.id.chat);
