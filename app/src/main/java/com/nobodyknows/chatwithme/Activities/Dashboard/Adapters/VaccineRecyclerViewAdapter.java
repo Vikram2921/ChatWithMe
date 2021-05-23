@@ -4,7 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,9 +15,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.SelectListener;
+import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.VaccineSelectListener;
 import com.nobodyknows.chatwithme.DTOS.VaccineCenter;
+import com.nobodyknows.chatwithme.DTOS.VaccineSessions;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -24,9 +33,12 @@ public class VaccineRecyclerViewAdapter extends RecyclerView.Adapter<VaccineRecy
 
     private ArrayList<VaccineCenter> centers;
     private Context context;
-    public VaccineRecyclerViewAdapter(Context context, ArrayList<VaccineCenter> contacts) {
+    private String benefeciaryId = "";
+    private VaccineSelectListener vaccineSelectListener;
+    public VaccineRecyclerViewAdapter(Context context, ArrayList<VaccineCenter> contacts,VaccineSelectListener vaccineSelectListener) {
         this.context = context;
         this.centers = contacts;
+        this.vaccineSelectListener =vaccineSelectListener;
     }
 
     @NonNull
@@ -51,8 +63,29 @@ public class VaccineRecyclerViewAdapter extends RecyclerView.Adapter<VaccineRecy
         } else {
             holder.feetype.setBackgroundResource(R.drawable.paid);
         }
+        for(VaccineSessions vaccineSessions:center.getSessions()) {
+            for(String slot:vaccineSessions.getSlots()) {
+                Button button = new Button(context);
+                button.setText(slot);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            schedule(slot,vaccineSessions);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                holder.slots.addView(button);
+            }
+        }
     }
 
+    private void schedule(String slot,VaccineSessions vaccineSessions) throws JSONException {
+
+        vaccineSelectListener.onSchedule(vaccineSessions,slot);
+    }
 
 
     @Override
@@ -65,11 +98,13 @@ public class VaccineRecyclerViewAdapter extends RecyclerView.Adapter<VaccineRecy
         public TextView feetype;
         public TextView totalavail;
         public TextView timming;
+        public LinearLayout slots;
         public ViewHolder(View itemView) {
             super(itemView);
             this.feetype = itemView.findViewById(R.id.feetype);
             this.name = itemView.findViewById(R.id.centername);
             this.totalavail = itemView.findViewById(R.id.total);
+            this.slots = itemView.findViewById(R.id.slots);
             this.timming = itemView.findViewById(R.id.timming);
         }
     }

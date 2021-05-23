@@ -69,7 +69,7 @@ public class ChatRoom extends AppCompatActivity {
     private ChatLayoutView chatLayoutView;
     private CircleImageView profileView;
     private TextView nameView,statusView;
-    private ImageView verified,emoji,send;
+    private ImageView verified,emoji,send,attachment;
     private EmojiEditText messageBox;
     private Boolean isVerfied = false,isBlocked = false;
     private String myUsername = "",roomid = "";
@@ -385,6 +385,7 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void init() {
+        attachment = findViewById(R.id.attachment);
         backgroundImage = findViewById(R.id.background);
         chatLayoutView = findViewById(R.id.chatlayoutview);
         profileView = actionBarView.findViewById(R.id.profile);

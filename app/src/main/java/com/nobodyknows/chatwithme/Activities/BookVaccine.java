@@ -1,27 +1,28 @@
 package com.nobodyknows.chatwithme.Activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.codepath.asynchttpclient.AbsCallback;
+import com.codepath.asynchttpclient.AsyncHttpClient;
+import com.codepath.asynchttpclient.RequestHeaders;
+import com.codepath.asynchttpclient.callback.TextHttpResponseHandler;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Adapters.VaccineRecyclerViewAdapter;
+import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.VaccineSelectListener;
 import com.nobodyknows.chatwithme.DTOS.VaccineCenter;
 import com.nobodyknows.chatwithme.DTOS.VaccineSessions;
 import com.nobodyknows.chatwithme.R;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,18 +32,27 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import okhttp3.Call;
+import okhttp3.Headers;
+import okhttp3.Response;
+
+
 public class BookVaccine extends AppCompatActivity {
 
     private String stateFetchUrl = "";
     private String districFetchUrl = "https://cdn-api.co-vin.in/api/v2/admin/location/districts/";
-    private RequestQueue requestQueue;
+    private String scheduleURL = "https://cdn-api.co-vin.in/api/v2/appointment/schedule";
     private CountDownTimer countDownTimer;
     private ArrayList<VaccineCenter> centers = new ArrayList<>();
     private RecyclerView recyclerView;
     private VaccineRecyclerViewAdapter recyclerViewAdapter;
-    private String jwttoken = "eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTYyMTY5NzM4NiwiaWF0IjoxNjIxNjk3Mzg2fQ.wqk_3TcdXeOZoKSKXDuFuhdH8SUm8gq70IhsFQ_5YBs";
-    private String webUrl = "https://www.nobodyknows.com/setu_callback";
+    private int minAgeLimitFilter = 18;
     private String apiKey = "shRPbnXUdj472zXHJEYeg1Oz3TlfmvFt3xeNBZhV";
+    private int dosenumber = 1;
+    private String benefeciaryId = "90809695362020";  //VIKRAM SINGH RAWAT
+    private AsyncHttpClient client = new AsyncHttpClient();
+    private String token = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +64,16 @@ public class BookVaccine extends AppCompatActivity {
 
     private void init() {
         recyclerView = findViewById(R.id.vaccineList);
-        recyclerViewAdapter = new VaccineRecyclerViewAdapter(getApplicationContext(),centers);
+        recyclerViewAdapter = new VaccineRecyclerViewAdapter(getApplicationContext(), centers, new VaccineSelectListener() {
+            @Override
+            public void onSchedule(VaccineSessions sessions,String slot) {
+                try {
+                    schedule(sessions,slot);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         layoutManager.setReverseLayout(false);
         layoutManager.setItemPrefetchEnabled(true);
@@ -64,8 +83,8 @@ public class BookVaccine extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
         addTimer();
+       //readDummy();
     }
 
     private void readDummy() {
@@ -90,7 +109,11 @@ public class BookVaccine extends AppCompatActivity {
 
 
     private void addTimer() {
-        sync();
+        try {
+            sync();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         countDownTimer  = new CountDownTimer(10000, 20) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -127,23 +150,22 @@ public class BookVaccine extends AppCompatActivity {
         }
     }
 
-    private void sync() {
+    private void sync() throws IOException {
         String url = getAvailabilityUrl("507");
         centers.clear();
         recyclerViewAdapter.notifyDataSetChanged();
-        StringRequest stringRequest = new StringRequest(url, new Response.Listener<String>() {
+        client.get(url, new TextHttpResponseHandler() {
             @Override
-            public void onResponse(String response) {
-                Log.d("TAGREC", "onResponse: "+response);
+            public void onSuccess(int statusCode, Headers headers, String response) {
+                Log.d("DEBUG", response);
                 readResponse(response);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
 
+            @Override
+            public void onFailure(int statusCode, @Nullable Headers headers, String errorResponse, @Nullable Throwable throwable) {
+                Log.d("DEBUG", errorResponse);
             }
         });
-        requestQueue.add(stringRequest);
     }
 
     private void convertToVaccine(JSONObject jsonObject) throws JSONException {
@@ -152,7 +174,7 @@ public class BookVaccine extends AppCompatActivity {
         VaccineSessions vaccineSessions;
         int totalAvailable = 0;
         for(int i=0;i<array.length();i++) {
-            if(array.getJSONObject(i).getInt("available_capacity") > 0) {
+            if(array.getJSONObject(i).getInt("available_capacity") > 0 && array.getJSONObject(i).getInt("min_age_limit") == minAgeLimitFilter) {
                 vaccineSessions = new VaccineSessions();
                 vaccineSessions.setSessionId(array.getJSONObject(i).getString("session_id"));
                 vaccineSessions.setDate(array.getJSONObject(i).getString("date"));
@@ -161,6 +183,10 @@ public class BookVaccine extends AppCompatActivity {
                 vaccineSessions.setVaccine(array.getJSONObject(i).getString("vaccine"));
                 vaccineSessions.setAvailableDose1(array.getJSONObject(i).getInt("available_capacity_dose1"));
                 vaccineSessions.setAvailableDose2(array.getJSONObject(i).getInt("available_capacity_dose2"));
+                JSONArray slots = array.getJSONObject(i).getJSONArray("slots");
+                for(int j=0;j<slots.length();j++) {
+                    vaccineSessions.addSlot(slots.getString(j));
+                }
                 center.addSession(vaccineSessions);
                 totalAvailable += vaccineSessions.getAvailableCapacity();
             }
@@ -198,5 +224,29 @@ public class BookVaccine extends AppCompatActivity {
 
     private String getAvailabilityUrl(String districid) {
         return "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id="+districid+"&date="+new Date().toString();
+    }
+
+    private void schedule(VaccineSessions sessions,String slot) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("dose",1);
+        jsonObject.put("session_id",sessions.getSessionId());
+        jsonObject.put("slot",slot);
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.put(benefeciaryId);
+        jsonObject.put("beneficiaries",jsonArray);
+        RequestHeaders requestHeaders = new RequestHeaders();
+        requestHeaders.put("Authorization","Bearer "+token);
+        client.post(scheduleURL,requestHeaders, null,jsonObject.toString(), new AbsCallback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Toast.makeText(getApplicationContext(),"Failed",Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+               // Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
