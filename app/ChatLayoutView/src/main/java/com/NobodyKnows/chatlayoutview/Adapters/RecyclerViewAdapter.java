@@ -147,10 +147,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((TextMessageViewLeft) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
             case SENT_CONTACT_SINGLE:
-                ((ContactSingleRight) holder).initalize(context,message);
+                ((ContactSingleRight) holder).initalize(context,message,chatLayoutListener);
                 break;
             case SENT_CONTACT_MULTIPLE:
-                ((ContactMultipleRight) holder).initalize(context,message);
+                ((ContactMultipleRight) holder).initalize(context,message,chatLayoutListener);
                 break;
             case RECEIVE_CONTACT_SINGLE:
                 ((ContactSingleLeft) holder).initalize(context,message,userMap.get(message.getSender()),chatLayoutListener);

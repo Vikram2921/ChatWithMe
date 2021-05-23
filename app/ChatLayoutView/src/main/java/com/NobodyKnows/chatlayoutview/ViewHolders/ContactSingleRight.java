@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.R;
@@ -26,7 +27,7 @@ public class ContactSingleRight extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
-    public void initalize(Context context,Message message) {
+    public void initalize(Context context, Message message, ChatLayoutListener chatLayoutListener) {
         TextView name = view.findViewById(R.id.name);
         CircleImageView profile = view.findViewById(R.id.profile);
         TextView number = view.findViewById(R.id.contactnumber);
@@ -43,16 +44,17 @@ public class ContactSingleRight extends RecyclerView.ViewHolder {
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                chatLayoutListener.onClickChatFromContactMessage(message.getContacts().get(0));
             }
         });
         addcontact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                chatLayoutListener.onClickAddContactFromContactMessage(message.getContacts().get(0));
             }
         });
         TextView status = view.findViewById(R.id.status);
+        LayoutService.updateMessageStatus(message,status);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

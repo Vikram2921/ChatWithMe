@@ -10,6 +10,7 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.NavUtils;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -47,6 +48,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.Activities.Signup.CreateUser;
 import com.nobodyknows.chatwithme.R;
@@ -447,22 +450,37 @@ public class ChatRoom extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 attachemntPane.setVisibility(View.GONE);
-                new MultiContactPicker.Builder(ChatRoom.this) //Activity/fragment context
-                        .theme(R.style.MyCustomPickerTheme)
-                        .hideScrollbar(false) //Optional - default: false
-                        .showTrack(true) //Optional - default: true
-                        .searchIconColor(Color.WHITE) //Option - default: White
-                        .setChoiceMode(MultiContactPicker.CHOICE_MODE_MULTIPLE) //Optional - default: CHOICE_MODE_MULTIPLE
-                        .handleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
-                        .bubbleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
-                        .bubbleTextColor(Color.WHITE) //Optional - default: White
-                        .setTitleText("Select Contacts") //Optional - default: Select Contact
-                        .setLoadingType(MultiContactPicker.LOAD_SYNC) //Optional - default LOAD_ASYNC (wait till all loaded vs stream results)
-                        .limitToColumn(LimitColumn.NONE) //Optional - default NONE (Include phone + email, limiting to one can improve loading time)
-                        .setActivityAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
-                                android.R.anim.fade_in,
-                                android.R.anim.fade_out) //Optional - default: No animation overrides
-                        .showPickerForResult(CONTACT_PICKER_REQUEST);
+                PermissionListener permissionlistener = new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        new MultiContactPicker.Builder(ChatRoom.this) //Activity/fragment context
+                                .theme(R.style.MyCustomPickerTheme)
+                                .hideScrollbar(false) //Optional - default: false
+                                .showTrack(true) //Optional - default: true
+                                .searchIconColor(Color.WHITE) //Option - default: White
+                                .setChoiceMode(MultiContactPicker.CHOICE_MODE_MULTIPLE) //Optional - default: CHOICE_MODE_MULTIPLE
+                                .handleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
+                                .bubbleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
+                                .bubbleTextColor(Color.WHITE) //Optional - default: White
+                                .setTitleText("Select Contacts") //Optional - default: Select Contact
+                                .setLoadingType(MultiContactPicker.LOAD_SYNC) //Optional - default LOAD_ASYNC (wait till all loaded vs stream results)
+                                .limitToColumn(LimitColumn.NONE) //Optional - default NONE (Include phone + email, limiting to one can improve loading time)
+                                .setActivityAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                                        android.R.anim.fade_in,
+                                        android.R.anim.fade_out) //Optional - default: No animation overrides
+                                .showPickerForResult(CONTACT_PICKER_REQUEST);
+                    }
+
+                    @Override
+                    public void onPermissionDenied(List<String> deniedPermissions) {
+                        finish();
+                    }
+                };
+                TedPermission.with(getApplicationContext())
+                        .setPermissionListener(permissionlistener)
+                        .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                        .setPermissions(Manifest.permission.READ_CONTACTS,Manifest.permission.WRITE_CONTACTS)
+                        .check();
             }
         });
         backgroundImage = findViewById(R.id.background);
@@ -613,6 +631,16 @@ public class ChatRoom extends AppCompatActivity {
             }
 
             @Override
+            public void onClickChatFromContactMessage(Contact contact) {
+                OpenInChat(contact);
+            }
+
+            @Override
+            public void onClickAddContactFromContactMessage(Contact contact){
+
+            }
+
+            @Override
             public void onMessageSeenConfirmed(Message message) {
                 if(!isBlocked) {
                     firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -648,6 +676,34 @@ public class ChatRoom extends AppCompatActivity {
         User freinduser = databaseHelper.getUser(username);
         chatLayoutView.addUser(freinduser);
         loadBackgroundImage();
+    }
+
+    private void OpenInChat(Contact contact) {
+        Boolean userExist = databaseHelper.isUserExist(contact.getContactNumbers());
+        if(userExist) {
+            MessageMaker.startChatroom(getApplicationContext(),contact.getContactNumbers());
+            finish();
+        } else {
+            firebaseService.readFromFireStore("Users").document(contact.getContactNumbers()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()) {
+                        if(task.getResult().exists()) {
+                            User user = task.getResult().toObject(User.class);
+                        } else {
+                            Pop.on(ChatRoom.this).with()
+                                    .cancelable(true)
+                                    .layout(R.layout.inviteuser).show(new Pop.View() {
+                                @Override
+                                public void prepare(@Nullable View view) {
+
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void loadBackgroundImage() {

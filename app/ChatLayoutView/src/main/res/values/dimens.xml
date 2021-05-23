@@ -2,5 +2,5 @@
 <resources>
     <dimen name="chatmessagetextsize">15dp</dimen>
     <dimen name="messagepadding">15dp</dimen>
-    <dimen name="sendernametextsize">12</dimen>
+    <dimen name="sendernametextsize">12dp</dimen>
 </resources>

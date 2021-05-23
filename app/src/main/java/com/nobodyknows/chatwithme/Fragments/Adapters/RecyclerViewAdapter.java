@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.bumptech.glide.Glide;
 import com.github.curioustechizen.ago.RelativeTimeTextView;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
@@ -61,7 +62,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             Glide.with(context).load(R.drawable.profile).into(holder.profile);
         }
         if(user.getLastMessage() != null) {
-            holder.lastMessage.setText(user.getLastMessage().getMessage());
+            if(user.getLastMessage().getSender().equalsIgnoreCase(MessageMaker.getMyNumber())) {
+                holder.lastMessage.setText("You : ");
+            } else {
+                holder.lastMessage.setText(user.getName()+" : ");
+            }
+            MessageType messageType = user.getLastMessage().getMessageType();
+            if(messageType == MessageType.CONTACT_MULTIPLE || messageType == MessageType.CONTACT_SINGLE) {
+                holder.lastMessage.setText(holder.lastMessage.getText()+"Shared "+user.getLastMessage().getContacts().size()+" Contacts.");
+            } else {
+                holder.lastMessage.setText(holder.lastMessage.getText()+user.getLastMessage().getMessage());
+            }
             holder.lastDate.setReferenceTime(user.getLastMessage().getSentAt().getTime());
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {

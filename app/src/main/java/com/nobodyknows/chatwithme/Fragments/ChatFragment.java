@@ -140,7 +140,6 @@ public class ChatFragment extends Fragment {
 
     private void loadPrevioudUsers() {
         ArrayList<UserListItemDTO> list = databaseHelper.getRecentChatUsers(getContext());
-        User user;
         for(UserListItemDTO userListItemDTO:list) {
             addNewChat(userListItemDTO);
         }

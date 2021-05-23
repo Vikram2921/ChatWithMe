@@ -44,13 +44,13 @@ public class ContactSingleLeft extends RecyclerView.ViewHolder {
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                chatLayoutListener.onClickChatFromContactMessage(message.getContacts().get(0));
             }
         });
         addcontact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                chatLayoutListener.onClickAddContactFromContactMessage(message.getContacts().get(0));
             }
         });
         LayoutService.setUpSenderName(view,user,message,chatLayoutListener);

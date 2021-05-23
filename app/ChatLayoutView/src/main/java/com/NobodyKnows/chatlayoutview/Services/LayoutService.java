@@ -361,13 +361,17 @@ public class LayoutService {
 
     public static void setUpSenderName(View view, User user,Message message, ChatLayoutListener chatLayoutListener) {
         TextView textView = view.findViewById(R.id.sendername);
-        textView.setText(user.getName());
-        textView.setTextColor(user.getColorCode());
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chatLayoutListener.onSenderNameClicked(user,message);
-            }
-        });
+        if(message.getRoomId().startsWith("G")) {
+            textView.setText(user.getName());
+            textView.setTextColor(user.getColorCode());
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    chatLayoutListener.onSenderNameClicked(user, message);
+                }
+            });
+        } else {
+            textView.setVisibility(View.GONE);
+        }
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout android:background="@drawable/left_message_background"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:elevation="2dp"
     android:layout_marginLeft="5dp"
     android:layout_marginBottom="3dp"
@@ -11,6 +10,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <TextView
         android:id="@+id/sendername"
+        android:visibility="gone"
         android:text="Vikram Singh Rawat"
         android:background="@drawable/sendernameback"
         android:textStyle="bold"
@@ -22,14 +22,17 @@
         android:layout_height="wrap_content">
     </TextView>
     <TextView
-        android:text="Hello "
+        android:text="Hello"
         android:textColor="#E4E4E4"
         android:textSize="@dimen/chatmessagetextsize"
         android:layout_marginLeft="8dp"
         android:layout_marginBottom="8dp"
         android:layout_marginRight="8dp"
+        android:paddingRight="8dp"
+        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="8dp"
         android:textColorLink="#FFC107"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sendername"
         app:layout_constraintBottom_toBottomOf="parent"

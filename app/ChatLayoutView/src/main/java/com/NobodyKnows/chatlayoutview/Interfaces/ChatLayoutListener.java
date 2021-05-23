@@ -2,6 +2,7 @@ package com.NobodyKnows.chatlayoutview.Interfaces;
 
 import android.view.View;
 
+import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 
@@ -12,4 +13,8 @@ public interface ChatLayoutListener {
     public void onMessageSeen(Message message);
     public void onMessageSeenConfirmed(Message message);
     public void onSenderNameClicked(User user, Message message);
+
+    void onClickChatFromContactMessage(Contact contact);
+
+    void onClickAddContactFromContactMessage(Contact contact);
 }

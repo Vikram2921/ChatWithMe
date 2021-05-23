@@ -4,11 +4,13 @@ import android.content.Context;
 import android.text.util.Linkify;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.R;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
@@ -25,7 +27,7 @@ public class ContactMultipleRight extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
-    public void initalize(Context context,Message message) {
+    public void initalize(Context context, Message message, ChatLayoutListener chatLayoutListener) {
         TextView name = view.findViewById(R.id.name);
         CircleImageView profile = view.findViewById(R.id.profile);
         TextView number = view.findViewById(R.id.contactnumber);
@@ -38,14 +40,29 @@ public class ContactMultipleRight extends RecyclerView.ViewHolder {
         number.setText(message.getContacts().get(0).getContactNumbers());
         name.setText(message.getContacts().get(0).getName());
         Button viewall = view.findViewById(R.id.viewall);
+        viewall.setText("View All "+message.getContacts().size()+" Contacts");
         viewall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
-
+        ImageView chat = view.findViewById(R.id.chat);
+        ImageView addcontact = view.findViewById(R.id.addcontact);
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatLayoutListener.onClickChatFromContactMessage(message.getContacts().get(0));
+            }
+        });
+        addcontact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatLayoutListener.onClickAddContactFromContactMessage(message.getContacts().get(0));
+            }
+        });
         TextView status = view.findViewById(R.id.status);
+        LayoutService.updateMessageStatus(message,status);
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
