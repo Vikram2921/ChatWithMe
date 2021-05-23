@@ -608,6 +608,11 @@ public class ChatRoom extends AppCompatActivity {
             }
 
             @Override
+            public void onSenderNameClicked(User user, Message message) {
+
+            }
+
+            @Override
             public void onMessageSeenConfirmed(Message message) {
                 if(!isBlocked) {
                     firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {

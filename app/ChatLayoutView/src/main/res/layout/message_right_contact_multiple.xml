@@ -42,6 +42,9 @@
         <TextView
             android:id="@+id/contactnumber"
             android:text="7014550298"
+            android:drawableTint="#6e6e6e"
+            android:drawablePadding="5dp"
+            android:drawableLeft="@drawable/ic_baseline_local_phone_24"
             android:textColor="#6E6E6E"
             android:textSize="12dp"
             app:layout_constraintLeft_toRightOf="@id/profile"

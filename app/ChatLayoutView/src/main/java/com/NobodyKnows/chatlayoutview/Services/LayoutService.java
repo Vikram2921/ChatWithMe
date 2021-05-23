@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Environment;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -11,10 +12,12 @@ import android.widget.TextView;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.ContactParceable;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -356,4 +359,15 @@ public class LayoutService {
         return "false";
     }
 
+    public static void setUpSenderName(View view, User user,Message message, ChatLayoutListener chatLayoutListener) {
+        TextView textView = view.findViewById(R.id.sendername);
+        textView.setText(user.getName());
+        textView.setTextColor(user.getColorCode());
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatLayoutListener.onSenderNameClicked(user,message);
+            }
+        });
+    }
 }

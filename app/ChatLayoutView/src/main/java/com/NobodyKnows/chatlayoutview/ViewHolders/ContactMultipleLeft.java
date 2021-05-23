@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
@@ -26,8 +27,9 @@ public class ContactMultipleLeft extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
-    public void initalize(Context context, Message message, User user) {
+    public void initalize(Context context, Message message, User user, ChatLayoutListener chatLayoutListener) {
         TextView name = view.findViewById(R.id.name);
+        LayoutService.setUpSenderName(view,user,message,chatLayoutListener);
         CircleImageView profile = view.findViewById(R.id.profile);
         TextView number = view.findViewById(R.id.contactnumber);
         String profile_url = message.getContacts().get(0).getProfileUrl();

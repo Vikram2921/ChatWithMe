@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
@@ -73,12 +74,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final int RECEIVE_CONTACT_MULTIPLE = 94;
 
     private String myId = "";
-
-    public RecyclerViewAdapter(Context context, ArrayList<Message> messages, Map<String, User> userMap, Map<MessageType,String> downloadPaths,String myId) {
+    private ChatLayoutListener chatLayoutListener;
+    public RecyclerViewAdapter(Context context, ArrayList<Message> messages, Map<String, User> userMap, Map<MessageType,String> downloadPaths, String myId, ChatLayoutListener chatLayoutListener) {
         this.context = context;
         this.messages = messages;
         this.userMap = userMap;
         this.myId = myId;
+        this.chatLayoutListener = chatLayoutListener;
         this.downloadPath = downloadPaths;
     }
 
@@ -142,7 +144,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((TextMessageViewRight) holder).initalize(message);
                 break;
             case RECEIVE_TEXT_MESSAGE:
-                ((TextMessageViewLeft) holder).initalize(message,userMap.get(message.getSender()));
+                ((TextMessageViewLeft) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
             case SENT_CONTACT_SINGLE:
                 ((ContactSingleRight) holder).initalize(context,message);
@@ -151,10 +153,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((ContactMultipleRight) holder).initalize(context,message);
                 break;
             case RECEIVE_CONTACT_SINGLE:
-                ((ContactSingleLeft) holder).initalize(context,message,userMap.get(message.getSender()));
+                ((ContactSingleLeft) holder).initalize(context,message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
             case RECEIVE_CONTACT_MULTIPLE:
-                ((ContactMultipleLeft) holder).initalize(context,message,userMap.get(message.getSender()));
+                ((ContactMultipleLeft) holder).initalize(context,message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
             default:
                 break;

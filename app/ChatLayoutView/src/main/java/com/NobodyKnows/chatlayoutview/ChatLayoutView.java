@@ -112,7 +112,7 @@ public class ChatLayoutView extends RelativeLayout {
 
     private void setupRecyclerView() {
         recyclerView.setVisibility(VISIBLE);
-        recyclerViewAdapter = new RecyclerViewAdapter(getContext(),messages,helper.getUserMap(),downloadPaths,myUsername);
+        recyclerViewAdapter = new RecyclerViewAdapter(getContext(),messages,helper.getUserMap(),downloadPaths,myUsername,chatLayoutListener);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setReverseLayout(false);
         layoutManager.setItemPrefetchEnabled(true);

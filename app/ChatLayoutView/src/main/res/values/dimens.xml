@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="chatmessagetextsize">15dp</dimen>
+    <dimen name="messagepadding">15dp</dimen>
+    <dimen name="sendernametextsize">12</dimen>
 </resources>
