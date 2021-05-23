@@ -13,7 +13,7 @@
     <TextView
         android:text="Hello "
         android:textColor="#E4E4E4"
-        android:textSize="18dp"
+        android:textSize="@dimen/chatmessagetextsize"
         android:textColorLink="#FFC107"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"

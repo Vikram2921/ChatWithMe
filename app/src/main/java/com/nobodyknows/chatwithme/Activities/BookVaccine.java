@@ -12,10 +12,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.codepath.asynchttpclient.AbsCallback;
 import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.RequestHeaders;
 import com.codepath.asynchttpclient.callback.TextHttpResponseHandler;
+import com.google.type.DateTime;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Adapters.VaccineRecyclerViewAdapter;
 import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.VaccineSelectListener;
 import com.nobodyknows.chatwithme.DTOS.VaccineCenter;
@@ -29,7 +34,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import okhttp3.Call;
@@ -51,7 +59,8 @@ public class BookVaccine extends AppCompatActivity {
     private int dosenumber = 1;
     private String benefeciaryId = "90809695362020";  //VIKRAM SINGH RAWAT
     private AsyncHttpClient client = new AsyncHttpClient();
-    private String token = "";
+    private String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiIwNWMzOTUxZi1lYTI4LTRmNzYtODc2Zi1jYjZjYTU1YmQzM2UiLCJ1c2VyX2lkIjoiMDVjMzk1MWYtZWEyOC00Zjc2LTg3NmYtY2I2Y2E1NWJkMzNlIiwidXNlcl90eXBlIjoiQkVORUZJQ0lBUlkiLCJtb2JpbGVfbnVtYmVyIjo3MDE0NTUwMjk4LCJiZW5lZmljaWFyeV9yZWZlcmVuY2VfaWQiOjkwODA5Njk1MzYyMDIwLCJzZWNyZXRfa2V5IjoiYjVjYWIxNjctNzk3Ny00ZGYxLTgwMjctYTYzYWExNDRmMDRlIiwidWEiOiJNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvOTAuMC40NDMwLjIxMiBTYWZhcmkvNTM3LjM2IEVkZy85MC4wLjgxOC42NiIsImRhdGVfbW9kaWZpZWQiOiIyMDIxLTA1LTIzVDEzOjIwOjU0LjY1M1oiLCJpYXQiOjE2MjE3NzYwNTQsImV4cCI6MTYyMTc3Njk1NH0.zR2kzPTmNVJ2rlip1rO38dLXElfs8MQxgDqvdtpZgiI";
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +68,14 @@ public class BookVaccine extends AppCompatActivity {
         setContentView(R.layout.activity_book_vaccine);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Book COVID-19 Vaccine");
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
         init();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countDownTimer.cancel();
     }
 
     private void init() {
@@ -133,14 +149,13 @@ public class BookVaccine extends AppCompatActivity {
 
     private void readResponse(String response) {
         try {
+            Log.d("TAGRESPONSE", "readResponse: ."+response);
             JSONObject object = new JSONObject(response);
             JSONArray centersList = object.getJSONArray("centers");
             if(centersList.length() > 0) {
                 for(int i=0;i<centersList.length();i++) {
                     convertToVaccine(centersList.getJSONObject(i));
                 }
-            } else {
-                Toast.makeText(getApplicationContext(),"Not Started Yet.",Toast.LENGTH_SHORT).show();
             }
             if(countDownTimer != null) {
                 countDownTimer.start();
@@ -154,18 +169,18 @@ public class BookVaccine extends AppCompatActivity {
         String url = getAvailabilityUrl("507");
         centers.clear();
         recyclerViewAdapter.notifyDataSetChanged();
-        client.get(url, new TextHttpResponseHandler() {
+        StringRequest stringRequest = new StringRequest(url, new com.android.volley.Response.Listener<String>() {
             @Override
-            public void onSuccess(int statusCode, Headers headers, String response) {
-                Log.d("DEBUG", response);
+            public void onResponse(String response) {
                 readResponse(response);
             }
-
+        }, new com.android.volley.Response.ErrorListener() {
             @Override
-            public void onFailure(int statusCode, @Nullable Headers headers, String errorResponse, @Nullable Throwable throwable) {
-                Log.d("DEBUG", errorResponse);
+            public void onErrorResponse(VolleyError error) {
+
             }
         });
+        requestQueue.add(stringRequest);
     }
 
     private void convertToVaccine(JSONObject jsonObject) throws JSONException {
@@ -174,7 +189,7 @@ public class BookVaccine extends AppCompatActivity {
         VaccineSessions vaccineSessions;
         int totalAvailable = 0;
         for(int i=0;i<array.length();i++) {
-            if(array.getJSONObject(i).getInt("available_capacity") > 0 && array.getJSONObject(i).getInt("min_age_limit") == minAgeLimitFilter) {
+            if(array.getJSONObject(i).getInt("available_capacity") > 0) {
                 vaccineSessions = new VaccineSessions();
                 vaccineSessions.setSessionId(array.getJSONObject(i).getString("session_id"));
                 vaccineSessions.setDate(array.getJSONObject(i).getString("date"));
@@ -191,7 +206,7 @@ public class BookVaccine extends AppCompatActivity {
                 totalAvailable += vaccineSessions.getAvailableCapacity();
             }
         }
-        if(totalAvailable > 0) {
+        if(totalAvailable >0) {
             center.setCenterId(jsonObject.getString("center_id"));
             center.setName(jsonObject.getString("name"));
             center.setAddress(jsonObject.getString("address"));
@@ -223,7 +238,13 @@ public class BookVaccine extends AppCompatActivity {
     }
 
     private String getAvailabilityUrl(String districid) {
-        return "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id="+districid+"&date="+new Date().toString();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrow = calendar.getTime();
+        String date = simpleDateFormat.format(tomorrow);
+        Log.d("TAGRESPONSE", "getAvailabilityUrl: "+date);
+        return "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id="+districid+"&date="+date;
     }
 
     private void schedule(VaccineSessions sessions,String slot) throws JSONException {
@@ -245,6 +266,7 @@ public class BookVaccine extends AppCompatActivity {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Log.d("TAGLOG", "onResponse: "+response.toString());
                // Toast.makeText(getApplicationContext(),response.toString(),Toast.LENGTH_SHORT).show();
             }
         });

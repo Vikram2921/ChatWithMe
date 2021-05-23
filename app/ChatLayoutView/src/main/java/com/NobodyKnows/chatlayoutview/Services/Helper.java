@@ -184,16 +184,8 @@ public class Helper {
                 }
                 preview.setVisibility(GONE);
                 messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_insert_drive_file_24,0,0,0);
-            }  else if(message.getMessageType() == MessageType.CONTACT) {
-                if(message.getContacts().size() > 1) {
-                    messageview.setText("Contact"+DOT_SEPRATOR+message.getContacts().size()+" contacts");
-                } else if(message.getContacts().size() == 1) {
-                    messageview.setText("Contact"+DOT_SEPRATOR+message.getContacts().get(0).getName());
-                } else {
-                    messageview.setText("Contact");
-                }
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_contacts_24,0,0,0);
-                preview.setVisibility(GONE);
+            }  else if(message.getMessageType() == MessageType.CONTACT_SINGLE) {
+
             }  else if(message.getMessageType() == MessageType.STICKER) {
                 messageview.setText("Sticker");
                 messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_emoji_emotions_24,0,0,0);

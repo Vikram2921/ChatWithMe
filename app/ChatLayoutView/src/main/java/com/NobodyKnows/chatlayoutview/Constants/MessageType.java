@@ -9,7 +9,8 @@ public enum  MessageType {
 
     TEXT, //DONE
     GIF, //DONE
-    CONTACT, //DONE
+    CONTACT_SINGLE, //DONE
+    CONTACT_MULTIPLE, //DONE
     DATE, //DONE
     STICKER, //DONE
     INFO, //DONE

@@ -5,13 +5,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.NavUtils;
+import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,6 +32,7 @@ import com.NobodyKnows.chatlayoutview.ChatLayoutView;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
+import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
@@ -53,11 +57,17 @@ import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.emoji.Emoji;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 import com.vistrav.pop.Pop;
+import com.wafflecopter.multicontactpicker.ContactResult;
+import com.wafflecopter.multicontactpicker.LimitColumn;
+import com.wafflecopter.multicontactpicker.MultiContactPicker;
+import com.wafflecopter.multicontactpicker.RxContacts.PhoneNumber;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import at.markushi.ui.CircleButton;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
@@ -65,10 +75,12 @@ import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.database
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatRoom extends AppCompatActivity {
 
+    private static final int CONTACT_PICKER_REQUEST = 2921;
     private String username,name,profile,lastOnlineStatus;
     private ChatLayoutView chatLayoutView;
     private CircleImageView profileView;
     private TextView nameView,statusView;
+    private ConstraintLayout attachemntPane;
     private ImageView verified,emoji,send,attachment;
     private EmojiEditText messageBox;
     private Boolean isVerfied = false,isBlocked = false;
@@ -81,6 +93,7 @@ public class ChatRoom extends AppCompatActivity {
     private View rootView;
     private String blockedBy = "";
     private boolean isMuted = false;
+    private CircleButton contacts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -352,19 +365,50 @@ public class ChatRoom extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            File file = ImagePicker.Companion.getFile(data);
-            String profilePath = file.getPath();
-            SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("backgroundPath"+username,profilePath);
-            editor.apply();
-            loadBackgroundImage();
+            if(requestCode == CONTACT_PICKER_REQUEST){
+                if(resultCode == RESULT_OK) {
+                    List<ContactResult> results = MultiContactPicker.obtainResult(data);
+                    sendContacts(results);
+                } else if(resultCode == RESULT_CANCELED){
+                    System.out.println("User closed the picker without selecting items.");
+                }
+            } else {
+                Uri uri = data.getData();
+                File file = ImagePicker.Companion.getFile(data);
+                String profilePath = file.getPath();
+                SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("backgroundPath"+username,profilePath);
+                editor.apply();
+                loadBackgroundImage();
+            }
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
-            Toast.makeText(this, "Failed to load Image", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Task Cancelled", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void sendContacts(List<ContactResult> results) {
+        Message message = getDefaultObject();
+        message.setMessage("");
+        message.setMessageType((results.size() > 1)?MessageType.CONTACT_MULTIPLE:MessageType.CONTACT_SINGLE);
+        for(ContactResult contactResult:results) {
+            message.addContact(convertToContact(contactResult));
+        }
+        sendNow(message);
+    }
+
+    private Contact convertToContact(ContactResult contactResult) {
+        Contact contact = new Contact();
+        contact.setName(contactResult.getDisplayName());
+        User user = null;
+        for(PhoneNumber phoneNumber:contactResult.getPhoneNumbers()) {
+            contact.setContactNumbers(MessageMaker.getNormalizedPhoneNumber(phoneNumber.getNumber()));
+            user = databaseHelper.getUser(contact.getContactNumbers());
+            if(user != null) {
+                contact.setProfileUrl(user.getProfileUrl());
+            }
+        }
+        return contact;
     }
 
     private void openViewContact() {
@@ -384,8 +428,43 @@ public class ChatRoom extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),"This is not available right now",Toast.LENGTH_SHORT).show();
     }
 
+
     private void init() {
+        attachemntPane = findViewById(R.id.attachmentpane);
         attachment = findViewById(R.id.attachment);
+        contacts = findViewById(R.id.contact);
+        attachment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(attachemntPane.getVisibility() == View.GONE) {
+                    attachemntPane.setVisibility(View.VISIBLE);
+                } else {
+                    attachemntPane.setVisibility(View.GONE);
+                }
+            }
+        });
+        contacts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                attachemntPane.setVisibility(View.GONE);
+                new MultiContactPicker.Builder(ChatRoom.this) //Activity/fragment context
+                        .theme(R.style.MyCustomPickerTheme)
+                        .hideScrollbar(false) //Optional - default: false
+                        .showTrack(true) //Optional - default: true
+                        .searchIconColor(Color.WHITE) //Option - default: White
+                        .setChoiceMode(MultiContactPicker.CHOICE_MODE_MULTIPLE) //Optional - default: CHOICE_MODE_MULTIPLE
+                        .handleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
+                        .bubbleColor(ContextCompat.getColor(ChatRoom.this, R.color.purple_500)) //Optional - default: Azure Blue
+                        .bubbleTextColor(Color.WHITE) //Optional - default: White
+                        .setTitleText("Select Contacts") //Optional - default: Select Contact
+                        .setLoadingType(MultiContactPicker.LOAD_SYNC) //Optional - default LOAD_ASYNC (wait till all loaded vs stream results)
+                        .limitToColumn(LimitColumn.NONE) //Optional - default NONE (Include phone + email, limiting to one can improve loading time)
+                        .setActivityAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                                android.R.anim.fade_in,
+                                android.R.anim.fade_out) //Optional - default: No animation overrides
+                        .showPickerForResult(CONTACT_PICKER_REQUEST);
+            }
+        });
         backgroundImage = findViewById(R.id.background);
         chatLayoutView = findViewById(R.id.chatlayoutview);
         profileView = actionBarView.findViewById(R.id.profile);

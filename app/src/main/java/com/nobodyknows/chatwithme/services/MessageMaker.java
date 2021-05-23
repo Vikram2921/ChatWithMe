@@ -20,7 +20,6 @@ import java.util.Date;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.notfound;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.recyclerViewAdapter;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItemDTOMap;
@@ -166,5 +165,12 @@ public class MessageMaker {
             userListItemDTOMap.put(username,userListItemDTO);
             recyclerViewAdapter.notifyItemChanged(index);
         }
+    }
+
+    public static String getNormalizedPhoneNumber(String number) {
+        if(number != null && number.charAt(0) == '+') {
+            number = number.replace("+91","");
+        }
+       return number;
     }
 }

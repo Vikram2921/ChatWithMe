@@ -63,6 +63,7 @@ public class VaccineRecyclerViewAdapter extends RecyclerView.Adapter<VaccineRecy
         } else {
             holder.feetype.setBackgroundResource(R.drawable.paid);
         }
+        holder.slots.removeAllViews();;
         for(VaccineSessions vaccineSessions:center.getSessions()) {
             for(String slot:vaccineSessions.getSlots()) {
                 Button button = new Button(context);

@@ -18,4 +18,8 @@
         <item name="contentInsetStart">0dp</item>
         <item name="contentInsetEnd">0dp</item>
     </style>
+    <style name="MyCustomPickerTheme" parent="MultiContactPicker.Azure">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryDark">@color/purple_500</item>
+    </style>
 </resources>
