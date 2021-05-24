@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,18 +20,19 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.AddNewChat;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
+import com.nobodyknows.chatwithme.DTOS.userListenerHolder;
 import com.nobodyknows.chatwithme.Fragments.Adapters.RecyclerViewAdapter;
 import com.nobodyknows.chatwithme.R;
-import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class ChatFragment extends Fragment {
     public static ArrayList<UserListItemDTO> userListItems = new ArrayList<>();
     public static RecyclerViewAdapter recyclerViewAdapter;
     private String myNumber = "";
-    public static Map<String,UserListItemDTO> userListItemDTOMap = new HashMap<>();
+    public static Map<String, userListenerHolder> userListItemDTOMap = new HashMap<>();
     public static ConstraintLayout notfound;
     private Button action;
     @Override
@@ -86,8 +88,11 @@ public class ChatFragment extends Fragment {
         layoutManager.setInitialPrefetchItemCount(5);
         layoutManager.setRecycleChildrenOnDetach(true);
         recyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                layoutManager.getOrientation());
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.addItemDecoration(dividerItemDecoration);
     }
 
     private void startListener() {
@@ -210,7 +215,9 @@ public class ChatFragment extends Fragment {
         if(!userListItemDTOMap.containsKey(userListItem.getContactNumber())) {
             userListItems.add(0,userListItem);
             recyclerViewAdapter.notifyItemInserted(0);
-            userListItemDTOMap.put(userListItem.getContactNumber(),userListItem);
+            userListenerHolder userListenerHolder = new userListenerHolder();
+            userListenerHolder.setUserListItemDTO(userListItem);
+            userListItemDTOMap.put(userListItem.getContactNumber(),userListenerHolder);
             if(userListItem.getLastMessage() != null) {
                 databaseHelper.insertInRecentChats(userListItem.getContactNumber(),userListItem.getLastMessage().getMessageId(),userListItem.getLastMessage().getSentAt());
             }
@@ -219,25 +226,26 @@ public class ChatFragment extends Fragment {
     }
 
     private void attachListener(String username) {
-        firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                User user = value.toObject(User.class);
-                UserListItemDTO userListItemDTO = userListItemDTOMap.get(username);
-                int index = userListItems.indexOf(userListItemDTO);
-                userListItemDTO.setName(user.getName());
-                userListItemDTO.setVerified(user.getVerified());
-                userListItemDTO.setLastOnline(user.getLastOnline());
-                userListItemDTO.setStatus(user.getStatus());
-                userListItemDTO.setProfileUrl(user.getProfileUrl());
-                userListItemDTO.setMuted(user.getMuted());
-                userListItemDTO.setBlocked(user.getBlocked());
-                userListItemDTO.setCurrentStatus(user.getCurrentStatus());
-                userListItems.remove(index);
-                userListItems.add(index,userListItemDTO);
-                recyclerViewAdapter.notifyItemChanged(index);
-                databaseHelper.updateUserInfo(user);
-            }
-        });
+//        ListenerRegistration listenerRegistration = firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+//            @Override
+//            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+//                User user = value.toObject(User.class);
+//                UserListItemDTO userListItemDTO = userListItemDTOMap.get(username).getUserListItemDTO();
+//                int index = userListItems.indexOf(userListItemDTO);
+//                userListItemDTO.setName(user.getName());
+//                userListItemDTO.setVerified(user.getVerified());
+//                userListItemDTO.setLastOnline(user.getLastOnline());
+//                userListItemDTO.setStatus(user.getStatus());
+//                userListItemDTO.setProfileUrl(user.getProfileUrl());
+//                userListItemDTO.setMuted(user.getMuted());
+//                userListItemDTO.setBlocked(user.getBlocked());
+//                userListItemDTO.setCurrentStatus(user.getCurrentStatus());
+//                userListItems.remove(index);
+//                userListItems.add(index,userListItemDTO);
+//                recyclerViewAdapter.notifyItemChanged(index);
+//                databaseHelper.updateUserInfo(user);
+//            }
+//        });
+//        userListItemDTOMap.get(username).setListenerRegistration(listenerRegistration);
     }
 }

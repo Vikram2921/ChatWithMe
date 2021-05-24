@@ -19,25 +19,28 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
-import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.nobodyknows.chatwithme.Activities.BookVaccine;
-import com.nobodyknows.chatwithme.Activities.SetuLogin;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.sinch.android.rtc.ClientRegistration;
+import com.sinch.android.rtc.Sinch;
+import com.sinch.android.rtc.SinchClient;
+import com.sinch.android.rtc.SinchClientListener;
+import com.sinch.android.rtc.SinchError;
+import com.sinch.android.rtc.calling.Call;
+import com.sinch.android.rtc.calling.CallClient;
+import com.sinch.android.rtc.calling.CallClientListener;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
@@ -65,6 +68,10 @@ public class Dashboard extends AppCompatActivity {
     public static DatabaseHelper databaseHelper;
     public static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper databaseHelperChat;
     private Bluetooth bluetooth;
+    private String sinchApplicationKey = "4f4a2900-a600-45ef-9e35-d2d20b6b2e93";
+    private String sinchApplicationSecret = "ML6bBC1ri0GvMuNfI93sWw==";
+    private SinchClient sinchClient;
+    public static CallClient callClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +96,7 @@ public class Dashboard extends AppCompatActivity {
       //  setupBlueTooth();
         Contacts.initialize(getApplicationContext());
         init();
+        setupSinch();
     }
 
     private void updateOnlineStatus(String status,Boolean canFinish) {
@@ -308,6 +316,55 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(sinchClient != null) {
+            sinchClient.stopListeningOnActiveConnection();
+            sinchClient.terminate();
+        }
         updateOnlineStatus("Offline",true);
+    }
+
+    private void setupSinch() {
+        sinchClient = Sinch.getSinchClientBuilder().context(getApplicationContext())
+                .applicationKey(sinchApplicationKey)
+                .applicationSecret(sinchApplicationSecret)
+                .environmentHost("clientapi.sinch.com")
+                .userId(MessageMaker.getMyNumber())
+                .build();
+        sinchClient.setSupportCalling(true);
+        sinchClient.addSinchClientListener(new SinchClientListener() {
+            @Override
+            public void onClientStarted(SinchClient sinchClient) {
+                setupApptoAppCall();
+            }
+
+            @Override
+            public void onClientStopped(SinchClient sinchClient) {
+            }
+
+            @Override
+            public void onClientFailed(SinchClient sinchClient, SinchError sinchError) {
+
+            }
+
+            @Override
+            public void onRegistrationCredentialsRequired(SinchClient sinchClient, ClientRegistration clientRegistration) {
+            }
+
+            @Override
+            public void onLogMessage(int i, String s, String s1) {
+
+            }
+        });
+        sinchClient.start();
+    }
+
+    private void setupApptoAppCall() {
+        callClient = sinchClient.getCallClient();
+        callClient.addCallClientListener(new CallClientListener() {
+            @Override
+            public void onIncomingCall(CallClient callClient, Call call) {
+                MessageMaker.handleIncomingCall(getApplicationContext(),call);
+            }
+        });
     }
 }

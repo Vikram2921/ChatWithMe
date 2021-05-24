@@ -65,6 +65,16 @@ public class FirebaseService {
         databaseReference = firebaseDatabase.getReference();
     }
 
+    public void enableNetwork() {
+        firebaseFirestore.enableNetwork();
+        firebaseDatabase.goOnline();
+    }
+
+    public void disableNetwork() {
+        firebaseFirestore.disableNetwork();
+        firebaseDatabase.goOffline();
+    }
+
     public CollectionReference saveToFireStore(String collectionName) {
         return firebaseFirestore.collection(collectionName);
     }

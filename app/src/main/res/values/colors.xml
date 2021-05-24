@@ -14,4 +14,5 @@
     <color name="emojicondivider">#FF5B4F</color>
     <color name="defaulttext">#FFFFFF</color>
     <color name="typing">#09E812</color>
+    <color name="black_op">#75000000</color>
 </resources>

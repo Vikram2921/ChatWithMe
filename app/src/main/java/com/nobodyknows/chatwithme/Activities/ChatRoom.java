@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.app.NavUtils;
 import androidx.core.content.ContextCompat;
+import androidx.transition.TransitionManager;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,7 +27,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -478,11 +478,14 @@ public class ChatRoom extends AppCompatActivity {
 
 
     private void videoCall() {
-        Toast.makeText(getApplicationContext(),"This is not available right now",Toast.LENGTH_SHORT).show();
+        MessageMaker.videoCall(username);
     }
 
     private void audioCall() {
-        Toast.makeText(getApplicationContext(),"This is not available right now",Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(),AudioCall.class);
+        intent.putExtra("username",username);
+        intent.putExtra("making",true);
+        startActivity(intent);
     }
 
 

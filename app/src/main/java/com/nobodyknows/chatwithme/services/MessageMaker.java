@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -14,17 +15,23 @@ import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.nobodyknows.chatwithme.Activities.AudioCall;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
+import com.sinch.android.rtc.PushPair;
+import com.sinch.android.rtc.calling.Call;
+import com.sinch.android.rtc.calling.CallListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.callClient;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.notfound;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.recyclerViewAdapter;
@@ -34,9 +41,14 @@ import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItems;
 public class MessageMaker {
 
     private static String myNumber ="";
+    private static Call currentCallRef;
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
         return id;
+    }
+
+    public static Call getCurrentCallRef() {
+        return currentCallRef;
     }
 
     public static String getMyNumber() {
@@ -185,9 +197,12 @@ public class MessageMaker {
     }
 
     public static void removeFromRecentChatUI(String username) {
-        int index = userListItems.indexOf(userListItemDTOMap.get(username));
+        int index = userListItems.indexOf(userListItemDTOMap.get(username).getUserListItemDTO());
         if(index >= 0) {
-            userListItems.remove(userListItemDTOMap.get(username));
+            userListItems.remove(userListItemDTOMap.get(username).getUserListItemDTO());
+            if( userListItemDTOMap.get(username).getListenerRegistration() != null) {
+                userListItemDTOMap.get(username).getListenerRegistration().remove();
+            }
             userListItemDTOMap.remove(username);
             recyclerViewAdapter.notifyItemRemoved(index);
             if(userListItems.size() == 0) {
@@ -203,7 +218,7 @@ public class MessageMaker {
             userListItemDTO.setMuted(muted);
             userListItems.remove(index);
             userListItems.add(index,userListItemDTO);
-            userListItemDTOMap.put(username,userListItemDTO);
+            userListItemDTOMap.get(username).setUserListItemDTO(userListItemDTO);
             recyclerViewAdapter.notifyItemChanged(index);
         }
     }
@@ -231,5 +246,29 @@ public class MessageMaker {
         intent.putExtra(ContactsContract.Intents.Insert.PHONE, contact.getContactNumbers());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         applicationContext.startActivity(intent);
+    }
+
+    public static void handleIncomingCall(Context applicationContext, Call call) {
+        currentCallRef = call;
+        Toast.makeText(applicationContext,"Incoming Call"+call.getRemoteUserId(),Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(applicationContext, AudioCall.class);
+        intent.putExtra("username",call.getRemoteUserId());
+        intent.putExtra("making",false);
+        applicationContext.startActivity(intent);
+    }
+
+    public static void setCurrentCallRef(Call currentCallRef) {
+        MessageMaker.currentCallRef = currentCallRef;
+    }
+
+    public static void audioCall(String username) {
+        currentCallRef = callClient.callUser(username);
+    }
+
+    public static void audioConferenceCall(String username) {
+        currentCallRef = callClient.callConference(username);
+    }
+
+    public static void videoCall(String username) {
     }
 }
