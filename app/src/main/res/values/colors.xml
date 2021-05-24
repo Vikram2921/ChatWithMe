@@ -12,4 +12,6 @@
     <color name="selected_emoji">#673AB7</color>
     <color name="emojiconbackground">#C0C0C0</color>
     <color name="emojicondivider">#FF5B4F</color>
+    <color name="defaulttext">#FFFFFF</color>
+    <color name="typing">#09E812</color>
 </resources>

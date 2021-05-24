@@ -22,9 +22,14 @@ import android.widget.TextView;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.nobodyknows.chatwithme.Activities.BookVaccine;
 import com.nobodyknows.chatwithme.Activities.SetuLogin;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
@@ -37,7 +42,10 @@ import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.aflak.bluetooth.Bluetooth;
@@ -68,6 +76,7 @@ public class Dashboard extends AppCompatActivity {
         getSupportActionBar().setElevation(0);
         MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
         firebaseService = new FirebaseService();
+        updateOnlineStatus("Online",false);
         databaseHelper = new DatabaseHelper(getApplicationContext());
         databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
             @Override
@@ -80,6 +89,20 @@ public class Dashboard extends AppCompatActivity {
       //  setupBlueTooth();
         Contacts.initialize(getApplicationContext());
         init();
+    }
+
+    private void updateOnlineStatus(String status,Boolean canFinish) {
+        Map<String,Object> update = new HashMap<>();
+        update.put("currentStatus",status);
+        update.put("lastOnline",new Date());
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update(update).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(canFinish) {
+                    finish();
+                }
+            }
+        });
     }
 
     private void setupBlueTooth() {
@@ -280,5 +303,11 @@ public class Dashboard extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        updateOnlineStatus("Offline",true);
     }
 }

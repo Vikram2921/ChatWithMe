@@ -214,6 +214,30 @@ public class ChatFragment extends Fragment {
             if(userListItem.getLastMessage() != null) {
                 databaseHelper.insertInRecentChats(userListItem.getContactNumber(),userListItem.getLastMessage().getMessageId(),userListItem.getLastMessage().getSentAt());
             }
+            attachListener(userListItem.getContactNumber());
         }
+    }
+
+    private void attachListener(String username) {
+        firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                User user = value.toObject(User.class);
+                UserListItemDTO userListItemDTO = userListItemDTOMap.get(username);
+                int index = userListItems.indexOf(userListItemDTO);
+                userListItemDTO.setName(user.getName());
+                userListItemDTO.setVerified(user.getVerified());
+                userListItemDTO.setLastOnline(user.getLastOnline());
+                userListItemDTO.setStatus(user.getStatus());
+                userListItemDTO.setProfileUrl(user.getProfileUrl());
+                userListItemDTO.setMuted(user.getMuted());
+                userListItemDTO.setBlocked(user.getBlocked());
+                userListItemDTO.setCurrentStatus(user.getCurrentStatus());
+                userListItems.remove(index);
+                userListItems.add(index,userListItemDTO);
+                recyclerViewAdapter.notifyItemChanged(index);
+                databaseHelper.updateUserInfo(user);
+            }
+        });
     }
 }

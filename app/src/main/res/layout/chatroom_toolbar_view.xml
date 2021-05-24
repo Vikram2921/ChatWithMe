@@ -39,7 +39,7 @@
         android:layout_marginLeft="10dp"
         android:singleLine="true"
         android:text=""
-        android:textColor="#fff"
+        android:textColor="@color/defaulttext"
         android:textSize="12dp"
         app:layout_constraintBottom_toBottomOf="@id/profile"
         app:layout_constraintLeft_toRightOf="@id/profile"

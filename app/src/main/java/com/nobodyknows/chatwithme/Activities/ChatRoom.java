@@ -20,6 +20,8 @@ import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +46,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -93,14 +96,16 @@ public class ChatRoom extends AppCompatActivity {
     private Boolean isVerfied = false,isBlocked = false;
     private String myUsername = "",roomid = "";
     private ImageView backgroundImage;
-    private ListenerRegistration listner;
+    private ListenerRegistration listner,listneruseraccount;
     private EmojiPopup emojiPopup;
+    private Date lastOnlineDate;
     private View actionBarView;
     private Menu menu;
     private View rootView;
     private String blockedBy = "";
     private boolean isMuted = false;
     private CircleButton contacts;
+    private Boolean isIamTyping = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +135,48 @@ public class ChatRoom extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
         init();
+        updateUserInfoSync();
+    }
+
+    private void updateStatusViewColor() {
+        if(statusView.getText().toString().equalsIgnoreCase("typing ...")) {
+            statusView.setTextColor(getResources().getColor(R.color.typing));
+        } else {
+            statusView.setTextColor(getResources().getColor(R.color.defaulttext));
+        }
+    }
+
+    private void updateUserInfoSync() {
+        listneruseraccount = firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                User user = value.toObject(User.class);
+                MessageMaker.loadProfile(getApplicationContext(),user.getProfileUrl(),profileView);
+                nameView.setText(user.getName());
+                lastOnlineDate = user.getLastOnline();
+                lastOnlineStatus = user.getCurrentStatus();
+                statusView.setText(MessageMaker.laodOnlineStatus(lastOnlineStatus,lastOnlineDate));
+                updateStatusViewColor();
+                isVerfied = user.getVerified();
+                if(isVerfied) {
+                    verified.setVisibility(View.VISIBLE);
+                }
+                databaseHelper.updateUserInfo(user);
+            }
+        });
+    }
+
+    private void updateStatus(Boolean istyping) {
+        String newstatus = "Online";
+        if(istyping) {
+            newstatus = "typing]-]"+username;
+        }
+        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update("currentStatus",newstatus).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+            }
+        });
     }
 
 
@@ -137,6 +184,11 @@ public class ChatRoom extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         removeListener();
+        if(listneruseraccount != null) {
+            listneruseraccount.remove();
+            listneruseraccount = null;
+        }
+        updateStatus(false);
     }
 
     @Override
@@ -389,8 +441,6 @@ public class ChatRoom extends AppCompatActivity {
                 editor.apply();
                 loadBackgroundImage();
             }
-        } else if (resultCode == ImagePicker.RESULT_ERROR) {
-        } else {
         }
     }
 
@@ -500,10 +550,37 @@ public class ChatRoom extends AppCompatActivity {
         rootView = findViewById(R.id.root);
         nameView = actionBarView.findViewById(R.id.name);
         statusView = actionBarView.findViewById(R.id.status);
+        statusView.setText(lastOnlineStatus);
         verified = actionBarView.findViewById(R.id.verified);
         emoji = findViewById(R.id.emoji);
         send = findViewById(R.id.send);
         messageBox = findViewById(R.id.messagebox);
+        messageBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.toString() != null && s.toString().length() > 0) {
+                    if(!isIamTyping) {
+                        isIamTyping = true;
+                        updateStatus(true);
+                    }
+                } else {
+                    if(isIamTyping) {
+                        isIamTyping = false;
+                        updateStatus(false);
+                    }
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
         emojiPopup = EmojiPopup.Builder.fromRootView(rootView)
                 .setSelectedIconColor(getResources().getColor(R.color.purple_500))
                 .setOnSoftKeyboardCloseListener(new OnSoftKeyboardCloseListener() {

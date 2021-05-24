@@ -259,6 +259,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public Boolean updateUserInfo(User user) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        Boolean isUpdated = db.update(UsersDB.getTableName(), getUserContentValue(user),UsersDB.COLUMN_CONTACT_NUMBER+"=?",new String[]{user.getContactNumber()}) > 0;
+        if(db.isOpen()) {
+            db.close();
+        }
+        return isUpdated;
+    }
+
     public Boolean deleteUser(String username) {
         SQLiteDatabase db = this.getWritableDatabase();
         Boolean isDeleted = db.delete(UsersDB.getTableName(),UsersDB.COLUMN_CONTACT_NUMBER+"=?",new String[]{username}) > 0;

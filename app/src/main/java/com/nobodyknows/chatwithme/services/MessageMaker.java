@@ -1,35 +1,28 @@
 package com.nobodyknows.chatwithme.services;
 
-import android.Manifest;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.net.Uri;
-import android.provider.Contacts;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
-import com.wafflecopter.multicontactpicker.LimitColumn;
-import com.wafflecopter.multicontactpicker.MultiContactPicker;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
@@ -124,6 +117,13 @@ public class MessageMaker {
             Glide.with(context).load(R.drawable.profile).into(profile);
         }
     }
+    public static void loadProfile(Context context,String profileUrl, CircleImageView profile) {
+        if(profileUrl != null && profileUrl.length() > 0 && !profileUrl.equalsIgnoreCase("NO_PROFILE")) {
+            Glide.with(context).load(profileUrl).into(profile);
+        } else {
+            Glide.with(context).load(R.drawable.profile).into(profile);
+        }
+    }
 
     public static Message filterMessage(Message message) {
         if(message.getMessageType() == MessageType.BLOCKED) {
@@ -145,7 +145,7 @@ public class MessageMaker {
         Intent intent = new Intent(context, ChatRoom.class);
         intent.putExtra("username",user.getContactNumber());
         intent.putExtra("name",user.getName());
-        intent.putExtra("lastOnlineStatus",user.getCurrentStatus());
+        intent.putExtra("lastOnlineStatus",laodOnlineStatus(user.getCurrentStatus(),user.getLastOnline()));
         intent.putExtra("verified",user.getVerified());
         intent.putExtra("blocked",user.getBlocked());
         intent.putExtra("muted",user.getMuted());
@@ -154,6 +154,34 @@ public class MessageMaker {
         intent.putExtra("blockedBy",user.getBlockedBy());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static String laodOnlineStatus(String status, Date lastOnline) {
+        String lastStatus = status;
+        if (status.equalsIgnoreCase("typing]-]"+myNumber)) {
+            return "typing ...";
+        } else {
+            if(status.equalsIgnoreCase("Offline")) {
+                Calendar calendar = Calendar.getInstance();
+                Date date = calendar.getTime();
+                String stringdate = "";
+                if(date.equals(lastOnline)) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a");
+                    stringdate = simpleDateFormat.format(lastOnline);
+                } else  {
+                    calendar.add(Calendar.DATE, -1);
+                    date = calendar.getTime();
+                    if(date.equals(lastOnline)) {
+                        stringdate = "yesterday.";
+                    } else {
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy");
+                        stringdate = simpleDateFormat.format(lastOnline);
+                    }
+                }
+                lastStatus = "Last online at "+stringdate;
+            }
+        }
+        return lastStatus;
     }
 
     public static void removeFromRecentChatUI(String username) {
