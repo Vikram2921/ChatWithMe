@@ -41,6 +41,7 @@ import com.sinch.android.rtc.SinchError;
 import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
+import com.sinch.android.rtc.video.VideoScalingType;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
@@ -70,7 +71,7 @@ public class Dashboard extends AppCompatActivity {
     private Bluetooth bluetooth;
     private String sinchApplicationKey = "4f4a2900-a600-45ef-9e35-d2d20b6b2e93";
     private String sinchApplicationSecret = "ML6bBC1ri0GvMuNfI93sWw==";
-    private SinchClient sinchClient;
+    public static SinchClient sinchClient;
     public static CallClient callClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -329,6 +330,8 @@ public class Dashboard extends AppCompatActivity {
                 .applicationSecret(sinchApplicationSecret)
                 .environmentHost("clientapi.sinch.com")
                 .userId(MessageMaker.getMyNumber())
+                .enableVideoCalls(true)
+                .callerIdentifier(MessageMaker.getMyNumber())
                 .build();
         sinchClient.setSupportCalling(true);
         sinchClient.addSinchClientListener(new SinchClientListener() {
@@ -355,6 +358,8 @@ public class Dashboard extends AppCompatActivity {
 
             }
         });
+        sinchClient.getVideoController().setResizeBehaviour(VideoScalingType.ASPECT_BALANCED);
+        sinchClient.startListeningOnActiveConnection();
         sinchClient.start();
     }
 

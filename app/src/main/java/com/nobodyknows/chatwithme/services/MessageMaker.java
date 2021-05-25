@@ -3,11 +3,17 @@ package com.nobodyknows.chatwithme.services;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
@@ -40,11 +46,30 @@ import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItems;
 
 public class MessageMaker {
 
+    private static MediaPlayer mp;
     private static String myNumber ="";
     private static Call currentCallRef;
+    private static View myVideoView,remoteVideoView;
+    private static Boolean isCallMuted = false,isOnSpeaker = false,isVideoOn = false,isCallStarted = false,isVideoViewSwitched = false;
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
         return id;
+    }
+
+    public static View getMyVideoView() {
+        return myVideoView;
+    }
+
+    public static void setMyVideoView(View myVideoView) {
+        MessageMaker.myVideoView = myVideoView;
+    }
+
+    public static View getRemoteVideoView() {
+        return remoteVideoView;
+    }
+
+    public static void setRemoteVideoView(View remoteVideoView) {
+        MessageMaker.remoteVideoView = remoteVideoView;
     }
 
     public static Call getCurrentCallRef() {
@@ -250,14 +275,22 @@ public class MessageMaker {
 
     public static void handleIncomingCall(Context applicationContext, Call call) {
         currentCallRef = call;
-        Toast.makeText(applicationContext,"Incoming Call"+call.getRemoteUserId(),Toast.LENGTH_SHORT).show();
+        playRingtone(applicationContext);
         Intent intent = new Intent(applicationContext, AudioCall.class);
         intent.putExtra("username",call.getRemoteUserId());
         intent.putExtra("making",false);
+        intent.putExtra("video",call.getDetails().isVideoOffered());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         applicationContext.startActivity(intent);
     }
 
     public static void setCurrentCallRef(Call currentCallRef) {
+        if(currentCallRef == null) {
+            isCallMuted = false;
+            isOnSpeaker = false;
+            isVideoOn = false;
+            isCallStarted = false;
+        }
         MessageMaker.currentCallRef = currentCallRef;
     }
 
@@ -270,5 +303,84 @@ public class MessageMaker {
     }
 
     public static void videoCall(String username) {
+        currentCallRef = callClient.callUserVideo(username);
+    }
+
+    public static void hangup() {
+        stopRingtone();
+        isCallMuted = false;
+        isOnSpeaker = false;
+        isVideoOn = false;
+        isCallStarted = false;
+        if(currentCallRef != null) {
+            currentCallRef.hangup();
+            currentCallRef = null;
+        }
+    }
+
+    public static void answer() {
+        isCallStarted = true;
+        if(currentCallRef != null) {
+            currentCallRef.answer();
+        }
+    }
+
+
+    public static void playRingtone(Context context) {
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        mp = MediaPlayer.create(context, notification);
+        mp.setLooping(true);
+        mp.start();
+    }
+
+    public static void playRingingSound(Context context) {
+
+    }
+
+    public static void stopRingtone() {
+        if(mp != null) {
+            mp.stop();
+            mp = null;
+        }
+    }
+
+    public static Boolean getIsCallMuted() {
+        return isCallMuted;
+    }
+
+    public static void setIsCallMuted(Boolean isCallMuted) {
+        MessageMaker.isCallMuted = isCallMuted;
+    }
+
+    public static Boolean getIsOnSpeaker() {
+        return isOnSpeaker;
+    }
+
+    public static void setIsOnSpeaker(Boolean isOnSpeaker) {
+        MessageMaker.isOnSpeaker = isOnSpeaker;
+    }
+
+    public static Boolean getIsVideoOn() {
+        return isVideoOn;
+    }
+
+    public static void setIsVideoOn(Boolean isVideoOn) {
+        MessageMaker.isVideoOn = isVideoOn;
+    }
+
+    public static Boolean getIsCallStarted() {
+        return isCallStarted;
+    }
+
+    public static void setIsCallStarted(Boolean isCallStarted) {
+        MessageMaker.isCallStarted = isCallStarted;
+    }
+
+    public static Boolean getIsVideoViewSwitched() {
+        return isVideoViewSwitched;
+    }
+
+    public static void setIsVideoViewSwitched(Boolean isVideoViewSwitched) {
+        MessageMaker.isVideoViewSwitched = isVideoViewSwitched;
     }
 }

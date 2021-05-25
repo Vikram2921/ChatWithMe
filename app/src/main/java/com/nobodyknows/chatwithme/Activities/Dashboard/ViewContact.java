@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
+import com.nobodyknows.chatwithme.Activities.AudioCall;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -78,6 +79,27 @@ public class ViewContact extends AppCompatActivity {
             verified.setVisibility(View.GONE);
         }
         MessageMaker.loadProfile(getApplicationContext(),user.getProfileUrl(),profile);
+        audio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AudioCall.class);
+                intent.putExtra("username",username);
+                intent.putExtra("making",true);
+                intent.putExtra("video",false);
+                startActivity(intent);
+            }
+        });
+
+        video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AudioCall.class);
+                intent.putExtra("username",username);
+                intent.putExtra("making",true);
+                intent.putExtra("video",true);
+                startActivity(intent);
+            }
+        });
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -2,9 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.nobodyknows.chatwithme">
 
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false"/>
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -22,32 +26,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatWithMe">
-        <activity android:name=".Activities.AudioCall"></activity>
-        <activity android:name=".Activities.SetuLogin" />
+        <activity android:name=".Activities.AudioCall" android:screenOrientation="portrait"></activity>
+        <activity android:name=".Activities.SetuLogin" android:screenOrientation="portrait" />
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity android:name=".Activities.BookVaccine" />
+        <activity android:name=".Activities.BookVaccine" android:screenOrientation="portrait" />
         <activity android:name=".Activities.Dashboard.ViewContact" />
         <activity android:name=".Activities.SyncContacts" />
         <activity android:name=".Activities.SearchFreinds" />
         <activity android:name=".Activities.Signup.CreatingSetup" />
         <activity
             android:name=".Activities.ChatRoom"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize" android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Activities.Dashboard.Dashboard" />
         </activity>
         <activity android:name=".Activities.Dashboard.AddNewChat" />
-        <activity android:name=".Activities.LoginContinue" />
-        <activity android:name=".Activities.Dashboard.Dashboard" />
+        <activity android:name=".Activities.LoginContinue" android:screenOrientation="portrait" />
+        <activity android:name=".Activities.Dashboard.Dashboard" android:screenOrientation="portrait" />
         <activity android:name=".Activities.Signup.MobileVerification" />
-        <activity android:name=".Activities.Signup.CreateUser" />
-        <activity android:name=".Activities.Login" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activities.Signup.CreateUser" android:screenOrientation="portrait" />
+        <activity android:name=".Activities.Login" android:screenOrientation="portrait" />
+        <activity android:name=".MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

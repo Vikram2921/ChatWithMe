@@ -478,13 +478,18 @@ public class ChatRoom extends AppCompatActivity {
 
 
     private void videoCall() {
-        MessageMaker.videoCall(username);
+        Intent intent = new Intent(getApplicationContext(),AudioCall.class);
+        intent.putExtra("username",username);
+        intent.putExtra("making",true);
+        intent.putExtra("video",true);
+        startActivity(intent);
     }
 
     private void audioCall() {
         Intent intent = new Intent(getApplicationContext(),AudioCall.class);
         intent.putExtra("username",username);
         intent.putExtra("making",true);
+        intent.putExtra("video",false);
         startActivity(intent);
     }
 
