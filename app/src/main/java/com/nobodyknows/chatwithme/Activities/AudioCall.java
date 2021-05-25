@@ -103,6 +103,9 @@ public class AudioCall extends AppCompatActivity {
     }
 
     private void initVideoCall() {
+        video.setVisibility(View.GONE);
+        videolayout.setVisibility(View.GONE);
+        audioLayout.setVisibility(View.VISIBLE);
         if(making) {
             MessageMaker.videoCall(username);
         }
@@ -149,6 +152,7 @@ public class AudioCall extends AppCompatActivity {
 
             @Override
             public void onCallEnded(Call call) {
+                MessageMaker.updateCallInfo(call);
                 MessageMaker.setCurrentCallRef(null);
                 finish();
             }
@@ -222,6 +226,7 @@ public class AudioCall extends AppCompatActivity {
 
             @Override
             public void onCallEnded(Call call) {
+                MessageMaker.updateCallInfo(call);
                 MessageMaker.setCurrentCallRef(null);
                 finish();
             }

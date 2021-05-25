@@ -1,19 +1,16 @@
 package com.nobodyknows.chatwithme.services;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
@@ -21,13 +18,14 @@ import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.AudioCall;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
+import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
-import com.sinch.android.rtc.PushPair;
 import com.sinch.android.rtc.calling.Call;
-import com.sinch.android.rtc.calling.CallListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -50,6 +48,7 @@ public class MessageMaker {
     private static String myNumber ="";
     private static Call currentCallRef;
     private static View myVideoView,remoteVideoView;
+    private static String currentCallId = "";
     private static Boolean isCallMuted = false,isOnSpeaker = false,isVideoOn = false,isCallStarted = false,isVideoViewSwitched = false;
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
@@ -273,15 +272,57 @@ public class MessageMaker {
         applicationContext.startActivity(intent);
     }
 
+    public static CallModel updateCallModel(CallModel callModel, Call call) {
+        if(call != null) {
+            callModel.setCallId(call.getCallId());
+            callModel.setStartedTime(call.getDetails().getStartedTime());
+            callModel.setEstablishedTime(call.getDetails().getEstablishedTime());
+            callModel.setCallDuration(call.getDetails().getDuration());
+            callModel.setEndedTime(call.getDetails().getEndedTime());
+            callModel.setEndCause(call.getDetails().getEndCause().name());
+            callModel.setCalltype(call.getDetails().isVideoOffered()?"Video":"Audio");
+        } else {
+            callModel.setCallId(createMessageId("CALL299221"));
+        }
+        return callModel;
+    }
+
     public static void handleIncomingCall(Context applicationContext, Call call) {
-        currentCallRef = call;
-        playRingtone(applicationContext);
-        Intent intent = new Intent(applicationContext, AudioCall.class);
-        intent.putExtra("username",call.getRemoteUserId());
-        intent.putExtra("making",false);
-        intent.putExtra("video",call.getDetails().isVideoOffered());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        applicationContext.startActivity(intent);
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                currentCallRef = call;
+                currentCallId = call.getCallId();
+                CallModel callModel = new CallModel();
+                callModel.setIncomingCall(true);
+                callModel.setUsername(call.getRemoteUserId());
+                updateCallModel(callModel,call);
+                databaseHelper.insertInCalls(callModel);
+                playRingtone(applicationContext);
+                Intent intent = new Intent(applicationContext, AudioCall.class);
+                intent.putExtra("username",call.getRemoteUserId());
+                intent.putExtra("making",false);
+                intent.putExtra("video",call.getDetails().isVideoOffered());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                applicationContext.startActivity(intent);
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+            }
+        };
+        TedPermission.with(applicationContext)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.ACCESS_NETWORK_STATE,Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO,Manifest.permission.MODIFY_AUDIO_SETTINGS,Manifest.permission.READ_PHONE_STATE)
+                .check();
+
+    }
+
+    public static void updateCallInfo(Call call) {
+        CallModel callModel = databaseHelper.getCallObject(call.getCallId());
+        updateCallModel(callModel,call);
+        databaseHelper.updateCallInfo(callModel);
     }
 
     public static void setCurrentCallRef(Call currentCallRef) {
@@ -296,14 +337,29 @@ public class MessageMaker {
 
     public static void audioCall(String username) {
         currentCallRef = callClient.callUser(username);
+        CallModel callModel = new CallModel();
+        callModel.setIncomingCall(false);
+        callModel.setUsername(username);
+        updateCallModel(callModel,currentCallRef);
+        databaseHelper.insertInCalls(callModel);
     }
 
     public static void audioConferenceCall(String username) {
         currentCallRef = callClient.callConference(username);
+        CallModel callModel = new CallModel();
+        callModel.setIncomingCall(false);
+        callModel.setUsername(username);
+        updateCallModel(callModel,currentCallRef);
+        databaseHelper.insertInCalls(callModel);
     }
 
     public static void videoCall(String username) {
         currentCallRef = callClient.callUserVideo(username);
+        CallModel callModel = new CallModel();
+        callModel.setIncomingCall(false);
+        callModel.setUsername(username);
+        updateCallModel(callModel,currentCallRef);
+        databaseHelper.insertInCalls(callModel);
     }
 
     public static void hangup() {
@@ -313,6 +369,7 @@ public class MessageMaker {
         isVideoOn = false;
         isCallStarted = false;
         if(currentCallRef != null) {
+            updateCallInfo(currentCallRef);
             currentCallRef.hangup();
             currentCallRef = null;
         }
@@ -382,5 +439,13 @@ public class MessageMaker {
 
     public static void setIsVideoViewSwitched(Boolean isVideoViewSwitched) {
         MessageMaker.isVideoViewSwitched = isVideoViewSwitched;
+    }
+
+    public static String getCurrentCallId() {
+        return currentCallId;
+    }
+
+    public static void setCurrentCallId(String currentCallId) {
+        MessageMaker.currentCallId = currentCallId;
     }
 }

@@ -11,7 +11,9 @@ import androidx.annotation.Nullable;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
+import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
+import com.nobodyknows.chatwithme.Database.model.CallsDB;
 import com.nobodyknows.chatwithme.Database.model.RecentChats;
 import com.nobodyknows.chatwithme.Database.model.UsersDB;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -52,6 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(RecentChats.getCreateTableQuery());
         db.execSQL(UsersDB.getCreateTableQuery());
+        db.execSQL(CallsDB.getCreateTableQuery());
     }
     public void createTable(String roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -61,6 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + RecentChats.getTableName());
         db.execSQL("DROP TABLE IF EXISTS " + UsersDB.getTableName());
+        db.execSQL("DROP TABLE IF EXISTS " + CallsDB.getTableName());
         onCreate(db);
     }
 
@@ -76,12 +80,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         delete(db,RecentChats.getTableName());
         delete(db,UsersDB.getTableName());
+        delete(db,CallsDB.getTableName());
     }
 
     public void clearAll() {
         SQLiteDatabase db = this.getWritableDatabase();
         clear(db,RecentChats.getTableName());
         clear(db,UsersDB.getTableName());
+        clear(db,CallsDB.getTableName());
     }
 
     /**
@@ -297,7 +303,88 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    //USER DB CRUD STOP HERE
+    //Calls DB CRUD STOP HERE
+
+    public long insertInCalls(CallModel callModel) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        long id = 0;
+        id = db.insert(CallsDB.getTableName(),null,getCallContentValue(callModel));
+        db.close();
+        return id;
+    }
+
+
+    private ContentValues getCallContentValue(CallModel callModel) {
+        ContentValues values = new ContentValues();
+        values.put(CallsDB.COLUMN_USERNAME,callModel.getUsername());
+        values.put(CallsDB.COLUMN_CALL_TYPE,callModel.getCalltype());
+        values.put(CallsDB.COLUMN_CALL_DURATION,callModel.getCallDuration());
+        values.put(CallsDB.COLUMN_END_CAUSE,callModel.getEndCause());
+        values.put(CallsDB.COLUMN_ENDED_TIME,callModel.getEndedTime());
+        values.put(CallsDB.COLUMN_ESTABLISHED_TIME,callModel.getEstablishedTime());
+        values.put(CallsDB.COLUMN_STARTED_TIME,callModel.getStartedTime());
+        values.put(CallsDB.COLUMN_ERROR,callModel.getError());
+        values.put(CallsDB.COLUMN_CALL_ID,callModel.getCallId());
+        values.put(CallsDB.COLUMN_IS_INCOMING_CALL,MessageMaker.convertBoolean(callModel.getIncomingCall()));
+        return values;
+    }
+
+    private CallModel convertToCall(Cursor cursor) {
+        CallModel callModel = new CallModel();
+        callModel.setUsername(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_USERNAME)));
+        callModel.setCalltype(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_CALL_TYPE)));
+        callModel.setCallDuration(cursor.getInt(cursor.getColumnIndex(CallsDB.COLUMN_CALL_DURATION)));
+        callModel.setEndCause(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_END_CAUSE)));
+        callModel.setEndedTime(cursor.getLong(cursor.getColumnIndex(CallsDB.COLUMN_ENDED_TIME)));
+        callModel.setEstablishedTime(cursor.getLong(cursor.getColumnIndex(CallsDB.COLUMN_ESTABLISHED_TIME)));
+        callModel.setStartedTime(cursor.getLong(cursor.getColumnIndex(CallsDB.COLUMN_STARTED_TIME)));
+        callModel.setError(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_ERROR)));
+        callModel.setCallId(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_CALL_ID)));
+        callModel.setIncomingCall(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(CallsDB.COLUMN_IS_INCOMING_CALL))));
+        return callModel;
+    }
+
+    public Boolean updateCallInfo(CallModel callModel) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        Boolean isUpdated = db.update(CallsDB.getTableName(), getCallContentValue(callModel),CallsDB.COLUMN_CALL_ID+"=?",new String[]{callModel.getCallId()}) > 0;
+        if(db.isOpen()) {
+            db.close();
+        }
+        return isUpdated;
+    }
+
+    public CallModel getCallObject(String callId) {
+        String selectQuery = "SELECT  * FROM " + CallsDB.getTableName() + " WHERE " +
+                CallsDB.COLUMN_CALL_ID + " = '"+callId+"'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        CallModel callModel  = null;
+        if (cursor.moveToFirst()) {
+            do {
+                callModel = convertToCall(cursor);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return callModel;
+    }
+
+    public ArrayList<CallModel> getAllCalls() {
+        ArrayList<CallModel> callModels = new ArrayList<>();
+        String selectQuery = "SELECT  * FROM " + CallsDB.getTableName();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        CallModel callModel  = null;
+        if (cursor.moveToFirst()) {
+            do {
+                callModel = convertToCall(cursor);
+                callModels.add(callModel);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return callModels;
+    }
 
 
 }
