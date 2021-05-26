@@ -44,7 +44,6 @@ import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
 import com.sinch.android.rtc.video.VideoScalingType;
-import com.thz.keystorehelper.KeyStoreManager;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
@@ -107,7 +106,7 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void setupSecuritySetup() {
-        KeyStoreManager.init(getApplicationContext());
+        //KeyStoreManager.init(getApplicationContext());
     }
 
     private void updateOnlineStatus(String status,Boolean canFinish) {

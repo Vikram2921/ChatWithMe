@@ -155,6 +155,7 @@ public class FirebaseService {
                                                 databaseHelperChat.deleteMessagesOf(MessageMaker.createRoomId(username));
                                                 databaseHelper.deleteRecentChat(username);
                                                 databaseHelper.deleteUser(username);
+                                                databaseHelper.deleteSecurityInfo(MessageMaker.createRoomId(username));
                                                 MessageMaker.removeFromRecentChatUI(username);
                                                 pop.dismiss();
                                                 activity.finish();

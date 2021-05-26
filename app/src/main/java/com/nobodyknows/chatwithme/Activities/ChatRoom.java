@@ -17,6 +17,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -34,7 +36,6 @@ import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
-import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -54,7 +55,9 @@ import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
-import com.thz.keystorehelper.KeyStoreManager;
+import com.scottyab.aescrypt.AESCrypt;
+//import com.thz.keystorehelper.EncryptionDecryptionListener;
+//import com.thz.keystorehelper.KeyStoreManager;
 import com.vanniktech.emoji.EmojiEditText;
 import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
@@ -65,6 +68,7 @@ import com.wafflecopter.multicontactpicker.MultiContactPicker;
 import com.wafflecopter.multicontactpicker.RxContacts.PhoneNumber;
 
 import java.io.File;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +104,6 @@ public class ChatRoom extends AppCompatActivity {
     private CircleButton contacts;
     private Boolean isIamTyping = false;
     private String roomSecurityKey = "";
-    private Boolean saveSecurityKey = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,12 +133,16 @@ public class ChatRoom extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
         roomSecurityKey = databaseHelper.getSecurityKey(roomid);
-        if(roomSecurityKey == null  || roomSecurityKey.length() == 0) {
-            roomSecurityKey = KeyStoreManager.getNewRandomPhrase(7);
-            saveSecurityKey = true;
-        }
         init();
         updateUserInfoSync();
+    }
+
+    private void addInfoMessage() {
+        Message message = getDefaultObject();
+        message.setMessageType(MessageType.INFO);
+        message.setMessageId("0");
+        message.setMessage("Messages and calls are end-to-end encrypted. No one outside of this chat, not even Chat With Me, can read or listen to them");
+        chatLayoutView.addMessage(message);
     }
 
     private void updateStatusViewColor() {
@@ -335,6 +342,7 @@ public class ChatRoom extends AppCompatActivity {
                         databaseHelperChat.clearAll(roomid);
                         databaseHelper.clearLastMessage(username);
                         chatLayoutView.reload();
+                        addInfoMessage();
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -456,13 +464,13 @@ public class ChatRoom extends AppCompatActivity {
 
     private Contact convertToContact(ContactResult contactResult) {
         Contact contact = new Contact();
-        contact.setName(MessageMaker.encrypt(roomSecurityKey,contactResult.getDisplayName()));
+        contact.setName(contactResult.getDisplayName());
         User user = null;
         for(PhoneNumber phoneNumber:contactResult.getPhoneNumbers()) {
-            contact.setContactNumbers(MessageMaker.encrypt(roomSecurityKey,MessageMaker.getNormalizedPhoneNumber(phoneNumber.getNumber())));
+            contact.setContactNumbers(MessageMaker.getNormalizedPhoneNumber(phoneNumber.getNumber()));
             user = databaseHelper.getUser(contact.getContactNumbers());
             if(user != null) {
-                contact.setProfileUrl(MessageMaker.encrypt(roomSecurityKey,user.getProfileUrl()));
+                contact.setProfileUrl(user.getProfileUrl());
             }
         }
         return contact;
@@ -635,10 +643,10 @@ public class ChatRoom extends AppCompatActivity {
                             if(messageUpdate != null) {
                                 switch (doc.getType()) {
                                     case ADDED:
-                                        chatLayoutView.addMessage(messageUpdate);
+                                        decryptMessage(messageUpdate,false);
                                         break;
                                     case MODIFIED:
-                                        chatLayoutView.updateMessage(messageUpdate);
+                                        decryptMessage(messageUpdate,true);
                                         break;
                                     case REMOVED:
                                         break;
@@ -668,6 +676,19 @@ public class ChatRoom extends AppCompatActivity {
         }
     }
 
+    private void decryptMessage(Message messageUpdate,Boolean update) {
+        try {
+            messageUpdate.setMessage(AESCrypt.decrypt(roomSecurityKey,messageUpdate.getMessage()));
+            if(update) {
+                chatLayoutView.updateMessage(messageUpdate);
+            } else {
+                chatLayoutView.addMessage(messageUpdate);
+            }
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setupMessageBoxWork() {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -683,7 +704,7 @@ public class ChatRoom extends AppCompatActivity {
 
     private void sendMessage(String messageText) {
         Message message = getDefaultObject();
-        message.setMessage(MessageMaker.encrypt(roomSecurityKey,messageText));
+        message.setMessage(messageText);
         sendNow(message);
     }
 
@@ -697,32 +718,59 @@ public class ChatRoom extends AppCompatActivity {
         return message;
     }
 
+    public static <T extends Parcelable> T copy(T orig) {
+        Parcel p = Parcel.obtain();
+        orig.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        T copy = null;
+        try {
+            copy = (T) orig.getClass().getDeclaredConstructor(new Class[]{Parcel.class}).newInstance(p);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return copy;
+    }
+
     private void sendNow(Message message) {
-        chatLayoutView.addMessage(message);
-        message.setMessageStatus(MessageStatus.SENT);
-        if(!isBlocked) {
-            firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    if(saveSecurityKey) {
-                        Map<String,String> map = new HashMap<>();
-                        map.put("securityKey", roomSecurityKey);
-                        firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").set(map).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                saveSecurityKey = false;
-                                databaseHelper.insertInSecurity(roomid,roomSecurityKey);
-                                chatLayoutView.updateMessage(message);
-                                firebaseService.updateLastMessage(myUsername,username,message);
-                            }
-                        });
-                    } else {
-                        chatLayoutView.updateMessage(message);
+        Message message1 = message.clone();
+        chatLayoutView.addMessage(message1);
+        try {
+            if(!isBlocked) {
+
+                message.setMessage(AESCrypt.encrypt(roomSecurityKey,message.getMessage()));
+                message.setMessageStatus(MessageStatus.SENT);
+                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message1.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        decryptMessage(message,true);
                         firebaseService.updateLastMessage(myUsername,username,message);
                     }
-                }
-            });
+                });
+            }
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
         }
+//        KeyStoreManager.encryptDataAsync(message.getMessage(), roomSecurityKey, new EncryptionDecryptionListener() {
+//            @Override
+//            public void onSuccess(String s) {
+//                message.setMessage(s);
+//                message.setMessageStatus(MessageStatus.SENT);
+//                if(!isBlocked) {
+//                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                        @Override
+//                        public void onSuccess(Void aVoid) {
+//                            decryptMessage(message,true);
+//                            firebaseService.updateLastMessage(myUsername,username,message);
+//                        }
+//                    });
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(String s) {
+//
+//            }
+//        });
     }
 
     private void setupChatLayoutView() {
@@ -767,12 +815,13 @@ public class ChatRoom extends AppCompatActivity {
             @Override
             public void onMessageSeen(Message message) {
                 if(!isBlocked) {
+                    Map<String,Object> mapToUpdate = new HashMap<>();
                     if(message.getReceivedAt() == null) {
-                        message.setReceivedAt(new Date());
+                        mapToUpdate.put("receivedAt",new Date());
                     }
-                    message.setMessageStatus(MessageStatus.SEEN);
-                    message.setSeenAt(new Date());
-                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    mapToUpdate.put("messageStatus",MessageStatus.SEEN);
+                    mapToUpdate.put("seenAt",new Date());
+                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).update(mapToUpdate).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             chatLayoutView.updateMessage(message);
@@ -781,6 +830,7 @@ public class ChatRoom extends AppCompatActivity {
                 }
             }
         });
+        addInfoMessage();
         User myUser = new User();
         myUser.setName(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"name"));
         myUser.setContactNumber(myUsername);

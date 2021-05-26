@@ -151,6 +151,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return isUpdated;
     }
 
+    public void updateMessageStatus(String roomId,Message message) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+MessageDB.getTableName(roomId)
+                +" SET "+MessageDB.COLUMN_SENTAT+" = '"+LayoutService.getConvertedDate(message.getSentAt())
+                +"',"+MessageDB.COLUMN_RECEIVEAT+" = '"+LayoutService.getConvertedDate(message.getReceivedAt())
+                +"',"+MessageDB.COLUMN_SEENAT+" = '"+LayoutService.getConvertedDate(message.getSeenAt())
+                +"',"+MessageDB.COLUMN_MESSAGE_STATUS+" = '"+message.getMessageStatus().ordinal()
+                +"' WHERE "+MessageDB.COLUMN_MESSAGE_ID+" = "+ message.getMessageId();
+        db.execSQL(strSQL);
+        db.close();
+    }
+
     public boolean deleteMessage(String messageid, String roomid) {
         SQLiteDatabase db  = this.getWritableDatabase();
         Boolean isDeleted = db.delete(MessageDB.getTableName(roomid),MessageDB.COLUMN_MESSAGE_ID+"=?",new String[]{messageid}) > 0;

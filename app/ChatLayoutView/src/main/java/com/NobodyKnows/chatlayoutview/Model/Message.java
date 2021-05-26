@@ -9,7 +9,7 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class Message {
+public class Message implements Cloneable {
     private String messageId;
     private String sender;
     private String receiver;
@@ -197,5 +197,17 @@ public class Message {
 
     public void setContacts(ArrayList<Contact> contacts) {
         this.contacts = contacts;
+    }
+
+    public Message clone()
+    {
+        try
+        {
+            return (Message) super.clone();
+        }
+        catch( CloneNotSupportedException e )
+        {
+            return null;
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
 import com.nobodyknows.chatwithme.DTOS.CallModel;
+import com.nobodyknows.chatwithme.DTOS.SecurityDTO;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.Database.model.CallsDB;
 import com.nobodyknows.chatwithme.Database.model.RecentChats;
@@ -393,11 +394,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     /**Security update **/
 
-    public long insertInSecurity(String roomId,String securityKey) {
+    public long insertInSecurity(String roomId, SecurityDTO securityDTO) {
         SQLiteDatabase db  = this.getWritableDatabase();
         long id = 0;
         if(!isSecurityInfoExist(roomId,db)) {
-            id = db.insert(SecurityDB.getTableName(),null,getSecurityContentValue(roomId,securityKey));
+            id = db.insert(SecurityDB.getTableName(),null,getSecurityContentValue(roomId,securityDTO));
         }
         db.close();
         return id;
@@ -416,10 +417,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    private ContentValues getSecurityContentValue(String roomId, String securityKey) {
+    private ContentValues getSecurityContentValue(String roomId, SecurityDTO securityDTO) {
         ContentValues values = new ContentValues();
         values.put(SecurityDB.COLUMN_ROOM_ID,roomId);
-        values.put(SecurityDB.COLUMN_SECURITY_KEY,securityKey);
+        values.put(SecurityDB.COLUMN_SECURITY_KEY,securityDTO.getSecurityKey());
+        values.put(SecurityDB.COLUMN_LAST_CHANGED_BY,securityDTO.getLastChangedBy());
+        values.put(SecurityDB.COLUMN_CREATED_ON,MessageMaker.getConvertedDate(securityDTO.getCreatedOn()));
         return values;
     }
 
@@ -439,4 +442,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return key;
     }
 
+    public Boolean deleteSecurityInfo(String roomId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Boolean isDeleted = db.delete(SecurityDB.getTableName(),SecurityDB.COLUMN_ROOM_ID+"=?",new String[]{roomId}) > 0;
+        return isDeleted;
+    }
 }

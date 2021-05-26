@@ -37,6 +37,7 @@ import com.nobodyknows.chatwithme.Activities.Dashboard.Interfaces.SelectListener
 import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Activities.SyncContacts;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
+import com.nobodyknows.chatwithme.DTOS.SecurityDTO;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -127,12 +128,22 @@ public class AddNewChat extends AppCompatActivity {
                 if(documentSnapshot != null) {
                     User user = documentSnapshot.toObject(User.class);
                     databaseHelper.insertInUser(user);
-                    if (!contactsAdded.contains(user.getContactNumber())) {
-                        MessageMaker.hideNotFound(notfound);
-                        contacts.add(user);
-                        contactsAdded.add(user.getContactNumber());
-                        recyclerViewAdapter.notifyItemInserted(contacts.size() - 1);
-                    }
+                    String roomid = MessageMaker.createRoomId(user.getContactNumber());
+                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if(documentSnapshot != null) {
+                                SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
+                                databaseHelper.insertInSecurity(roomid,securityDTO);
+                                if (!contactsAdded.contains(user.getContactNumber())) {
+                                    MessageMaker.hideNotFound(notfound);
+                                    contacts.add(user);
+                                    contactsAdded.add(user.getContactNumber());
+                                    recyclerViewAdapter.notifyItemInserted(contacts.size() - 1);
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });

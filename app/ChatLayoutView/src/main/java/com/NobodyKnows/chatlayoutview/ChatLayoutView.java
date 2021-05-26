@@ -5,17 +5,21 @@ import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.NobodyKnows.chatlayoutview.Adapters.RecyclerViewAdapter;
 import com.NobodyKnows.chatlayoutview.Constants.MessagePosition;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper;
+import com.NobodyKnows.chatlayoutview.Interfaces.CSwipControllersActions;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
+import com.NobodyKnows.chatlayoutview.Interfaces.ChatSwipeController;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.MessageConfiguration;
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -49,6 +53,7 @@ public class ChatLayoutView extends RelativeLayout {
     private int sentSoundEffect = R.raw.message_added;
     private int receivedSoundEffect = R.raw.message_received;
     private int blurRadius = 70;
+    private ArrayList<MessageType> nowSwipableType = new ArrayList<>();
     public static DatabaseHelper databaseHelper;
 
     public ChatLayoutView(Context context) {
@@ -123,14 +128,40 @@ public class ChatLayoutView extends RelativeLayout {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);;
+        ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        nowSwipableType.add(MessageType.DATE);
+        nowSwipableType.add(MessageType.INFO);
+        nowSwipableType.add(MessageType.WARNING);
+        nowSwipableType.add(MessageType.MISSED_INCOMING_AUDIO_CALL);
+        nowSwipableType.add(MessageType.MISSED_INCOMING_VIDEO_CALL);
+        nowSwipableType.add(MessageType.MISSED_OUTGOING_AUDIO_CALL);
+        nowSwipableType.add(MessageType.MISSED_OUTGOING_VIDEO_CALL);
+        nowSwipableType.add(MessageType.SECURITY_KEY_CHANGED);
+        nowSwipableType.add(MessageType.BLOCKED);
+        nowSwipableType.add(MessageType.UNBLOCKED);
+        nowSwipableType.add(MessageType.UNFREIND);
         addSwipeRecyclerView();
     }
 
+    public void addInNonSwipable(MessageType messageType) {
+        nowSwipableType.add(messageType);
+    }
+
+
     private void addSwipeRecyclerView() {
-        SwipeController controller = new SwipeController(getContext(), new ISwipeControllerActions() {
+        ChatSwipeController controller = new ChatSwipeController(getContext(), new CSwipControllersActions() {
             @Override
             public void onSwipePerformed(int position) {
                 //chatLayoutListener.onSwipeToReply(messages.get(position),helper.getReplyMessageView(messages.get(position)));
+
+            }
+
+            @Override
+            public boolean canSwipe(int position) {
+                if(nowSwipableType.contains(messages.get(position).getMessageType())) {
+                    return false;
+                }
+                return true;
             }
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(controller);
@@ -207,6 +238,7 @@ public class ChatLayoutView extends RelativeLayout {
 
     public void updateMessage(Message message) {
         if(helper.messageIdExists(message.getMessageId())) {
+
             int index = helper.getMessageIdPositon(message.getMessageId());
             Message messageOld = messages.get(index);
             messages.remove(index);
@@ -223,7 +255,7 @@ public class ChatLayoutView extends RelativeLayout {
     }
 
     private void updateMessageToDatabase(Message message) {
-        databaseHelper.updateMessage(message,roomId);
+        databaseHelper.updateMessageStatus(roomId,message);
     }
 
 
@@ -254,7 +286,7 @@ public class ChatLayoutView extends RelativeLayout {
 
     private void checkForDate(Message message) {
         String formattedText = getFormattedDate(message.getCreatedTimestamp());
-        if(!dates.contains(formattedText)) {
+        if(!dates.contains(formattedText) && message.getMessageType() != MessageType.INFO) {
             dates.add(formattedText);
             Message dateMessage = new Message();
             dateMessage.setMessageType(MessageType.DATE);
@@ -284,6 +316,7 @@ public class ChatLayoutView extends RelativeLayout {
 
     public void reload() {
         messages.clear();
+        dates.clear();
         recyclerViewAdapter.notifyDataSetChanged();
         helper.clearMessagedIds();
         if(saveToDatabase) {

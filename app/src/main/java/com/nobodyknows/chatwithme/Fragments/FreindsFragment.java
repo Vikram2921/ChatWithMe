@@ -28,11 +28,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.kaopiz.kprogresshud.KProgressHUD;
+import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.Activities.Dashboard.AddNewChat;
 import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Activities.Signup.CreatingSetup;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestDTO;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
+import com.nobodyknows.chatwithme.DTOS.SecurityDTO;
 import com.nobodyknows.chatwithme.Fragments.Adapters.FreindsRequestRecyclerViewAdapter;
 import com.nobodyknows.chatwithme.Fragments.Adapters.RecyclerViewAdapter;
 import com.nobodyknows.chatwithme.Fragments.Interfaces.FreindsOptionListener;
@@ -42,6 +45,8 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
@@ -120,6 +125,13 @@ public class FreindsFragment extends Fragment {
     }
 
     private void confirmFreind(FreindRequestDTO freindRequestDTO) {
+        KProgressHUD popup = KProgressHUD.create(getActivity())
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setLabel("Please wait")
+                .setCancellable(false)
+                .setAnimationSpeed(2)
+                .setDimAmount(0.5f)
+                .show();
         String mynumber= MessageMaker.getMyNumber();
         FreindRequestSaveDTO fdto = new FreindRequestSaveDTO();
         fdto.setContactNumber(freindRequestDTO.getContactNumber());
@@ -138,9 +150,21 @@ public class FreindsFragment extends Fragment {
                     firebaseService.saveToFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("Freinds").document(mynumber).set(myDto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()) {
-                                deleteRequest(freindRequestDTO,true);
-                            }
+                            String roomid= MessageMaker.createRoomId(freindRequestDTO.getContactNumber());
+                            String key = MessageMaker.generateSecurityKey(32);
+                            SecurityDTO securityDTO = new SecurityDTO();
+                            securityDTO.setLastChangedBy(mynumber);
+                            securityDTO.setSecurityKey(key);
+                            firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").set(securityDTO).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    if(task.isSuccessful()) {
+                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        deleteRequest(freindRequestDTO,true);
+                                        popup.dismiss();
+                                    }
+                                }
+                            });
                         }
                     });
                 }
@@ -171,6 +195,16 @@ public class FreindsFragment extends Fragment {
                 if(documentSnapshot != null) {
                     User users = documentSnapshot.toObject(User.class);
                     databaseHelper.insertInUser(users);
+                    String roomid = MessageMaker.createRoomId(users.getContactNumber());
+                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if(documentSnapshot != null) {
+                                SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
+                                databaseHelper.insertInSecurity(roomid,securityDTO);
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -300,6 +334,7 @@ public class FreindsFragment extends Fragment {
                         databaseHelperChat.deleteMessagesOf(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
                         databaseHelper.deleteRecentChat(freindRequestSaveDTO.getContactNumber());
                         databaseHelper.deleteUser(freindRequestSaveDTO.getContactNumber());
+                        databaseHelper.deleteSecurityInfo(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
                         MessageMaker.removeFromRecentChatUI(freindRequestSaveDTO.getContactNumber());
                     }
                 });

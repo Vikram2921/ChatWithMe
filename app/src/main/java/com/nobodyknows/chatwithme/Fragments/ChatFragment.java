@@ -20,6 +20,7 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -29,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.nobodyknows.chatwithme.Activities.Dashboard.AddNewChat;
+import com.nobodyknows.chatwithme.DTOS.SecurityDTO;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.DTOS.userListenerHolder;
 import com.nobodyknows.chatwithme.Fragments.Adapters.RecyclerViewAdapter;
@@ -182,16 +184,26 @@ public class ChatFragment extends Fragment {
                     if(task.isSuccessful()) {
                         if(task.getResult().exists()) {
                             User user = task.getResult().toObject(User.class);
-                            userListItemDTO.setCurrentStatus(user.getCurrentStatus());
-                            userListItemDTO.setName(user.getName());
-                            userListItemDTO.setProfileUrl(user.getProfileUrl());
-                            userListItemDTO.setStatus(user.getStatus());
-                            userListItemDTO.setVerified(user.getVerified());
-                            userListItemDTO.setLastOnline(user.getLastOnline());
-                            userListItemDTO.setBlocked(user.getBlocked());
-                            databaseHelper.insertInUser(user);
-                            databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
-                            addNewChat(userListItemDTO);
+                            String roomid = MessageMaker.createRoomId(user.getContactNumber());
+                            firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    if(documentSnapshot != null) {
+                                        SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
+                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        userListItemDTO.setCurrentStatus(user.getCurrentStatus());
+                                        userListItemDTO.setName(user.getName());
+                                        userListItemDTO.setProfileUrl(user.getProfileUrl());
+                                        userListItemDTO.setStatus(user.getStatus());
+                                        userListItemDTO.setVerified(user.getVerified());
+                                        userListItemDTO.setLastOnline(user.getLastOnline());
+                                        userListItemDTO.setBlocked(user.getBlocked());
+                                        databaseHelper.insertInUser(user);
+                                        databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
+                                        addNewChat(userListItemDTO);
+                                    }
+                                }
+                            });
                         }
                     }
                 }

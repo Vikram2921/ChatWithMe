@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -38,12 +39,15 @@ repositories {
 
 dependencies {
     implementation project(path: 'ChatLayoutView')
+    implementation 'com.google.firebase:firebase-crashlytics:18.0.0'
+    implementation 'com.google.firebase:firebase-analytics:19.0.0'
     compile(name:'sinch-android-rtc', version:'+', ext:'aar')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.github.talhahasanzia:android-encryption-helper:0.3.1'
+//    implementation 'com.github.talhahasanzia:android-encryption-helper:0.3.1'
+    implementation 'com.scottyab:aescrypt:0.0.1'
     implementation 'com.github.mutasemhajhasan:SlideToAnswerView:1.0.0'
     implementation 'com.github.curioustechizen.android-ago:library:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'

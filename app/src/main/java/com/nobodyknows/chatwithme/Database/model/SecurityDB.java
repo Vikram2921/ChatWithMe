@@ -6,10 +6,14 @@ public class SecurityDB {
     private int id;
     private String roomid;
     private String securityKey;
+    private String lastChangedBy;
+    private String createdOn;
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_ROOM_ID = "roomid";
     public static final String COLUMN_SECURITY_KEY = "securitykey";
+    public static final String COLUMN_LAST_CHANGED_BY = "lastChangedBy";
+    public static final String COLUMN_CREATED_ON = "createdOn";
 
 
     public static final String getTableName() {
@@ -20,7 +24,9 @@ public class SecurityDB {
         String CREATE_TABLE="CREATE TABLE IF NOT EXISTS "+getTableName()+"("
                 + COLUMN_ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_ROOM_ID +" TEXT NOT NULL,"
-                + COLUMN_SECURITY_KEY +" TEXT NOT NULL"
+                + COLUMN_SECURITY_KEY +" TEXT NOT NULL,"
+                + COLUMN_LAST_CHANGED_BY +" TEXT NOT NULL,"
+                + COLUMN_CREATED_ON +" TEXT"
                 +")";
         return CREATE_TABLE;
     }
@@ -47,5 +53,21 @@ public class SecurityDB {
 
     public void setSecurityKey(String securityKey) {
         this.securityKey = securityKey;
+    }
+
+    public String getLastChangedBy() {
+        return lastChangedBy;
+    }
+
+    public void setLastChangedBy(String lastChangedBy) {
+        this.lastChangedBy = lastChangedBy;
+    }
+
+    public String getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(String createdOn) {
+        this.createdOn = createdOn;
     }
 }

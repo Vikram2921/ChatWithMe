@@ -26,7 +26,6 @@ import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
 import com.sinch.android.rtc.calling.Call;
-import com.thz.keystorehelper.KeyStoreManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -506,11 +505,5 @@ public class MessageMaker {
         return sb.toString();
     }
 
-    public static String encrypt(String mySecurityKey,String data) {
-       return KeyStoreManager.encryptData(data,mySecurityKey);
-    }
 
-    public static String decrypt(String mySecurityKey,String data) {
-        return KeyStoreManager.decryptData(data,mySecurityKey);
-    }
 }
