@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Activities.BookVaccine;
+import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
@@ -73,6 +74,7 @@ public class Dashboard extends AppCompatActivity {
     private String sinchApplicationSecret = "ML6bBC1ri0GvMuNfI93sWw==";
     public static SinchClient sinchClient;
     public static CallClient callClient;
+    private CallClientListener callClientListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -243,6 +245,13 @@ public class Dashboard extends AppCompatActivity {
         editor.apply();
         databaseHelper.deleteDatabase();
         databaseHelperChat.deleteDatabase();
+        if(sinchClient != null) {
+            sinchClient.stop();
+            callClient.removeCallClientListener(callClientListener);
+            callClientListener = null;
+            callClient = null;
+            sinchClient = null;
+        }
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
         finish();
@@ -252,6 +261,12 @@ public class Dashboard extends AppCompatActivity {
         if(tabLayout.getSelectedTabPosition() == 0) {
             Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
             intent.putExtra("title","Add New Chat");
+            startActivity(intent);
+        } else if(tabLayout.getSelectedTabPosition() == 2) {
+            Intent intent = new Intent(getApplicationContext(), SearchFreinds.class);
+            startActivity(intent);
+        } else if(tabLayout.getSelectedTabPosition() == 3) {
+            Intent intent = new Intent(getApplicationContext(),AddNewCall.class);
             startActivity(intent);
         }
     }
@@ -365,11 +380,12 @@ public class Dashboard extends AppCompatActivity {
 
     private void setupApptoAppCall() {
         callClient = sinchClient.getCallClient();
-        callClient.addCallClientListener(new CallClientListener() {
+        callClientListener = new CallClientListener() {
             @Override
             public void onIncomingCall(CallClient callClient, Call call) {
                 MessageMaker.handleIncomingCall(getApplicationContext(),call);
             }
-        });
+        };
+        callClient.addCallClientListener(callClientListener);
     }
 }

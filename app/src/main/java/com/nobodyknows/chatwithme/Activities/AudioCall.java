@@ -94,13 +94,7 @@ public class AudioCall extends AppCompatActivity {
     }
 
 
-    private void updateTime(int seconds) {
-        int p1 = seconds % 60;
-        int p2 = seconds / 60;
-        int p3 = p2 % 60;
-        p2 = p2 / 60;
-        time.setText(p2 + ":" + p3 + ":" + p1);
-    }
+
 
     private void initVideoCall() {
         video.setVisibility(View.GONE);
@@ -147,12 +141,12 @@ public class AudioCall extends AppCompatActivity {
                     MessageMaker.setIsCallStarted(true);
                     changeView();
                 }
-                updateTime(call.getDetails().getDuration());
+                time.setText(MessageMaker.getFullTimeFromSeconds(call.getDetails().getDuration()));
             }
 
             @Override
             public void onCallEnded(Call call) {
-                MessageMaker.updateCallInfo(call);
+                MessageMaker.updateCallInfo(call,true);
                 MessageMaker.setCurrentCallRef(null);
                 finish();
             }
@@ -221,12 +215,12 @@ public class AudioCall extends AppCompatActivity {
                     MessageMaker.setIsCallStarted(true);
                     changeView();
                 }
-                updateTime(call.getDetails().getDuration());
+                time.setText(MessageMaker.getFullTimeFromSeconds(call.getDetails().getDuration()));
             }
 
             @Override
             public void onCallEnded(Call call) {
-                MessageMaker.updateCallInfo(call);
+                MessageMaker.updateCallInfo(call,true);
                 MessageMaker.setCurrentCallRef(null);
                 finish();
             }

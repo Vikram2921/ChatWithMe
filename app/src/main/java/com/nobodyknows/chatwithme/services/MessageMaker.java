@@ -27,6 +27,7 @@ import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
 import com.sinch.android.rtc.calling.Call;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,6 +38,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.callClient;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callIds;
+import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callNotFound;
+import static com.nobodyknows.chatwithme.Fragments.CallsFragment.calls;
+import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callsRecyclerViewAdapter;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.notfound;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.recyclerViewAdapter;
 import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItemDTOMap;
@@ -319,10 +324,24 @@ public class MessageMaker {
 
     }
 
-    public static void updateCallInfo(Call call) {
+    public static void updateCallInfo(Call call,Boolean updateinlist) {
         CallModel callModel = databaseHelper.getCallObject(call.getCallId());
         updateCallModel(callModel,call);
         databaseHelper.updateCallInfo(callModel);
+        if(updateinlist) {
+            if(!callIds.contains(callModel.getCallId())) {
+                calls.add(0,callModel);
+                callIds.add(0,callModel.getCallId());
+                callsRecyclerViewAdapter.notifyItemInserted(0);
+
+            } else {
+                int index = callIds.indexOf(callModel.getCallId());
+                calls.remove(index);
+                calls.add(index,callModel);
+                callsRecyclerViewAdapter.notifyItemChanged(index);
+            }
+            callNotFound.setVisibility(View.GONE);
+        }
     }
 
     public static void setCurrentCallRef(Call currentCallRef) {
@@ -369,7 +388,7 @@ public class MessageMaker {
         isVideoOn = false;
         isCallStarted = false;
         if(currentCallRef != null) {
-            updateCallInfo(currentCallRef);
+            updateCallInfo(currentCallRef,true);
             currentCallRef.hangup();
             currentCallRef = null;
         }
@@ -447,5 +466,22 @@ public class MessageMaker {
 
     public static void setCurrentCallId(String currentCallId) {
         MessageMaker.currentCallId = currentCallId;
+    }
+
+    public static String getFullTimeFromSeconds(int seconds) {
+        int p1 = seconds % 60;
+        int p2 = seconds / 60;
+        int p3 = p2 % 60;
+        p2 = p2 / 60;
+        return p2 + ":" + p3 + ":" + p1;
+    }
+
+    public static String formatDate(Date date,String format) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+        return simpleDateFormat.format(date);
+    }
+
+    public static Date longToDate(long longdate) throws ParseException {
+        return new Date(longdate * 1000);
     }
 }

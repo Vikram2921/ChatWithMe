@@ -371,7 +371,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public ArrayList<CallModel> getAllCalls() {
         ArrayList<CallModel> callModels = new ArrayList<>();
-        String selectQuery = "SELECT  * FROM " + CallsDB.getTableName();
+        String selectQuery = "SELECT  * FROM " + CallsDB.getTableName()+" ORDER BY "+CallsDB.COLUMN_ID+" DESC";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         CallModel callModel  = null;
