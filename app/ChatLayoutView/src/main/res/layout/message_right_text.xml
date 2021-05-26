@@ -5,6 +5,7 @@
     android:elevation="2dp"
     android:layout_marginBottom="3dp"
     android:layout_marginRight="5dp"
+    android:paddingLeft="25dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -21,7 +22,7 @@
             android:layout_width="wrap_content"
             android:textColorLink="#3F51B5"
             android:layout_height="wrap_content"
-            android:text="Hello"
+            android:text="Hello s dsfdsfdsd fsdf sd f sf sdf sdfsd f dsf s df sd fds  sdf sd fs df"
             android:textColor="#000000"
             android:textSize="@dimen/chatmessagetextsize"
             app:layout_constraintHorizontal_bias="1.0"
