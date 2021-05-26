@@ -29,6 +29,16 @@ public class Message {
     private View customView;
     private ArrayList<SharedFile> sharedFiles = new ArrayList<>();
     private ArrayList<Contact> contacts = new ArrayList<>();
+    private Boolean loadedFromDB = false;
+
+    public Boolean getLoadedFromDB() {
+        return loadedFromDB;
+    }
+
+    public void setLoadedFromDB(Boolean loadedFromDB) {
+        this.loadedFromDB = loadedFromDB;
+    }
+
     public String getMessageId() {
         return messageId;
     }

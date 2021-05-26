@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -43,6 +44,7 @@ import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
 import com.sinch.android.rtc.video.VideoScalingType;
+import com.thz.keystorehelper.KeyStoreManager;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
@@ -85,6 +87,7 @@ public class Dashboard extends AppCompatActivity {
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
         MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
+        MessageMaker.setMySecurityKey(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"securityKey"));
         firebaseService = new FirebaseService();
         updateOnlineStatus("Online",false);
         databaseHelper = new DatabaseHelper(getApplicationContext());
@@ -96,10 +99,15 @@ public class Dashboard extends AppCompatActivity {
         });
         databaseHelper.createTable();
         EmojiManager.install(new GoogleEmojiProvider());
+        setupSecuritySetup();
       //  setupBlueTooth();
         Contacts.initialize(getApplicationContext());
         init();
         setupSinch();
+    }
+
+    private void setupSecuritySetup() {
+        KeyStoreManager.init(getApplicationContext());
     }
 
     private void updateOnlineStatus(String status,Boolean canFinish) {

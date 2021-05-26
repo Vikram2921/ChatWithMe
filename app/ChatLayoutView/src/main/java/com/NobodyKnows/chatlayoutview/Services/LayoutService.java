@@ -52,6 +52,8 @@ public class LayoutService {
             textView.setText("Received at "+getFormatedDate("hh:mm a",message.getReceivedAt()));
         }  else if(status == MessageStatus.SENT && message.getSentAt() != null) {
             textView.setText("Sent at "+getFormatedDate("hh:mm a",message.getSentAt()));
+        } else if(status == MessageStatus.SENDING) {
+            textView.setText("Sending");
         }
     }
 

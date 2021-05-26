@@ -26,6 +26,7 @@ import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.R;
 import com.sinch.android.rtc.calling.Call;
+import com.thz.keystorehelper.KeyStoreManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,6 +52,7 @@ public class MessageMaker {
 
     private static MediaPlayer mp;
     private static String myNumber ="";
+    private static String mySecurityKey ="";
     private static Call currentCallRef;
     private static View myVideoView,remoteVideoView;
     private static String currentCallId = "";
@@ -58,6 +60,10 @@ public class MessageMaker {
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
         return id;
+    }
+
+    public static void setMySecurityKey(String mySecurityKey) {
+        MessageMaker.mySecurityKey = mySecurityKey;
     }
 
     public static View getMyVideoView() {
@@ -483,5 +489,28 @@ public class MessageMaker {
 
     public static Date longToDate(long longdate) throws ParseException {
         return new Date(longdate * 1000);
+    }
+
+    public static String generateSecurityKey(int n) {
+        String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "0123456789"
+                + "abcdefghijklmnopqrstuvxyz";
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+            int index
+                    = (int)(AlphaNumericString.length()
+                    * Math.random());
+            sb.append(AlphaNumericString
+                    .charAt(index));
+        }
+        return sb.toString();
+    }
+
+    public static String encrypt(String mySecurityKey,String data) {
+       return KeyStoreManager.encryptData(data,mySecurityKey);
+    }
+
+    public static String decrypt(String mySecurityKey,String data) {
+        return KeyStoreManager.decryptData(data,mySecurityKey);
     }
 }

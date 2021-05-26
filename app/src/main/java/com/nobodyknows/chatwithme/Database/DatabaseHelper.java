@@ -15,6 +15,7 @@ import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
 import com.nobodyknows.chatwithme.Database.model.CallsDB;
 import com.nobodyknows.chatwithme.Database.model.RecentChats;
+import com.nobodyknows.chatwithme.Database.model.SecurityDB;
 import com.nobodyknows.chatwithme.Database.model.UsersDB;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 
@@ -55,6 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(RecentChats.getCreateTableQuery());
         db.execSQL(UsersDB.getCreateTableQuery());
         db.execSQL(CallsDB.getCreateTableQuery());
+        db.execSQL(SecurityDB.getCreateTableQuery());
     }
     public void createTable(String roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -65,6 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + RecentChats.getTableName());
         db.execSQL("DROP TABLE IF EXISTS " + UsersDB.getTableName());
         db.execSQL("DROP TABLE IF EXISTS " + CallsDB.getTableName());
+        db.execSQL("DROP TABLE IF EXISTS " + SecurityDB.getTableName());
         onCreate(db);
     }
 
@@ -81,6 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         delete(db,RecentChats.getTableName());
         delete(db,UsersDB.getTableName());
         delete(db,CallsDB.getTableName());
+        delete(db,SecurityDB.getTableName());
     }
 
     public void clearAll() {
@@ -88,6 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         clear(db,RecentChats.getTableName());
         clear(db,UsersDB.getTableName());
         clear(db,CallsDB.getTableName());
+        clear(db,SecurityDB.getTableName());
     }
 
     /**
@@ -386,5 +391,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return callModels;
     }
 
+    /**Security update **/
+
+    public long insertInSecurity(String roomId,String securityKey) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        long id = 0;
+        if(!isSecurityInfoExist(roomId,db)) {
+            id = db.insert(SecurityDB.getTableName(),null,getSecurityContentValue(roomId,securityKey));
+        }
+        db.close();
+        return id;
+    }
+
+    private boolean isSecurityInfoExist(String roomId, SQLiteDatabase db) {
+        String selectQuery = "SELECT  * FROM " + SecurityDB.getTableName() + " WHERE " +
+                SecurityDB.COLUMN_ROOM_ID + " = '"+roomId+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.getCount() <=0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
+
+    private ContentValues getSecurityContentValue(String roomId, String securityKey) {
+        ContentValues values = new ContentValues();
+        values.put(SecurityDB.COLUMN_ROOM_ID,roomId);
+        values.put(SecurityDB.COLUMN_SECURITY_KEY,securityKey);
+        return values;
+    }
+
+    public String getSecurityKey(String roomId) {
+        String key= "";
+        String selectQuery = "SELECT  * FROM " + SecurityDB.getTableName() + " WHERE " +
+                SecurityDB.COLUMN_ROOM_ID + " = '"+roomId+"'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                key  = cursor.getString(cursor.getColumnIndex(SecurityDB.COLUMN_SECURITY_KEY));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return key;
+    }
 
 }
