@@ -67,8 +67,11 @@ import com.wafflecopter.multicontactpicker.LimitColumn;
 import com.wafflecopter.multicontactpicker.MultiContactPicker;
 import com.wafflecopter.multicontactpicker.RxContacts.PhoneNumber;
 
+import org.michaelbel.bottomsheet.BottomSheet;
+
 import java.io.File;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -138,11 +141,11 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void addInfoMessage() {
-        Message message = getDefaultObject();
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessageType(MessageType.INFO);
         message.setMessageId("0");
-        message.setMessage("Messages and calls are end-to-end encrypted. No one outside of this chat, not even Chat With Me, can read or listen to them");
-        chatLayoutView.addMessage(message);
+        message.setMessage("Messages and calls are end-to-end encrypted. No one outside of this chat, not even Chat With Me, can read or listen to them.");
+        chatLayoutView.addTopMessage(message);
     }
 
     private void updateStatusViewColor() {
@@ -171,6 +174,11 @@ public class ChatRoom extends AppCompatActivity {
                 databaseHelper.updateUserInfo(user);
             }
         });
+    }
+
+    private void showBottomSheetForWallpaper() {
+        BottomSheet.Builder builder = new BottomSheet.Builder(getApplicationContext());
+        builder.setTitle("Change chat wallpaper").show();
     }
 
     private void updateStatus(Boolean istyping) {
@@ -268,7 +276,7 @@ public class ChatRoom extends AppCompatActivity {
                 unfreind();
                 break;
             case R.id.menu_wallpaper:
-                changeWallpaper();
+                showBottomSheetForWallpaper();
                 break;
             case R.id.menu_mute:
                 if(item.getTitle().equals("Unmute")) {
@@ -453,7 +461,7 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void sendContacts(List<ContactResult> results) {
-        Message message = getDefaultObject();
+        Message message =MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessage("");
         message.setMessageType((results.size() > 1)?MessageType.CONTACT_MULTIPLE:MessageType.CONTACT_SINGLE);
         for(ContactResult contactResult:results) {
@@ -678,7 +686,9 @@ public class ChatRoom extends AppCompatActivity {
 
     private void decryptMessage(Message messageUpdate,Boolean update) {
         try {
-            messageUpdate.setMessage(AESCrypt.decrypt(roomSecurityKey,messageUpdate.getMessage()));
+            if(messageUpdate.getMessage() != null && messageUpdate.getMessage().length() > 0) {
+                messageUpdate.setMessage(AESCrypt.decrypt(roomSecurityKey,messageUpdate.getMessage()));
+            }
             if(update) {
                 chatLayoutView.updateMessage(messageUpdate);
             } else {
@@ -703,20 +713,12 @@ public class ChatRoom extends AppCompatActivity {
     }
 
     private void sendMessage(String messageText) {
-        Message message = getDefaultObject();
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessage(messageText);
         sendNow(message);
     }
 
-    private Message getDefaultObject() {
-        Message message = new Message();
-        message.setMessageId(MessageMaker.createMessageId(myUsername));
-        message.setReceiver(username);
-        message.setSender(myUsername);
-        message.setRoomId(roomid);
-        message.setMessageStatus(MessageStatus.SENDING);
-        return message;
-    }
+
 
     public static <T extends Parcelable> T copy(T orig) {
         Parcel p = Parcel.obtain();
@@ -736,8 +738,9 @@ public class ChatRoom extends AppCompatActivity {
         chatLayoutView.addMessage(message1);
         try {
             if(!isBlocked) {
-
-                message.setMessage(AESCrypt.encrypt(roomSecurityKey,message.getMessage()));
+                if(message.getMessage() != null && message.getMessage().length() > 0 ) {
+                    message.setMessage(AESCrypt.encrypt(roomSecurityKey,message.getMessage()));
+                }
                 message.setMessageStatus(MessageStatus.SENT);
                 firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message1.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

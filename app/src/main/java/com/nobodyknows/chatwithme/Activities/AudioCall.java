@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -102,6 +103,7 @@ public class AudioCall extends AppCompatActivity {
         audioLayout.setVisibility(View.VISIBLE);
         if(making) {
             MessageMaker.videoCall(username);
+            MessageMaker.playRingSound(getApplicationContext());
         }
         MessageMaker.getCurrentCallRef().addCallListener(new VideoCallListener() {
             @Override
@@ -111,6 +113,12 @@ public class AudioCall extends AppCompatActivity {
                 View remoteView = vc.getRemoteView();
                 MessageMaker.setMyVideoView(myPreview);
                 MessageMaker.setRemoteVideoView(remoteView);
+                if(myPreview.getParent() != null) {
+                    ((ViewGroup)myPreview.getParent()).removeView(myPreview);
+                }
+                if(remoteView.getParent() != null) {
+                    ((ViewGroup)remoteView.getParent()).removeView(remoteView);
+                }
                 bigView.addView(remoteView);
                 smallview.addView(myPreview);
                 video.setVisibility(View.VISIBLE);
@@ -138,10 +146,10 @@ public class AudioCall extends AppCompatActivity {
             @Override
             public void onCallEstablished(Call call) {
                 if(MessageMaker.getIsCallStarted()) {
+                    MessageMaker.stopRingtone();
                     MessageMaker.setIsCallStarted(true);
                     changeView();
                 }
-                time.setText(MessageMaker.getFullTimeFromSeconds(call.getDetails().getDuration()));
             }
 
             @Override
@@ -199,6 +207,7 @@ public class AudioCall extends AppCompatActivity {
         audioLayout.setVisibility(View.VISIBLE);
         if(making) {
             MessageMaker.audioCall(username);
+            MessageMaker.playRingSound(getApplicationContext());
         }
         MessageMaker.getCurrentCallRef().addCallListener(new CallListener() {
             @Override
@@ -212,6 +221,7 @@ public class AudioCall extends AppCompatActivity {
             @Override
             public void onCallEstablished(Call call) {
                 if(MessageMaker.getIsCallStarted()) {
+                    MessageMaker.stopRingtone();
                     MessageMaker.setIsCallStarted(true);
                     changeView();
                 }
@@ -332,11 +342,11 @@ public class AudioCall extends AppCompatActivity {
     private void startVideo() {
         if(MessageMaker.getIsVideoOn()) {
             MessageMaker.getCurrentCallRef().pauseVideo();
-            speaker.setImageResource(R.drawable.video_off);
+            video.setImageResource(R.drawable.video_off);
             MessageMaker.setIsVideoOn(false);
         } else {
             MessageMaker.getCurrentCallRef().resumeVideo();
-            speaker.setImageResource(R.drawable.video);
+            video.setImageResource(R.drawable.video);
             MessageMaker.setIsVideoOn(true);
         }
     }

@@ -24,8 +24,6 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.MessageConfiguration;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.Helper;
-import com.capybaralabs.swipetoreply.ISwipeControllerActions;
-import com.capybaralabs.swipetoreply.SwipeController;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -128,14 +126,11 @@ public class ChatLayoutView extends RelativeLayout {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recyclerViewAdapter);;
-        ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         nowSwipableType.add(MessageType.DATE);
         nowSwipableType.add(MessageType.INFO);
         nowSwipableType.add(MessageType.WARNING);
-        nowSwipableType.add(MessageType.MISSED_INCOMING_AUDIO_CALL);
-        nowSwipableType.add(MessageType.MISSED_INCOMING_VIDEO_CALL);
-        nowSwipableType.add(MessageType.MISSED_OUTGOING_AUDIO_CALL);
-        nowSwipableType.add(MessageType.MISSED_OUTGOING_VIDEO_CALL);
+        nowSwipableType.add(MessageType.MISSED_AUDIO_CALL);
+        nowSwipableType.add(MessageType.MISSED_VIDEO_CALL);
         nowSwipableType.add(MessageType.SECURITY_KEY_CHANGED);
         nowSwipableType.add(MessageType.BLOCKED);
         nowSwipableType.add(MessageType.UNBLOCKED);
@@ -143,6 +138,18 @@ public class ChatLayoutView extends RelativeLayout {
         addSwipeRecyclerView();
     }
 
+    public void addTopMessage(Message message) {
+        if(!helper.messageIdExists(message.getMessageId())) {
+            message = correctMessage(message);
+            messages.add(0,message);
+            helper.addMessageId(message.getMessageId());
+            notifyAdapter(true);
+        }
+    }
+
+    public void clearNonSwipableList() {
+        nowSwipableType.clear();
+    }
     public void addInNonSwipable(MessageType messageType) {
         nowSwipableType.add(messageType);
     }

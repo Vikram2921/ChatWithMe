@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.NobodyKnows.chatlayoutview.R;
-import com.capybaralabs.swipetoreply.DimensionUtils;
 
 public class ChatSwipeController extends ItemTouchHelper.Callback {
     private Context mContext;
@@ -39,9 +38,18 @@ public class ChatSwipeController extends ItemTouchHelper.Callback {
         this.mContext = context;
         this.mSwipeControllerActions = swipControllersActions;
 
-        mReplyIcon = mContext.getResources().getDrawable(R.drawable.ic_reply_black_24dp);
+        mReplyIcon = mContext.getResources().getDrawable(R.drawable.ic_reply_back_24dp);
         mReplyIconBackground = mContext.getResources().getDrawable(R.drawable.ic_round_shape);
 
+    }
+
+    private int getDP(float toDP, Context context){
+        if (toDP == 0){
+            return 0;
+        } else{
+            float density = context.getResources().getDisplayMetrics().density;
+            return (int) Math.ceil((density * toDP));
+        }
     }
 
     @Override
@@ -107,7 +115,7 @@ public class ChatSwipeController extends ItemTouchHelper.Callback {
     }
 
     private int convertToDp(int pixels){
-        return DimensionUtils.getDP((float) pixels, mContext);
+        return getDP((float) pixels, mContext);
     }
 
 

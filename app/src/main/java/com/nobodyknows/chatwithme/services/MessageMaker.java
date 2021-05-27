@@ -13,11 +13,13 @@ import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.AudioCall;
@@ -38,6 +40,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.callClient;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.sinchClient;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callIds;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callNotFound;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.calls;
@@ -338,7 +342,12 @@ public class MessageMaker {
                 calls.add(0,callModel);
                 callIds.add(0,callModel.getCallId());
                 callsRecyclerViewAdapter.notifyItemInserted(0);
-
+                if(callModel.getEndCause().equalsIgnoreCase("NO_ANSWER") || callModel.getEndCause().equalsIgnoreCase("FAILURE") || callModel.getEndCause().equalsIgnoreCase("CANCELED") || callModel.getEndCause().equalsIgnoreCase("TIMEOUT")) {
+                    Message message = getDefaultObject(myNumber,callModel.getUsername(),createRoomId(callModel.getUsername()));
+                    message.setMessageStatus(MessageStatus.SENT);
+                    message.setMessageType(callModel.getCalltype().equalsIgnoreCase("Video")?MessageType.MISSED_VIDEO_CALL:MessageType.MISSED_AUDIO_CALL);
+                    sendMessageNow(message);
+                }
             } else {
                 int index = callIds.indexOf(callModel.getCallId());
                 calls.remove(index);
@@ -349,12 +358,24 @@ public class MessageMaker {
         }
     }
 
+    private static void sendMessageNow(Message message) {
+        firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                firebaseService.updateLastMessage(message.getSender(),message.getReceiver(),message);
+            }
+        });
+    }
+
     public static void setCurrentCallRef(Call currentCallRef) {
         if(currentCallRef == null) {
             isCallMuted = false;
             isOnSpeaker = false;
             isVideoOn = false;
             isCallStarted = false;
+            if(mp != null && mp.isPlaying()) {
+                stopRingtone();
+            }
         }
         MessageMaker.currentCallRef = currentCallRef;
     }
@@ -505,5 +526,20 @@ public class MessageMaker {
         return sb.toString();
     }
 
+    public static Message getDefaultObject(String myUsername,String username,String roomid) {
+        Message message = new Message();
+        message.setMessageId(MessageMaker.createMessageId(myUsername));
+        message.setReceiver(username);
+        message.setSender(myUsername);
+        message.setRoomId(roomid);
+        message.setMessageStatus(MessageStatus.SENDING);
+        return message;
+    }
+
+    public static void playRingSound(Context context) {
+        mp = null;
+        mp= MediaPlayer.create(context,R.raw.ringeffect);
+        mp.start();
+    }
 
 }

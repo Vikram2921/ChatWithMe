@@ -19,6 +19,7 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.ContactSingleLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactSingleRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.InfoView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.MissedCallAlertView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewRight;
 
@@ -35,8 +36,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     //*************EXTRAS **************//
     private final int INFO_MESSAGE = 00;
-    private final int DATE_MESSAGE = 2921;
-    private final int WARNNIG_MESSAGE = 01;
+    private final int DATE_MESSAGE = 01;
+    private final int WARNNIG_MESSAGE = 02;
+    private final int MISSED_CALL_ALERT = 03;
     //***********TEXT ***************//
     private final int SENT_TEXT_MESSAGE = 11;
     private final int SENT_LINK_TEXT_MESSAGE = 12;
@@ -99,6 +101,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.dateview,parent,false);
                 viewHolder = new DateView(item);
                 break;
+            case MISSED_CALL_ALERT:
+                item = layoutInflater.inflate(R.layout.infoview,parent,false);
+                viewHolder = new MissedCallAlertView(item);
+                break;
             case SENT_TEXT_MESSAGE:
                 item = layoutInflater.inflate(R.layout.message_right_text,parent,false);
                 viewHolder = new TextMessageViewRight(item);
@@ -140,6 +146,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case DATE_MESSAGE:
                 ((DateView) holder).initalize(message.getMessage());
                 break;
+            case MISSED_CALL_ALERT:
+                ((MissedCallAlertView) holder).initalize(message,myId,userMap);
+                break;
             case SENT_TEXT_MESSAGE:
                 ((TextMessageViewRight) holder).initalize(message);
                 break;
@@ -173,7 +182,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
            type =  DATE_MESSAGE;
        } else if(message.getMessageType() == MessageType.WARNING) {
            type =  WARNNIG_MESSAGE;
-       } else {
+       } else if(message.getMessageType() == MessageType.MISSED_AUDIO_CALL || message.getMessageType() == MessageType.MISSED_VIDEO_CALL) {
+           type =  MISSED_CALL_ALERT;
+       }  else {
            if(message.getSender() != null && message.getSender().length() > 0 && message.getSender().equalsIgnoreCase(myId)) {
                switch (message.getMessageType()) {
                    case TEXT:
