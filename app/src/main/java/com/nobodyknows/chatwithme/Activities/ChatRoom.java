@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -161,24 +162,42 @@ public class ChatRoom extends AppCompatActivity {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 User user = value.toObject(User.class);
-                MessageMaker.loadProfile(getApplicationContext(),user.getProfileUrl(),profileView);
-                nameView.setText(user.getName());
-                lastOnlineDate = user.getLastOnline();
-                lastOnlineStatus = user.getCurrentStatus();
-                statusView.setText(MessageMaker.laodOnlineStatus(lastOnlineStatus,lastOnlineDate));
-                updateStatusViewColor();
-                isVerfied = user.getVerified();
-                if(isVerfied) {
-                    verified.setVisibility(View.VISIBLE);
+                if(user != null) {
+                     MessageMaker.loadProfile(getApplicationContext(),user.getProfileUrl(),profileView);
+                    nameView.setText(user.getName());
+                    lastOnlineDate = user.getLastOnline();
+                    lastOnlineStatus = user.getCurrentStatus();
+                    statusView.setText(MessageMaker.laodOnlineStatus(lastOnlineStatus,lastOnlineDate));
+                    updateStatusViewColor();
+                    isVerfied = user.getVerified();
+                    if(isVerfied) {
+                        verified.setVisibility(View.VISIBLE);
+                    }
+                    databaseHelper.updateUserInfo(user);
                 }
-                databaseHelper.updateUserInfo(user);
             }
         });
     }
 
     private void showBottomSheetForWallpaper() {
-        BottomSheet.Builder builder = new BottomSheet.Builder(getApplicationContext());
-        builder.setTitle("Change chat wallpaper").show();
+        CharSequence cs[] = {"Remove Wallpaper","Change Wallpaper"};
+        Drawable drawable[] = {getResources().getDrawable(R.drawable.ic_baseline_delete_forever_24),getResources().getDrawable(R.drawable.ic_baseline_wallpaper_24)};
+        BottomSheet.Builder builder = new BottomSheet.Builder(ChatRoom.this);
+        builder.setItems(cs, drawable, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(which == 0) {
+                            SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.remove("backgroundPath"+username);
+                            editor.apply();
+                            loadBackgroundImage();
+                        } else if(which == 1) {
+                            changeWallpaper();
+                        }
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     private void updateStatus(Boolean istyping) {
@@ -526,8 +545,10 @@ public class ChatRoom extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(attachemntPane.getVisibility() == View.GONE) {
+                    attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
                     attachemntPane.setVisibility(View.VISIBLE);
                 } else {
+                    attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24);
                     attachemntPane.setVisibility(View.GONE);
                 }
             }
