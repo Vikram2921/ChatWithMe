@@ -87,6 +87,7 @@ public class LoginContinue extends AppCompatActivity {
                         editor.putString("number",users.getContactNumber());
                         editor.putString("name",users.getName());
                         editor.putString("profile",users.getProfileUrl());
+                        editor.putInt("colorCode",users.getColorCode());
                         editor.putString("status",users.getStatus());
                         editor.apply();
                         Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);

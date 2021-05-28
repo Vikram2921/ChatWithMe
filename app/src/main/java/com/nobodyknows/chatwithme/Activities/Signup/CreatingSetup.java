@@ -19,8 +19,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.HashMap;
 import java.util.Map;
 
-import pl.droidsonroids.gif.GifImageView;
-
 public class CreatingSetup extends AppCompatActivity {
 
     private FirebaseService firebaseService;

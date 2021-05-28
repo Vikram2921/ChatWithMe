@@ -20,19 +20,17 @@ import com.bumptech.glide.Glide;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static android.view.View.GONE;
 
 public class Helper {
-    private Integer RECYCLERVIEW = 0;
-    private Integer LISTVIEW = 1;
     private Context context;
     private LayoutInflater layoutInflater;
     private Map<String, User> userMap;
     private String myId;
-    private Integer mode;
     private String DOT_SEPRATOR = " \u25CF ";
     private RecyclerView recyclerView;
     private ListView listView;
@@ -44,13 +42,6 @@ public class Helper {
         userMap = new HashMap();
     }
 
-    public Integer getMode() {
-        return mode;
-    }
-
-    public void setMode(Integer mode) {
-        this.mode = mode;
-    }
 
     public RecyclerView getRecyclerView() {
         return recyclerView;
@@ -131,98 +122,73 @@ public class Helper {
 
 
     public View getReplyMessageView(Message message) {
-        View view = layoutInflater.inflate(R.layout.replyview,null);
-        ImageView preview = view.findViewById(R.id.preview);
-        TextView senderName = view.findViewById(R.id.sendername);
-        TextView messageview = view.findViewById(R.id.message);
-        View bar = view.findViewById(R.id.bar);
-        if(message.getMessageType() == MessageType.DATE) {
-            senderName.setText("Date");
-            messageview.setText(message.getMessage());
-            senderName.setTextColor(Color.BLACK);
-            bar.setBackgroundColor(Color.BLACK);
-            preview.setVisibility(GONE);
-        } else {
-            User user =getUser(message.getSender());
-            senderName.setTextColor(user.getColorCode());
-            if(message.getSender().equalsIgnoreCase(myId)) {
-                senderName.setText("You");
-            } else {
-                senderName.setText(user.getName());
-            }
-            String url = "";
-            if(message.getSharedFiles().size() > 0) {
-                url = message.getSharedFiles().get(0).getPreviewUrl();
-                if(url == null || url.length() == 0) {
-                    url = message.getSharedFiles().get(0).getUrl();
-                }
-            }
-            if(message.getMessageType() == MessageType.IMAGE) {
-                messageview.setText("Photo");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_image_24,0,0,0);
-                Glide.with(getContext()).load(url).override(100,100).into(preview);
-            } else if(message.getMessageType() == MessageType.VIDEO) {
-                messageview.setText("Video");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_videocam_24,0,0,0);
-                Glide.with(getContext()).load(url).override(100,100).into(preview);
-            } else if(message.getMessageType() == MessageType.AUDIO) {
-                messageview.setText("Audio");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_headset_14,0,0,0);
-                preview.setVisibility(GONE);
-            }  else if(message.getMessageType() == MessageType.GIF) {
-                messageview.setText("GIF");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_gif_24,0,0,0);
-                Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
-            }  else if(message.getMessageType() == MessageType.RECORDING) {
-                messageview.setText("Recording");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_mic_24,0,0,0);
-                preview.setVisibility(GONE);
-            }  else if(message.getMessageType() == MessageType.DOCUMENT) {
-                messageview.setText("Document"+DOT_SEPRATOR+message.getSharedFiles().get(0).getName());
-                if(message.getSharedFiles().get(0).getFileInfo() != null && message.getSharedFiles().get(0).getFileInfo().length() > 0) {
-                    messageview.setText(messageview.getText()+DOT_SEPRATOR+message.getSharedFiles().get(0).getFileInfo());
-                }
-                preview.setVisibility(GONE);
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_insert_drive_file_24,0,0,0);
-            }  else if(message.getMessageType() == MessageType.CONTACT_SINGLE) {
-
-            }  else if(message.getMessageType() == MessageType.STICKER) {
-                messageview.setText("Sticker");
-                messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_emoji_emotions_24,0,0,0);
-                Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
-            }   else {
-                messageview.setText(message.getMessage());
-                preview.setVisibility(GONE);
-                messageview.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
-            }
-            bar.setBackgroundColor(user.getColorCode());
+        View view = layoutInflater.inflate(R.layout.reply_view,null);
+        TextView senderName = view.findViewById(R.id.sendernamereply);
+        TextView messageview = view.findViewById(R.id.messageReply);
+        ImageView preview = view.findViewById(R.id.previewreply);
+        TextView messagetime = view.findViewById(R.id.messagetimereply);
+        User user =getUser(message.getSender());
+        senderName.setTextColor(user.getColorCode());
+        String day = "";
+        if(LayoutService.getFormatedDate("dd-MM-yyyy",message.getSentAt()).equals(LayoutService.getFormatedDate("dd-MM-yyyy",new Date()))) {
+            day = "Today";
+        } else  {
+            day = LayoutService.getFormatedDate("dd MMMM yyyy",message.getSentAt());
         }
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view1) {
-                if(messageIds.contains(message.getMessageId())) {
-                    int index = messageIds.indexOf(message.getMessageId());
-                    if(mode == LISTVIEW) {
-                        listView.smoothScrollToPosition(index);
-                        View item = getViewByPosition(index,listView);
-                        if(item != null) {
-                            item.setBackgroundColor(Color.parseColor("#4003A9F4"));
-                            new Handler().postDelayed(() -> item.setBackgroundColor(Color.TRANSPARENT), 1000);
-                        }
-                    } else {
-                        recyclerView.scrollToPosition(index);
-                        RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(index);
-                        if(holder != null) {
-                            View item = holder.itemView;
-                            item.setBackgroundColor(Color.parseColor("#4003A9F4"));
-                            new Handler().postDelayed(() -> item.setBackgroundColor(Color.TRANSPARENT), 1000);
-                        }
-                    }
-                }
+        messagetime.setText(LayoutService.getFormatedDate("hh:mm a",message.getSentAt())+", "+day);
+        if(message.getSender().equalsIgnoreCase(myId)) {
+            senderName.setText("You");
+        } else {
+            senderName.setText(user.getName());
+        }
+        String url = "";
+        if(message.getSharedFiles().size() > 0) {
+            url = message.getSharedFiles().get(0).getPreviewUrl();
+            if(url == null || url.length() == 0) {
+                url = message.getSharedFiles().get(0).getUrl();
             }
-        });
+        }
+        if(message.getMessageType() == MessageType.IMAGE) {
+            preview.setVisibility(View.VISIBLE);
+            messageview.setText("Photo");
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_image_24,0,0,0);
+            Glide.with(getContext()).load(url).override(100,100).into(preview);
+        } else if(message.getMessageType() == MessageType.VIDEO) {
+            preview.setVisibility(View.VISIBLE);
+            messageview.setText("Video");
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_videocam_24,0,0,0);
+            Glide.with(getContext()).load(url).override(100,100).into(preview);
+        } else if(message.getMessageType() == MessageType.AUDIO) {
+            messageview.setText("Audio");
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_headset_14,0,0,0);
+        }  else if(message.getMessageType() == MessageType.GIF) {
+            messageview.setText("GIF");
+            preview.setVisibility(View.VISIBLE);
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_gif_24,0,0,0);
+            Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
+        }  else if(message.getMessageType() == MessageType.RECORDING) {
+            messageview.setText("Recording");
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_mic_24,0,0,0);
+        }  else if(message.getMessageType() == MessageType.DOCUMENT) {
+            messageview.setText("Document"+DOT_SEPRATOR+message.getSharedFiles().get(0).getName());
+            if(message.getSharedFiles().get(0).getFileInfo() != null && message.getSharedFiles().get(0).getFileInfo().length() > 0) {
+                messageview.setText(messageview.getText()+DOT_SEPRATOR+message.getSharedFiles().get(0).getFileInfo());
+            }
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_insert_drive_file_24,0,0,0);
+        }  else if(message.getMessageType() == MessageType.CONTACT_SINGLE) {
+
+        }  else if(message.getMessageType() == MessageType.STICKER) {
+            messageview.setText("Sticker");
+            preview.setVisibility(View.VISIBLE);
+            messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_emoji_emotions_24,0,0,0);
+            Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
+        }   else {
+            messageview.setText(message.getMessage());
+            messageview.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
+        }
         return view;
     }
+
 
     private View getViewByPosition(int pos, ListView listView) {
         final int firstListItemPosition = listView.getFirstVisiblePosition();

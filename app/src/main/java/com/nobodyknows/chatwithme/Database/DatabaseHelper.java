@@ -395,12 +395,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     /**Security update **/
 
     public long insertInSecurity(String roomId, SecurityDTO securityDTO) {
-        SQLiteDatabase db  = this.getWritableDatabase();
         long id = 0;
-        if(!isSecurityInfoExist(roomId,db)) {
-            id = db.insert(SecurityDB.getTableName(),null,getSecurityContentValue(roomId,securityDTO));
+        if(securityDTO != null) {
+            SQLiteDatabase db  = this.getWritableDatabase();
+            if(!isSecurityInfoExist(roomId,db)) {
+                id = db.insert(SecurityDB.getTableName(),null,getSecurityContentValue(roomId,securityDTO));
+            }
+            db.close();
         }
-        db.close();
         return id;
     }
 

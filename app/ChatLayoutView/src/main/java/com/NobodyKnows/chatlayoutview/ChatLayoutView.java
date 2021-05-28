@@ -3,6 +3,7 @@ package com.NobodyKnows.chatlayoutview;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -40,7 +41,7 @@ public class ChatLayoutView extends RelativeLayout {
     private RecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<Message> messages = new ArrayList<>();
     private String myUsername = "",roomId= "";
-    private Helper helper;
+    public static Helper helper;
     private Context context;
     private ArrayList<String> dates =new ArrayList<>();
     private Map<MessageType,String> downloadPaths = new HashMap<>();
@@ -85,15 +86,24 @@ public class ChatLayoutView extends RelativeLayout {
     public void setup(String myUsername,String roomId,Boolean saveToDatabase,DatabaseHelper databaseHelper,ChatLayoutListener chatLayoutListener) {
         this.myUsername = myUsername;
         this.roomId = roomId;
+        this.databaseHelper = databaseHelper;
         this.saveToDatabase = saveToDatabase;
         this.chatLayoutListener = chatLayoutListener;
         helper = new Helper(context);
         setupRecyclerView();
-        if(saveToDatabase) {
-            this.databaseHelper = databaseHelper;
+    }
+
+    public void loadSavedChat() {
+        if(saveToDatabase && databaseHelper != null) {
             databaseHelper.createTable(roomId);
             loadPreviousChatMessages();
+        } else {
+            logError("Database Helper is null or saveToDatabse is false.");
         }
+    }
+
+    private void logError(String message) {
+        Log.d("LOGCHATLAYOUT", "Chat Layout Log : "+message);
     }
 
     private void loadPreviousChatMessages() {
@@ -159,8 +169,7 @@ public class ChatLayoutView extends RelativeLayout {
         ChatSwipeController controller = new ChatSwipeController(getContext(), new CSwipControllersActions() {
             @Override
             public void onSwipePerformed(int position) {
-                //chatLayoutListener.onSwipeToReply(messages.get(position),helper.getReplyMessageView(messages.get(position)));
-
+                chatLayoutListener.onSwipeToReply(messages.get(position),helper.getReplyMessageView(messages.get(position)));
             }
 
             @Override
@@ -183,9 +192,6 @@ public class ChatLayoutView extends RelativeLayout {
     }
 
     private Message correctMessage(Message message) {
-        if(message.getMessageType() == MessageType.GIF || message.getMessageType() == MessageType.STICKER) {
-            message.setMessage("");
-        }
         message.setRoomId(roomId);
         if(message.getMessageConfiguration() == null) {
             message.setMessageConfiguration(getMessageConfig(message));
@@ -312,9 +318,14 @@ public class ChatLayoutView extends RelativeLayout {
             helper.addMessageId(dateMessage.getMessageId());
         }
         if(message.getIsRepliedMessage()) {
-            if(message.getReplyMessageView() == null) {
-                Message replyMessage = messages.get(helper.getMessageIdPositon(message.getRepliedMessageId()));
-                message.setReplyMessageView(helper.getReplyMessageView(replyMessage));
+            if(message.getReplyMessage() == null) {
+                int index = helper.getMessageIdPositon(message.getRepliedMessageId());
+                if(index > 0) {
+                    Message replyMessage = messages.get(helper.getMessageIdPositon(message.getRepliedMessageId()));
+                    message.setReplyMessage(replyMessage);
+                } else {
+                    message.setReplyMessage(null);
+                }
             }
         }
         messages.add(message);

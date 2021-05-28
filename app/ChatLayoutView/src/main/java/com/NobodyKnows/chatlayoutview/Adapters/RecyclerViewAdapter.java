@@ -17,11 +17,21 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.ContactMultipleLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactMultipleRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactSingleLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactSingleRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.GIFViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.GIFViewRightReply;
+import com.NobodyKnows.chatlayoutview.ViewHolders.GifViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.GifViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.InfoView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MissedCallAlertView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeftReply;
+import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRightReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewRightReply;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -74,6 +84,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private final int SENT_CONTACT_MULTIPLE = 92;
     private final int RECEIVE_CONTACT_SINGLE = 93;
     private final int RECEIVE_CONTACT_MULTIPLE = 94;
+
+    /** REPLY IDS ***/
+    private final int SENT_TEXT_MESSAGE_REPLY = 101;
+    private final int RECEIVE_TEXT_MESSAGE_REPLY = 102;
+    private final int SENT_GIF_REPLY = 103;
+    private final int RECEIVE_GIF_REPLY = 104;
+    private final int SENT_STICKER_REPLY = 105;
+    private final int RECEIVE_STICKER_REPLY = 106;
 
     private String myId = "";
     private ChatLayoutListener chatLayoutListener;
@@ -129,6 +147,46 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_left_contact_multiple,parent,false);
                 viewHolder = new ContactMultipleLeft(item);
                 break;
+            case SENT_TEXT_MESSAGE_REPLY:
+                item = layoutInflater.inflate(R.layout.message_right_text_reply,parent,false);
+                viewHolder = new TextMessageViewRightReply(item);
+                break;
+            case RECEIVE_TEXT_MESSAGE_REPLY:
+                item = layoutInflater.inflate(R.layout.message_left_text_reply,parent,false);
+                viewHolder = new TextMessageViewLeftReply(item);
+                break;
+            case SENT_GIF:
+                item = layoutInflater.inflate(R.layout.message_gif_right,parent,false);
+                viewHolder = new GIFViewRight(item);
+                break;
+            case RECEIVE_GIF:
+                item = layoutInflater.inflate(R.layout.message_gif_left,parent,false);
+                viewHolder = new GifViewLeft(item);
+                break;
+            case SENT_STICKER:
+                item = layoutInflater.inflate(R.layout.message_sticker_right,parent,false);
+                viewHolder = new StickerViewRight(item);
+                break;
+            case RECEIVE_STICKER:
+                item = layoutInflater.inflate(R.layout.message_sticker_left,parent,false);
+                viewHolder = new StickerViewLeft(item);
+                break;
+            case SENT_GIF_REPLY:
+                item = layoutInflater.inflate(R.layout.message_gif_right_reply,parent,false);
+                viewHolder = new GIFViewRightReply(item);
+                break;
+            case RECEIVE_GIF_REPLY:
+                item = layoutInflater.inflate(R.layout.message_gif_left_reply,parent,false);
+                viewHolder = new GifViewLeftReply(item);
+                break;
+            case SENT_STICKER_REPLY:
+                item = layoutInflater.inflate(R.layout.message_sticker_right_reply,parent,false);
+                viewHolder = new StickerViewRightReply(item);
+                break;
+            case RECEIVE_STICKER_REPLY:
+                item = layoutInflater.inflate(R.layout.message_sticker_left_reply,parent,false);
+                viewHolder = new StickerViewLeftReply(item);
+                break;
             default:
                 break;
         }
@@ -167,6 +225,36 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case RECEIVE_CONTACT_MULTIPLE:
                 ((ContactMultipleLeft) holder).initalize(context,message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
+            case SENT_TEXT_MESSAGE_REPLY:
+                ((TextMessageViewRightReply) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
+                break;
+            case RECEIVE_TEXT_MESSAGE_REPLY:
+                ((TextMessageViewLeftReply) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
+                break;
+            case SENT_GIF:
+                ((GIFViewRight) holder).initalize(message,context);
+                break;
+            case RECEIVE_GIF:
+                ((GifViewLeft) holder).initalize(message,context);
+                break;
+            case SENT_STICKER:
+                ((StickerViewRight) holder).initalize(message,context);
+                break;
+            case RECEIVE_STICKER:
+                ((StickerViewLeft) holder).initalize(message,context);
+                break;
+            case SENT_GIF_REPLY:
+                ((GIFViewRightReply) holder).initalize(message,context);
+                break;
+            case RECEIVE_GIF_REPLY:
+                ((GifViewLeftReply) holder).initalize(message,context);
+                break;
+            case SENT_STICKER_REPLY:
+                ((StickerViewRightReply) holder).initalize(message,context);
+                break;
+            case RECEIVE_STICKER_REPLY:
+                ((StickerViewLeftReply) holder).initalize(message,context);
+                break;
             default:
                 break;
         }
@@ -188,7 +276,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
            if(message.getSender() != null && message.getSender().length() > 0 && message.getSender().equalsIgnoreCase(myId)) {
                switch (message.getMessageType()) {
                    case TEXT:
-                       type =  SENT_TEXT_MESSAGE;
+                       if(message.getIsRepliedMessage()) {
+                           type =  SENT_TEXT_MESSAGE_REPLY;
+                       } else {
+                           type =  SENT_TEXT_MESSAGE;
+                       }
                        break;
                    case CONTACT_SINGLE:
                        type =  SENT_CONTACT_SINGLE;
@@ -196,19 +288,51 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                    case CONTACT_MULTIPLE:
                        type =  SENT_CONTACT_MULTIPLE;
                        break;
+                   case GIF:
+                       if(message.getIsRepliedMessage()) {
+                           type =  SENT_GIF_REPLY;
+                       } else {
+                           type =  SENT_GIF;
+                       }
+                       break;
+                   case STICKER:
+                       if(message.getIsRepliedMessage()) {
+                           type =  SENT_STICKER_REPLY;
+                       } else {
+                           type =  SENT_STICKER;
+                       }
+                       break;
                    default:
                        break;
                }
            } else {
                switch (message.getMessageType()) {
                    case TEXT:
-                       type =  RECEIVE_TEXT_MESSAGE;
+                       if(message.getIsRepliedMessage()) {
+                           type =  RECEIVE_TEXT_MESSAGE_REPLY;
+                       } else {
+                           type =  RECEIVE_TEXT_MESSAGE;
+                       }
                        break;
                    case CONTACT_SINGLE:
                        type =  RECEIVE_CONTACT_SINGLE;
                        break;
                    case CONTACT_MULTIPLE:
                        type =  RECEIVE_CONTACT_MULTIPLE;
+                       break;
+                   case GIF:
+                       if(message.getIsRepliedMessage()) {
+                           type =  RECEIVE_GIF_REPLY;
+                       } else {
+                           type =  RECEIVE_GIF;
+                       }
+                       break;
+                   case STICKER:
+                       if(message.getIsRepliedMessage()) {
+                           type =  RECEIVE_STICKER_REPLY;
+                       } else {
+                           type =  RECEIVE_STICKER;
+                       }
                        break;
                    default:
                        break;

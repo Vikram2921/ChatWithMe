@@ -23,6 +23,11 @@ import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
+import com.giphy.sdk.ui.GPHSettings;
+import com.giphy.sdk.ui.Giphy;
+import com.giphy.sdk.ui.themes.GPHTheme;
+import com.giphy.sdk.ui.themes.GridType;
+import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -74,6 +79,7 @@ public class Dashboard extends AppCompatActivity {
     private String sinchApplicationKey = "4f4a2900-a600-45ef-9e35-d2d20b6b2e93";
     private String sinchApplicationSecret = "ML6bBC1ri0GvMuNfI93sWw==";
     public static SinchClient sinchClient;
+    public static String GIPHY_KEY = "xEH0o5bSCOBYPjXj7tjqmV2YuTML8FjN";
     public static CallClient callClient;
     private CallClientListener callClientListener;
     @Override
@@ -99,6 +105,7 @@ public class Dashboard extends AppCompatActivity {
         databaseHelper.createTable();
         EmojiManager.install(new GoogleEmojiProvider());
         setupSecuritySetup();
+        Giphy.INSTANCE.configure(getApplicationContext(),GIPHY_KEY,true,null);
       //  setupBlueTooth();
         Contacts.initialize(getApplicationContext());
         init();

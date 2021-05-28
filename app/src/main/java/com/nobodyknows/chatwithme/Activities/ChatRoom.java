@@ -22,11 +22,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +40,12 @@ import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
+import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
+import com.giphy.sdk.core.models.Media;
+import com.giphy.sdk.ui.GPHContentType;
+import com.giphy.sdk.ui.GPHSettings;
+import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,8 +65,6 @@ import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 import com.scottyab.aescrypt.AESCrypt;
-//import com.thz.keystorehelper.EncryptionDecryptionListener;
-//import com.thz.keystorehelper.KeyStoreManager;
 import com.vanniktech.emoji.EmojiEditText;
 import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
@@ -68,6 +74,7 @@ import com.wafflecopter.multicontactpicker.LimitColumn;
 import com.wafflecopter.multicontactpicker.MultiContactPicker;
 import com.wafflecopter.multicontactpicker.RxContacts.PhoneNumber;
 
+import org.jetbrains.annotations.NotNull;
 import org.michaelbel.bottomsheet.BottomSheet;
 
 import java.io.File;
@@ -81,10 +88,11 @@ import java.util.Map;
 import at.markushi.ui.CircleButton;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.GIPHY_KEY;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
-public class ChatRoom extends AppCompatActivity {
+public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.GifSelectionListener {
 
     private static final int CONTACT_PICKER_REQUEST = 2921;
     private String username,name,profile,lastOnlineStatus;
@@ -105,9 +113,12 @@ public class ChatRoom extends AppCompatActivity {
     private View rootView;
     private String blockedBy = "";
     private boolean isMuted = false;
-    private CircleButton contacts;
+    private CircleButton contacts,gif;
     private Boolean isIamTyping = false;
+    private Message repliedMessage = null;
     private String roomSecurityKey = "";
+    private View replyview;
+    private ImageView cancel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +209,11 @@ public class ChatRoom extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 }).show();
+    }
+
+    private void openGiphymenu() {
+        GPHSettings settings = new GPHSettings();
+        GiphyDialogFragment.Companion.newInstance(settings,GIPHY_KEY,true).show(getSupportFragmentManager(),"giphy");
     }
 
     private void updateStatus(Boolean istyping) {
@@ -466,7 +482,15 @@ public class ChatRoom extends AppCompatActivity {
                 } else if(resultCode == RESULT_CANCELED){
                     System.out.println("User closed the picker without selecting items.");
                 }
-            } else {
+            } else if(requestCode==299221) {
+                String url=data.getStringExtra("url");
+                String type=data.getStringExtra("type");
+                if(type.equalsIgnoreCase("GIF")) {
+                    sendGif(url);
+                } else {
+                    sendSticker(url);
+                }
+            }   else {
                 Uri uri = data.getData();
                 File file = ImagePicker.Companion.getFile(data);
                 String profilePath = file.getPath();
@@ -477,6 +501,20 @@ public class ChatRoom extends AppCompatActivity {
                 loadBackgroundImage();
             }
         }
+    }
+
+    private void sendGif(String uri) {
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+        message.setMessageType(MessageType.GIF);
+        message.setMessage(uri);
+        sendNow(message);
+    }
+
+    private void sendSticker(String uri) {
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+        message.setMessageType(MessageType.STICKER);
+        message.setMessage(uri);
+        sendNow(message);
     }
 
     private void sendContacts(List<ContactResult> results) {
@@ -532,7 +570,18 @@ public class ChatRoom extends AppCompatActivity {
     private void init() {
         attachemntPane = findViewById(R.id.attachmentpane);
         attachment = findViewById(R.id.attachment);
+        replyview = findViewById(R.id.replyview);
         contacts = findViewById(R.id.contact);
+        gif = findViewById(R.id.gif);
+        cancel = findViewById(R.id.cancel_reply);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                repliedMessage = null;
+                replyview.setVisibility(View.GONE);
+                cancel.setVisibility(View.GONE);
+            }
+        });
         attachemntPane.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -551,6 +600,13 @@ public class ChatRoom extends AppCompatActivity {
                     attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24);
                     attachemntPane.setVisibility(View.GONE);
                 }
+            }
+        });
+        gif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                attachemntPane.setVisibility(View.GONE);
+                openGiphymenu();
             }
         });
         contacts.setOnClickListener(new View.OnClickListener() {
@@ -754,9 +810,18 @@ public class ChatRoom extends AppCompatActivity {
         return copy;
     }
 
+
     private void sendNow(Message message) {
+        if(repliedMessage != null ){
+            message.setIsRepliedMessage(true);
+            message.setReplyMessage(repliedMessage);
+            message.setRepliedMessageId(repliedMessage.getMessageId());
+        }
         Message message1 = message.clone();
         chatLayoutView.addMessage(message1);
+        repliedMessage = null;
+        replyview.setVisibility(View.GONE);
+        cancel.setVisibility(View.GONE);
         try {
             if(!isBlocked) {
                 if(message.getMessage() != null && message.getMessage().length() > 0 ) {
@@ -801,7 +866,12 @@ public class ChatRoom extends AppCompatActivity {
         chatLayoutView.setup(myUsername, roomid, true,databaseHelperChat, new ChatLayoutListener() {
             @Override
             public void onSwipeToReply(Message message, View replyView) {
-
+                if(replyview != null) {
+                    replyview.setVisibility(View.VISIBLE);
+                    LayoutService.updateReplyView(message,replyview);
+                    repliedMessage = message;
+                    cancel.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -854,14 +924,16 @@ public class ChatRoom extends AppCompatActivity {
                 }
             }
         });
-        addInfoMessage();
         User myUser = new User();
         myUser.setName(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"name"));
         myUser.setContactNumber(myUsername);
+        myUser.setColorCode(MessageMaker.getFromSharedPrefrencesInt(getApplicationContext(),"colorCode"));
         chatLayoutView.addUser(myUser);
         User freinduser = databaseHelper.getUser(username);
         chatLayoutView.addUser(freinduser);
+        chatLayoutView.loadSavedChat();
         loadBackgroundImage();
+        addInfoMessage();
     }
 
     private void addContactLocal(Contact contact) {
@@ -991,4 +1063,28 @@ public class ChatRoom extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void didSearchTerm(@NotNull String s) {
+
+    }
+
+    @Override
+    public void onDismissed(@NotNull GPHContentType gphContentType) {
+
+    }
+
+    @Override
+    public void onGifSelected(@NotNull Media media, @org.jetbrains.annotations.Nullable String s, @NotNull GPHContentType gphContentType) {
+        String type = gphContentType.getMediaType().name();
+        String url = media.getEmbedUrl();
+        url = url.replaceAll("https://giphy.com/embed","https://media.giphy.com/media");
+        url += "/giphy.gif";
+        Log.d ("TAGFINDURL", "onGifSelected: "+media.getEmbedUrl());
+        Log.d("TAGFINDURL", "onGifSelected: "+url);
+        if(type.equalsIgnoreCase("gif")) {
+            sendGif(url);
+        } else if(type.equalsIgnoreCase("sticker")) {
+            sendSticker(url);
+        }
+    }
 }

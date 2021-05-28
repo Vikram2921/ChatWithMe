@@ -25,19 +25,9 @@ public class Message implements Cloneable {
     private String repliedMessageId = "";
     private MessageStatus messageStatus = MessageStatus.SENT;
     private MessageConfiguration messageConfiguration;
-    private View replyMessageView;
-    private View customView;
     private ArrayList<SharedFile> sharedFiles = new ArrayList<>();
     private ArrayList<Contact> contacts = new ArrayList<>();
-    private Boolean loadedFromDB = false;
-
-    public Boolean getLoadedFromDB() {
-        return loadedFromDB;
-    }
-
-    public void setLoadedFromDB(Boolean loadedFromDB) {
-        this.loadedFromDB = loadedFromDB;
-    }
+    private Message replyMessage = null;
 
     public String getMessageId() {
         return messageId;
@@ -175,28 +165,20 @@ public class Message implements Cloneable {
         this.repliedMessageId = repliedMessageId;
     }
 
-    public View getReplyMessageView() {
-        return replyMessageView;
-    }
-
-    public void setReplyMessageView(View replyMessageView) {
-        this.replyMessageView = replyMessageView;
-    }
-
-    public View getCustomView() {
-        return customView;
-    }
-
-    public void setCustomView(View customView) {
-        this.customView = customView;
-    }
-
     public ArrayList<Contact> getContacts() {
         return contacts;
     }
 
     public void setContacts(ArrayList<Contact> contacts) {
         this.contacts = contacts;
+    }
+
+    public Message getReplyMessage() {
+        return replyMessage;
+    }
+
+    public void setReplyMessage(Message replyMessage) {
+        this.replyMessage = replyMessage;
     }
 
     public Message clone()

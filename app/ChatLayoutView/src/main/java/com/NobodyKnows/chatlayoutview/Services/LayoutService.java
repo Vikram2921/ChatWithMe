@@ -19,6 +19,8 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +29,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.NobodyKnows.chatlayoutview.ChatLayoutView.helper;
 
 public class LayoutService {
     private static SeekBar LseekBar;
@@ -44,6 +48,20 @@ public class LayoutService {
         return currentTime.toUpperCase();
     }
 
+    public static String getMessageText(Message message) {
+        if(message.getMessageType() == MessageType.CONTACT_SINGLE ) {
+            return message.getContacts().size()+" Contact.";
+        } else  if(message.getMessageType() == MessageType.CONTACT_MULTIPLE) {
+            return message.getContacts().size()+" Contacts.";
+        } else if(message.getMessageType() == MessageType.GIF) {
+            return "GIF";
+        } else if(message.getMessageType() == MessageType.STICKER) {
+            return "Sticker";
+        } else {
+            return message.getMessage();
+        }
+    }
+
     public static void updateMessageStatus(Message message, TextView textView) {
         MessageStatus status = message.getMessageStatus();
         if(status == MessageStatus.SEEN && message.getSeenAt() != null) {
@@ -54,6 +72,33 @@ public class LayoutService {
             textView.setText("Sent at "+getFormatedDate("hh:mm a",message.getSentAt()));
         } else if(status == MessageStatus.SENDING) {
             textView.setText("Sending");
+        }
+    }
+
+    public static void updateReplyView(Message message,View view) {
+        TextView sendernameReply = view.findViewById(R.id.sendernamereply);
+        TextView messageTimeReply = view.findViewById(R.id.messagetimereply);
+        TextView messageReply = view.findViewById(R.id.messageReply);
+        ImageView previewReply = view.findViewById(R.id.previewreply);
+        if(message != null) {
+            sendernameReply.setTextColor(helper.getUser(message.getSender()).getColorCode());
+            sendernameReply.setText(helper.getUser(message.getSender()).getName());
+            String day = "";
+            if(LayoutService.getFormatedDate("dd-MM-yyyy",message.getSentAt()).equals(LayoutService.getFormatedDate("dd-MM-yyyy",new Date()))) {
+                day = "Today";
+            } else  {
+                day = LayoutService.getFormatedDate("dd MMMM yyyy",message.getSentAt());
+            }
+            messageTimeReply.setText(LayoutService.getFormatedDate("hh:mm a",message.getSentAt())+", "+day);
+            messageReply.setText(getMessageText(message));
+        } else {
+            sendernameReply.setVisibility(View.GONE);
+            messageTimeReply.setVisibility(View.GONE);
+            messageReply.setText("This message was deleted from this chat.");
+        }
+        if(message.getMessageType() == MessageType.GIF || message.getMessageType() == MessageType.STICKER) {
+            previewReply.setVisibility(View.VISIBLE);
+            Glide.with(view).load(message.getMessage()).into(previewReply);
         }
     }
 

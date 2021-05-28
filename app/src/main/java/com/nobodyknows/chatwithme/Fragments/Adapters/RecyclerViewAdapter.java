@@ -78,7 +78,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             MessageType messageType = user.getLastMessage().getMessageType();
             if(messageType == MessageType.CONTACT_MULTIPLE || messageType == MessageType.CONTACT_SINGLE) {
                 holder.lastMessage.setText(holder.lastMessage.getText()+"Shared "+user.getLastMessage().getContacts().size()+" Contacts.");
-            } else {
+            } else if(messageType == MessageType.GIF ) {
+                holder.lastMessage.setText(holder.lastMessage.getText()+"Shared GIF.");
+            } else if(messageType == MessageType.STICKER ) {
+                holder.lastMessage.setText(holder.lastMessage.getText()+"Shared Sticker.");
+            }  else {
                 holder.lastMessage.setText(holder.lastMessage.getText()+user.getLastMessage().getMessage());
             }
             holder.lastDate.setReferenceTime(user.getLastMessage().getSentAt().getTime());
