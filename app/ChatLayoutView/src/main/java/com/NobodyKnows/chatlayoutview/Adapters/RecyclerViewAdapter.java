@@ -28,6 +28,8 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRightReply;
+import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageLinkViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageLinkViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.TextMessageViewRight;
@@ -187,6 +189,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_sticker_left_reply,parent,false);
                 viewHolder = new StickerViewLeftReply(item);
                 break;
+            case SENT_LINK_TEXT_MESSAGE:
+                item = layoutInflater.inflate(R.layout.message_right_text_link,parent,false);
+                viewHolder = new TextMessageLinkViewRight(item);
+                break;
+            case RECEIVE_LINK_TEXT_MESSAGE:
+                item = layoutInflater.inflate(R.layout.message_left_text_link,parent,false);
+                viewHolder = new TextMessageLinkViewLeft(item);
+                break;
             default:
                 break;
         }
@@ -255,6 +265,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case RECEIVE_STICKER_REPLY:
                 ((StickerViewLeftReply) holder).initalize(message,context);
                 break;
+            case SENT_LINK_TEXT_MESSAGE:
+                ((TextMessageLinkViewRight) holder).initalize(message);
+                break;
+            case RECEIVE_LINK_TEXT_MESSAGE:
+                ((TextMessageLinkViewLeft) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
+                break;
             default:
                 break;
         }
@@ -302,6 +318,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                            type =  SENT_STICKER;
                        }
                        break;
+                   case LINK:
+                       type = SENT_LINK_TEXT_MESSAGE;
                    default:
                        break;
                }
@@ -334,6 +352,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                            type =  RECEIVE_STICKER;
                        }
                        break;
+                   case LINK:
+                       type = RECEIVE_LINK_TEXT_MESSAGE;
                    default:
                        break;
                }

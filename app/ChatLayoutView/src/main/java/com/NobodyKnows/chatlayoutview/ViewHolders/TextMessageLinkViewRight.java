@@ -1,9 +1,7 @@
 package com.NobodyKnows.chatlayoutview.ViewHolders;
 
-import android.content.Context;
-import android.util.Log;
+import android.text.util.Linkify;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,24 +10,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.R;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 
 
-public class StickerViewRight extends RecyclerView.ViewHolder {
+public class TextMessageLinkViewRight extends RecyclerView.ViewHolder {
     View view;
     TextView textView;
-    public StickerViewRight(@NonNull View itemView) {
+    public TextMessageLinkViewRight(@NonNull View itemView) {
         super(itemView);
         view = itemView;
     }
 
-    public void initalize(Message message, Context context) {
-        ImageView imageView = view.findViewById(R.id.gif);
+    public void initalize(Message message) {
+        TextView messageText = view.findViewById(R.id.messagetext);
         TextView status = view.findViewById(R.id.status);
-        Glide.with(context).load(message.getMessage()).apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC)).into(imageView);
+        messageText.setAutoLinkMask(Linkify.ALL);
+        messageText.setText(message.getMessage());
         LayoutService.updateMessageStatus(message,status);
+        LayoutService.updateLinkView(message.getMessage(),view.findViewById(R.id.linkview));
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

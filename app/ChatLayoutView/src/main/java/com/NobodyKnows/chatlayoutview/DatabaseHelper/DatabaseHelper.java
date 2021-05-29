@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.ContactDB;
+import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.LinkDB;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.MessageDB;
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
@@ -18,6 +19,8 @@ import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.github.ponnamkarthik.richlinkpreview.MetaData;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -43,6 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(MessageDB.getCreateTableQuery(roomId));
         db.execSQL(ContactDB.getCreateTableQuery());
+        db.execSQL(LinkDB.getCreateTableQuery());
     }
 
     @Override
@@ -61,12 +65,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         delete(db, MessageDB.getTableName(roomId));
         delete(db, ContactDB.getTableName());
+        delete(db, LinkDB.getTableName());
     }
 
     public void clearAll(String roomId) {
         SQLiteDatabase db = this.getWritableDatabase();
         clear(db, MessageDB.getTableName(roomId));
         clear(db, ContactDB.getTableName());
+        clear(db, LinkDB.getTableName());
     }
 
     /**
@@ -256,4 +262,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
+    public MetaData getLink(String link) {
+        MetaData metaData = null;
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String selectQuery = "SELECT  * FROM " + LinkDB.getTableName() + " WHERE " +
+                LinkDB.COLUMN_URL + " = '"+link+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.moveToFirst()) {
+            do{
+                metaData = convertToMetadata(cursor);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return metaData;
+    }
+
+    public long insertInLinks(MetaData metaData) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        long id = 0;
+        if(!isLinkExist(metaData.getUrl(),db)) {
+            id = db.insert(LinkDB.getTableName(),null, getLinkContentValue(metaData));
+        }
+        db.close();
+        return id;
+    }
+
+    private ContentValues getLinkContentValue(MetaData metaData) {
+        ContentValues values = new ContentValues();
+        values.put(LinkDB.COLUMN_URL,metaData.getUrl());
+        values.put(LinkDB.COLUMN_IMAGEURL,metaData.getImageurl());
+        values.put(LinkDB.COLUMN_TITLE,metaData.getTitle());
+        values.put(LinkDB.COLUMN_DESCRIPTION,metaData.getDescription());
+        values.put(LinkDB.COLUMN_SITENAME,metaData.getSitename());
+        values.put(LinkDB.COLUMN_MEDIATYPE,metaData.getMediatype());
+        values.put(LinkDB.COLUMN_FAVICON,metaData.getFavicon());
+        return values;
+    }
+
+    private MetaData convertToMetadata(Cursor cursor) {
+        MetaData metaData = new MetaData();
+        metaData.setUrl(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_URL)));
+        metaData.setImageurl(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_IMAGEURL)));
+        metaData.setTitle(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_TITLE)));
+        metaData.setDescription(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_DESCRIPTION)));
+        metaData.setSitename(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_SITENAME)));
+        metaData.setMediatype(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_MEDIATYPE)));
+        metaData.setFavicon(cursor.getString(cursor.getColumnIndex(LinkDB.COLUMN_FAVICON)));
+        return metaData;
+    }
+
+    private boolean isLinkExist(String url, SQLiteDatabase db) {
+        String selectQuery = "SELECT  * FROM " + LinkDB.getTableName() + " WHERE " +
+                LinkDB.COLUMN_URL + " = '"+url+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.getCount() <=0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
 }

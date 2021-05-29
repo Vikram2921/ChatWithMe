@@ -38,6 +38,7 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
+import com.NobodyKnows.chatlayoutview.Model.LinkInfo;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
@@ -119,6 +120,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     private String roomSecurityKey = "";
     private View replyview;
     private ImageView cancel;
+    private Boolean isWithLink = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -664,6 +666,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(LayoutService.containsURL(s.toString()) && repliedMessage == null) {
+                    isWithLink = true;
+                } else {
+                    isWithLink = false;
+                }
                 if(s.toString() != null && s.toString().length() > 0) {
                     if(!isIamTyping) {
                         isIamTyping = true;
@@ -784,7 +791,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 if(message != null && message.length() > 0) {
                     sendMessage(message);
                 }
-                messageBox.setText("");
+
             }
         });
     }
@@ -792,26 +799,17 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     private void sendMessage(String messageText) {
         Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessage(messageText);
+        if(isWithLink) {
+            message.setMessageType(MessageType.LINK);
+        }
         sendNow(message);
     }
 
 
-
-    public static <T extends Parcelable> T copy(T orig) {
-        Parcel p = Parcel.obtain();
-        orig.writeToParcel(p, 0);
-        p.setDataPosition(0);
-        T copy = null;
-        try {
-            copy = (T) orig.getClass().getDeclaredConstructor(new Class[]{Parcel.class}).newInstance(p);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return copy;
-    }
-
-
     private void sendNow(Message message) {
+        if(message.getMessageType() == MessageType.TEXT || message.getMessageType() == MessageType.LINK) {
+            messageBox.setText("");
+        }
         if(repliedMessage != null ){
             message.setIsRepliedMessage(true);
             message.setReplyMessage(repliedMessage);
@@ -839,27 +837,6 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
         }
-//        KeyStoreManager.encryptDataAsync(message.getMessage(), roomSecurityKey, new EncryptionDecryptionListener() {
-//            @Override
-//            public void onSuccess(String s) {
-//                message.setMessage(s);
-//                message.setMessageStatus(MessageStatus.SENT);
-//                if(!isBlocked) {
-//                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
-//                        @Override
-//                        public void onSuccess(Void aVoid) {
-//                            decryptMessage(message,true);
-//                            firebaseService.updateLastMessage(myUsername,username,message);
-//                        }
-//                    });
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(String s) {
-//
-//            }
-//        });
     }
 
     private void setupChatLayoutView() {
@@ -1079,12 +1056,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         String url = media.getEmbedUrl();
         url = url.replaceAll("https://giphy.com/embed","https://media.giphy.com/media");
         url += "/giphy.gif";
-        Log.d ("TAGFINDURL", "onGifSelected: "+media.getEmbedUrl());
-        Log.d("TAGFINDURL", "onGifSelected: "+url);
         if(type.equalsIgnoreCase("gif")) {
             sendGif(url);
-        } else if(type.equalsIgnoreCase("sticker")) {
+        } else if(type.equalsIgnoreCase("sticker") || type.equalsIgnoreCase("text")) {
             sendSticker(url);
         }
     }
+
 }

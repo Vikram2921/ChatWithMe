@@ -40,7 +40,6 @@
         android:id="@+id/status"
         android:visibility="gone"
         app:layout_constraintRight_toLeftOf="@id/lastemessage"
-        android:src="@drawable/waiting"
         android:padding="2dp"
         android:layout_width="20dp"
         app:layout_constraintBottom_toTopOf="@id/lastemessage"

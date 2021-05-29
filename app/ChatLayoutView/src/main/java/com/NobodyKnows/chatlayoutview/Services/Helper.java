@@ -125,7 +125,6 @@ public class Helper {
         View view = layoutInflater.inflate(R.layout.reply_view,null);
         TextView senderName = view.findViewById(R.id.sendernamereply);
         TextView messageview = view.findViewById(R.id.messageReply);
-        ImageView preview = view.findViewById(R.id.previewreply);
         TextView messagetime = view.findViewById(R.id.messagetimereply);
         User user =getUser(message.getSender());
         senderName.setTextColor(user.getColorCode());
@@ -149,23 +148,23 @@ public class Helper {
             }
         }
         if(message.getMessageType() == MessageType.IMAGE) {
-            preview.setVisibility(View.VISIBLE);
+           // preview.setVisibility(View.VISIBLE);
             messageview.setText("Photo");
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_image_24,0,0,0);
-            Glide.with(getContext()).load(url).override(100,100).into(preview);
+         //   Glide.with(getContext()).load(url).override(100,100).into(preview);
         } else if(message.getMessageType() == MessageType.VIDEO) {
-            preview.setVisibility(View.VISIBLE);
+           // preview.setVisibility(View.VISIBLE);
             messageview.setText("Video");
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_videocam_24,0,0,0);
-            Glide.with(getContext()).load(url).override(100,100).into(preview);
+           // Glide.with(getContext()).load(url).override(100,100).into(preview);
         } else if(message.getMessageType() == MessageType.AUDIO) {
             messageview.setText("Audio");
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_headset_14,0,0,0);
         }  else if(message.getMessageType() == MessageType.GIF) {
             messageview.setText("GIF");
-            preview.setVisibility(View.VISIBLE);
+          //  preview.setVisibility(View.VISIBLE);
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_gif_24,0,0,0);
-            Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
+            //Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
         }  else if(message.getMessageType() == MessageType.RECORDING) {
             messageview.setText("Recording");
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_mic_24,0,0,0);
@@ -179,9 +178,9 @@ public class Helper {
 
         }  else if(message.getMessageType() == MessageType.STICKER) {
             messageview.setText("Sticker");
-            preview.setVisibility(View.VISIBLE);
+          //  preview.setVisibility(View.VISIBLE);
             messageview.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_emoji_emotions_24,0,0,0);
-            Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
+        //    Glide.with(getContext()).asBitmap().load(url).override(100,100).into(preview);
         }   else {
             messageview.setText(message.getMessage());
             messageview.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);

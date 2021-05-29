@@ -15,7 +15,7 @@ public enum  MessageType {
     STICKER, //DONE
     INFO, //DONE
     WARNING, //DONE
-    LINK_TEXT_VIEW, //DONE
+    LINK, //DONE
 
 //    MAP, //NOT REQUIRED
 

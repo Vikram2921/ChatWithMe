@@ -15,6 +15,7 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.ContactParceable;
+import com.NobodyKnows.chatlayoutview.Model.LinkInfo;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -26,10 +27,19 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+import io.github.ponnamkarthik.richlinkpreview.MetaData;
+import io.github.ponnamkarthik.richlinkpreview.ResponseListener;
+import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
+import io.github.ponnamkarthik.richlinkpreview.RichPreview;
+import io.github.ponnamkarthik.richlinkpreview.ViewListener;
+
+import static com.NobodyKnows.chatlayoutview.ChatLayoutView.databaseHelper;
 import static com.NobodyKnows.chatlayoutview.ChatLayoutView.helper;
 
 public class LayoutService {
@@ -79,7 +89,6 @@ public class LayoutService {
         TextView sendernameReply = view.findViewById(R.id.sendernamereply);
         TextView messageTimeReply = view.findViewById(R.id.messagetimereply);
         TextView messageReply = view.findViewById(R.id.messageReply);
-        ImageView previewReply = view.findViewById(R.id.previewreply);
         if(message != null) {
             sendernameReply.setTextColor(helper.getUser(message.getSender()).getColorCode());
             sendernameReply.setText(helper.getUser(message.getSender()).getName());
@@ -96,10 +105,10 @@ public class LayoutService {
             messageTimeReply.setVisibility(View.GONE);
             messageReply.setText("This message was deleted from this chat.");
         }
-        if(message.getMessageType() == MessageType.GIF || message.getMessageType() == MessageType.STICKER) {
-            previewReply.setVisibility(View.VISIBLE);
-            Glide.with(view).load(message.getMessage()).into(previewReply);
-        }
+//        if(message.getMessageType() == MessageType.GIF || message.getMessageType() == MessageType.STICKER) {
+//            ImageView previewReply = view.findViewById(R.id.previewreply);
+//           // Glide.with(view).load(message.getMessage()).into(previewReply);
+//        }
     }
 
     public static boolean containsURL(String content){
@@ -420,5 +429,55 @@ public class LayoutService {
         } else {
             textView.setVisibility(View.GONE);
         }
+    }
+
+    public static void updateLinkView(String message, View view) {
+        RichLinkView richLinkView = view.findViewById(R.id.richlinkview);
+        List<String> urls = extractUrls(message);
+        String link = "";
+        if(urls != null && urls.size() > 0) {
+            link = urls.get(0);
+        }
+        if(link != null && link.length() > 0) {
+            MetaData metaData = databaseHelper.getLink(link);
+            richLinkView.setDefaultClickListener(false);
+            if(metaData == null) {
+                String finalLink = link;
+                RichPreview richPreview = new RichPreview(new ResponseListener() {
+                    @Override
+                    public void onData(MetaData metaData) {
+                        metaData.setUrl(finalLink);
+                        databaseHelper.insertInLinks(metaData);
+                        richLinkView.setLinkFromMeta(metaData);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+
+                    }
+                });
+                richPreview.getPreview(link);
+            } else {
+                richLinkView.setLinkFromMeta(metaData);
+            }
+        }
+    }
+
+    /**
+     * Returns a list with all links contained in the input
+     */
+    private static List<String> extractUrls(String text) {
+        List<String> containedUrls = new ArrayList<String>();
+        String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
+        Matcher urlMatcher = pattern.matcher(text);
+
+        while (urlMatcher.find())
+        {
+            containedUrls.add(text.substring(urlMatcher.start(0),
+                    urlMatcher.end(0)));
+        }
+
+        return containedUrls;
     }
 }

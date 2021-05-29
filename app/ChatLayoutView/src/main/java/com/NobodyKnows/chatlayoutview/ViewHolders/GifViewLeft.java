@@ -25,6 +25,6 @@ public class GifViewLeft extends RecyclerView.ViewHolder {
 
     public void initalize(Message message, Context context) {
         ImageView imageView = view.findViewById(R.id.gif);
-        Glide.with(context).load(message.getMessage()).apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE)).into(imageView);
+        Glide.with(context).load(message.getMessage()).apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC)).into(imageView);
     }
 }
