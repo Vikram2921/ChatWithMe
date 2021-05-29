@@ -54,43 +54,48 @@ public class CallsRecyclerViewAdapter extends RecyclerView.Adapter<CallsRecycler
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CallModel callModel = callModels.get(position);
         User user = databaseHelper.getUser(callModel.getUsername());
-        MessageMaker.loadProfile(context,user.getProfileUrl(),holder.profile);
-        holder.profile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, ViewContact.class);
-                intent.putExtra("username",user.getContactNumber());
-                intent.putExtra("isFromChat",false);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity,v,"profile");
-                context.startActivity(intent,activityOptionsCompat.toBundle());
+        if(user != null) {
+            MessageMaker.loadProfile(context,user.getProfileUrl(),holder.profile);
+            holder.name.setText(user.getName());
+            holder.profile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, ViewContact.class);
+                    intent.putExtra("username",user.getContactNumber());
+                    intent.putExtra("isFromChat",false);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity,v,"profile");
+                    context.startActivity(intent,activityOptionsCompat.toBundle());
+                }
+            });
+            if(callModel.getCalltype().equalsIgnoreCase("Video")) {
+                holder.calltype.setImageResource(R.drawable.video);
+                holder.calltype.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(context, AudioCall.class);
+                        intent.putExtra("username",user.getContactNumber());
+                        intent.putExtra("making",true);
+                        intent.putExtra("video",true);
+                        context.startActivity(intent);
+                    }
+                });
+            } else {
+                holder.calltype.setImageResource(R.drawable.audio);
+                holder.calltype.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(context, AudioCall.class);
+                        intent.putExtra("username",user.getContactNumber());
+                        intent.putExtra("making",true);
+                        intent.putExtra("video",false);
+                        context.startActivity(intent);
+                    }
+                });
             }
-        });
-        holder.name.setText(user.getName());
-        if(callModel.getCalltype().equalsIgnoreCase("Video")) {
-            holder.calltype.setImageResource(R.drawable.video);
-            holder.calltype.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, AudioCall.class);
-                    intent.putExtra("username",user.getContactNumber());
-                    intent.putExtra("making",true);
-                    intent.putExtra("video",true);
-                    context.startActivity(intent);
-                }
-            });
         } else {
-            holder.calltype.setImageResource(R.drawable.audio);
-            holder.calltype.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, AudioCall.class);
-                    intent.putExtra("username",user.getContactNumber());
-                    intent.putExtra("making",true);
-                    intent.putExtra("video",false);
-                    context.startActivity(intent);
-                }
-            });
+            holder.calltype.setVisibility(View.GONE);
+            holder.name.setText(callModel.getUsername());
         }
         switch (callModel.getEndCause()) {
             case "NONE":

@@ -18,18 +18,13 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +33,13 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
-import com.NobodyKnows.chatlayoutview.Model.LinkInfo;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
+import com.fxn.pix.Options;
+import com.fxn.pix.Pix;
 import com.giphy.sdk.core.models.Media;
 import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.GPHSettings;
@@ -80,7 +77,7 @@ import org.michaelbel.bottomsheet.BottomSheet;
 
 import java.io.File;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -111,10 +108,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     private Date lastOnlineDate;
     private View actionBarView;
     private Menu menu;
+    private ArrayList<String> selectedUrls = new ArrayList<>();
     private View rootView;
     private String blockedBy = "";
     private boolean isMuted = false;
-    private CircleButton contacts,gif;
+    private CircleButton contacts,gif,imagebutton,videobutton;
     private Boolean isIamTyping = false;
     private Message repliedMessage = null;
     private String roomSecurityKey = "";
@@ -484,6 +482,12 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 } else if(resultCode == RESULT_CANCELED){
                     System.out.println("User closed the picker without selecting items.");
                 }
+            } else if (resultCode == Activity.RESULT_OK && requestCode == 12345) {
+                selectedUrls = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
+                sendMediaMessage(selectedUrls,"IMAGE");
+            } else if (resultCode == Activity.RESULT_OK && requestCode == 12346) {
+                selectedUrls = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
+                sendMediaMessage(selectedUrls,"VIDEO");
             } else if(requestCode==299221) {
                 String url=data.getStringExtra("url");
                 String type=data.getStringExtra("type");
@@ -503,6 +507,62 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 loadBackgroundImage();
             }
         }
+    }
+
+    private void sendMediaMessage(ArrayList<String> selectedUrls, String type) {
+        Message message;
+        SharedFile sharedFile = null;
+        if(selectedUrls.size() > 0 && selectedUrls.size() <=3) {
+            for(String url:selectedUrls) {
+                sharedFile = getSharedFileObject(url,type);
+                if(sharedFile != null) {
+                    message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+                    message.addSharedFile(sharedFile);
+                    if(type.equalsIgnoreCase("IMAGE")) {
+                        message.setMessageType(MessageType.IMAGE);
+                    } else if(type.equalsIgnoreCase("VIDEO")) {
+                        message.setMessageType(MessageType.VIDEO);
+                    } else {
+                        message.setMessageType(MessageType.DOCUMENT);
+                    }
+                   // sendNow(message);
+                }
+            }
+        } else {
+            message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+            for(String url:selectedUrls) {
+                sharedFile = getSharedFileObject(url,type);
+                if(sharedFile != null) {
+                    message.addSharedFile(sharedFile);
+                }
+            }
+            if(message.getSharedFiles().size() > 0) {
+                if(type.equalsIgnoreCase("IMAGE")) {
+                    message.setMessageType(MessageType.IMAGE);
+                } else if(type.equalsIgnoreCase("VIDEO")) {
+                    message.setMessageType(MessageType.VIDEO);
+                } else {
+                    message.setMessageType(MessageType.DOCUMENT);
+                }
+              //  sendNow(message);
+            }
+        }
+    }
+
+    private SharedFile getSharedFileObject(String filepath,String type) {
+        SharedFile sharedFile = new SharedFile();
+        File file = new File(filepath);
+        sharedFile.setFileId(MessageMaker.createMessageId(myUsername));
+        sharedFile.setLocalPath(filepath);
+        sharedFile.setName(file.getName());
+        if(type.equalsIgnoreCase("VIDEO")) {
+            sharedFile.setDuration(0.0);
+        }
+        sharedFile.setExtension("");
+        sharedFile.setSize(0.0);
+        sharedFile.setPreviewUrl("");
+        sharedFile.setUrl("");
+        return sharedFile;
     }
 
     private void sendGif(String uri) {
@@ -576,6 +636,41 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         contacts = findViewById(R.id.contact);
         gif = findViewById(R.id.gif);
         cancel = findViewById(R.id.cancel_reply);
+        imagebutton = findViewById(R.id.image);
+        imagebutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Options options = Options.init()
+                        .setRequestCode(12345)                                           //Request code for activity results
+                        .setCount(3)//Number of images to restict selection count
+                        .setFrontfacing(false)                                         //Front Facing camera on start
+                        .setPreSelectedUrls(selectedUrls)                               //Pre selected Image Urls
+                        .setSpanCount(4)                                               //Span count for gallery min 1 & max 5
+                        .setMode(Options.Mode.Picture)                                     //Option to select only pictures or videos or both
+                        .setVideoDurationLimitinSeconds(30)                            //Duration for video recording
+                        .setScreenOrientation(Options.SCREEN_ORIENTATION_PORTRAIT)     //Orientaion
+                        .setPath("/pix/images");                                       //Custom Path For media Storage
+                Pix.start(ChatRoom.this, options);
+            }
+        });
+
+        CircleButton videobutton = findViewById(R.id.video);
+        videobutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Options options = Options.init()
+                        .setRequestCode(12346)                                           //Request code for activity results
+                        .setCount(3)//Number of images to restict selection count
+                        .setFrontfacing(false)                                         //Front Facing camera on start
+                        .setPreSelectedUrls(selectedUrls)                               //Pre selected Image Urls
+                        .setSpanCount(4)                                               //Span count for gallery min 1 & max 5
+                        .setMode(Options.Mode.Video)                                     //Option to select only pictures or videos or both
+                        .setVideoDurationLimitinSeconds(30)                            //Duration for video recording
+                        .setScreenOrientation(Options.SCREEN_ORIENTATION_PORTRAIT)     //Orientaion
+                        .setPath("/pix/images");                                       //Custom Path For media Storage
+                Pix.start(ChatRoom.this, options);
+            }
+        });
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

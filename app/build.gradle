@@ -62,6 +62,7 @@ dependencies {
     implementation 'com.vistrav:pop:+'
     implementation 'com.github.markushi:circlebutton:1.1'
     implementation 'com.codepath.libraries:asynchttpclient:+'
+    implementation  'com.fxn769:pix:1.5.6'
     implementation 'com.android.volley:volley:1.1.0'
     implementation 'com.kaopiz:kprogresshud:1.2.0'
     implementation 'com.google.firebase:firebase-storage:19.2.2'
