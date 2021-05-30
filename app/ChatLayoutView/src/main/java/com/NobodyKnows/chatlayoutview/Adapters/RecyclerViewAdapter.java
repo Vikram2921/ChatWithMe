@@ -24,6 +24,8 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.GifViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.InfoView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MissedCallAlertView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRight;
@@ -197,6 +199,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_left_text_link,parent,false);
                 viewHolder = new TextMessageLinkViewLeft(item);
                 break;
+            case SENT_SINGLE_IMAGE:
+                item = layoutInflater.inflate(R.layout.message_right_image_single,parent,false);
+                viewHolder = new SingleImageViewRight(item);
+                break;
+            case SENT_MULTIPLE_IMAGES:
+                item = layoutInflater.inflate(R.layout.message_right_image_multiple,parent,false);
+                viewHolder = new MultipleImageViewRight(item);
+                break;
             default:
                 break;
         }
@@ -271,6 +281,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case RECEIVE_LINK_TEXT_MESSAGE:
                 ((TextMessageLinkViewLeft) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
+            case SENT_SINGLE_IMAGE:
+                ((SingleImageViewRight) holder).initalize(message,context,chatLayoutListener);
+                break;
+            case SENT_MULTIPLE_IMAGES:
+                ((MultipleImageViewRight) holder).initalize(message,context,chatLayoutListener);
+                break;
             default:
                 break;
         }
@@ -318,6 +334,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                            type =  SENT_STICKER;
                        }
                        break;
+                   case IMAGE:
+                       if(message.getSharedFiles().size() == 1) {
+                           type =  SENT_SINGLE_IMAGE;
+                       } else {
+                           type =  SENT_MULTIPLE_IMAGES;
+                       }
+                       break;
+                   case VIDEO:
+                       if(message.getSharedFiles().size() == 1) {
+                           type =  SENT_SINGLE_VIDEO;
+                       } else {
+                           type =  SENT_MULTIPLE_VIDEOS;
+                       }
+                       break;
                    case LINK:
                        type = SENT_LINK_TEXT_MESSAGE;
                    default:
@@ -350,6 +380,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                            type =  RECEIVE_STICKER_REPLY;
                        } else {
                            type =  RECEIVE_STICKER;
+                       }
+                       break;
+                   case IMAGE:
+                       if(message.getSharedFiles().size() == 1) {
+                           type =  RECEIVE_SINGLE_IMAGE;
+                       } else {
+                           type =  RECEIVE_MULTIPLE_IMAGES;
+                       }
+                       break;
+                   case VIDEO:
+                       if(message.getSharedFiles().size() == 1) {
+                           type =  RECEIVE_SINGLE_VIDEO;
+                       } else {
+                           type =  RECEIVE_MULTIPLE_VIDEOS;
                        }
                        break;
                    case LINK:

@@ -3,4 +3,6 @@
     <dimen name="chatmessagetextsize">15dp</dimen>
     <dimen name="messagepadding">15dp</dimen>
     <dimen name="sendernametextsize">12dp</dimen>
+    <dimen name="midiasuaresize">180dp</dimen>
+    <dimen name="midiasuaresizesingle">360dp</dimen>
 </resources>

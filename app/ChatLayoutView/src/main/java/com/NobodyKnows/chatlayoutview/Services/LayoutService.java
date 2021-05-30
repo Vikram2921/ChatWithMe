@@ -15,19 +15,19 @@ import com.NobodyKnows.chatlayoutview.Constants.MessageType;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.ContactParceable;
-import com.NobodyKnows.chatlayoutview.Model.LinkInfo;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
-import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +37,6 @@ import io.github.ponnamkarthik.richlinkpreview.MetaData;
 import io.github.ponnamkarthik.richlinkpreview.ResponseListener;
 import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
 import io.github.ponnamkarthik.richlinkpreview.RichPreview;
-import io.github.ponnamkarthik.richlinkpreview.ViewListener;
 
 import static com.NobodyKnows.chatlayoutview.ChatLayoutView.databaseHelper;
 import static com.NobodyKnows.chatlayoutview.ChatLayoutView.helper;
@@ -47,6 +46,19 @@ public class LayoutService {
     private static ImageView LplayPause;
     private static String LmessageId;
     private static MediaPlayer mediaPlayer;
+    private static Map<String,View> uploadView;
+
+    public static void initUploadList() {
+        uploadView = new HashMap<>();
+    }
+
+    public static void addUploadView(String messageId,String roomid,View view) {
+        uploadView.put(messageId+"]-]"+roomid,view);
+    }
+
+    public static View getUploadView(String messageId,String roomId) {
+        return uploadView.get(messageId+"]-]"+roomId);
+    }
 
 
     public static String getFormatedDate(String pattern, Date date) {

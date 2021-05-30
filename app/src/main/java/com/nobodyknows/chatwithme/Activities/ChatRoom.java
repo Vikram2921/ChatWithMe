@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -36,6 +37,7 @@ import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
+import com.NobodyKnows.chatlayoutview.ProgressButton;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
 import com.fxn.pix.Options;
@@ -525,7 +527,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                     } else {
                         message.setMessageType(MessageType.DOCUMENT);
                     }
-                   // sendNow(message);
+                    chatLayoutView.addMessage(message);
                 }
             }
         } else {
@@ -544,7 +546,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 } else {
                     message.setMessageType(MessageType.DOCUMENT);
                 }
-              //  sendNow(message);
+                chatLayoutView.addMessage(message);
             }
         }
     }
@@ -555,11 +557,20 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         sharedFile.setFileId(MessageMaker.createMessageId(myUsername));
         sharedFile.setLocalPath(filepath);
         sharedFile.setName(file.getName());
-        if(type.equalsIgnoreCase("VIDEO")) {
-            sharedFile.setDuration(0.0);
+        int index = sharedFile.getName().lastIndexOf('.');
+        if(index > 0) {
+            String extension = sharedFile.getName().substring(index + 1);
+            sharedFile.setExtension(extension);
         }
-        sharedFile.setExtension("");
-        sharedFile.setSize(0.0);
+        if(type.equalsIgnoreCase("VIDEO")) {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(getApplicationContext(), Uri.fromFile(file));
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            long timeInMillisec = Long.parseLong(time );
+            retriever.release();
+            sharedFile.setDuration(timeInMillisec);
+        }
+        sharedFile.setSize(file.length());
         sharedFile.setPreviewUrl("");
         sharedFile.setUrl("");
         return sharedFile;
@@ -642,7 +653,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             public void onClick(View v) {
                 Options options = Options.init()
                         .setRequestCode(12345)                                           //Request code for activity results
-                        .setCount(3)//Number of images to restict selection count
+                        .setCount(30)//Number of images to restict selection count
                         .setFrontfacing(false)                                         //Front Facing camera on start
                         .setPreSelectedUrls(selectedUrls)                               //Pre selected Image Urls
                         .setSpanCount(4)                                               //Span count for gallery min 1 & max 5
@@ -659,8 +670,8 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             @Override
             public void onClick(View v) {
                 Options options = Options.init()
-                        .setRequestCode(12346)                                           //Request code for activity results
-                        .setCount(3)//Number of images to restict selection count
+                        .setRequestCode(12346)//Request code for activity results
+                        .setCount(30)//Number of images to restict selection count
                         .setFrontfacing(false)                                         //Front Facing camera on start
                         .setPreSelectedUrls(selectedUrls)                               //Pre selected Image Urls
                         .setSpanCount(4)                                               //Span count for gallery min 1 & max 5
@@ -947,7 +958,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             }
 
             @Override
-            public void onUploadRetry(Message message) {
+            public void onUpload(Message message, ProgressButton progressButton) {
 
             }
 

@@ -15,6 +15,7 @@ public class MessageDB {
     private String sentAt;
     private String receiveAt;
     private String seenAt;
+    private Integer uploadStatus;
     private Integer isRepliedMessage;
     private String repliedMessageId;
     private Integer messageStatus;
@@ -38,6 +39,7 @@ public class MessageDB {
     public static final String COLUMN_IS_REPLY_MESSAGE = "isRepliedMessage";
     public static final String COLUMN_REPLY_MESSAGE_ID = "repliedMessageId";
     public static final String COLUMN_MESSAGE_STATUS = "messageStatus";
+    public static final String COLUMN_UPLOAD_STATUS = "uploadStatus";
 
 
     public static final String getTableName(String roomId) {
@@ -55,6 +57,7 @@ public class MessageDB {
                 + COLUMN_MESSAGE +" TEXT,"
                 + COLUMN_MESSAGE_TYPE +" INTEGER NOT NULL,"
                 + COLUMN_MESSAGE_STATUS +" INTEGER NOT NULL,"
+                + COLUMN_UPLOAD_STATUS +" INTEGER,"
                 + COLUMN_CREATED_TIME +" TEXT NOT NULL,"
                 + COLUMN_UPDATED_TIME +" TEXT,"
                 + COLUMN_SENTAT +" TEXT,"
@@ -183,5 +186,13 @@ public class MessageDB {
 
     public void setRepliedMessageId(String repliedMessageId) {
         this.repliedMessageId = repliedMessageId;
+    }
+
+    public Integer getUploadStatus() {
+        return uploadStatus;
+    }
+
+    public void setUploadStatus(Integer uploadStatus) {
+        this.uploadStatus = uploadStatus;
     }
 }

@@ -5,6 +5,7 @@ import android.view.View;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Constants.UploadStatus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +16,7 @@ public class Message implements Cloneable {
     private String receiver;
     private String message;
     private String roomId;
+    private UploadStatus uploadStatus = UploadStatus.NOT_STARTED;
     private MessageType messageType = MessageType.TEXT;
     private Date createdTimestamp = new Date();
     private Date updateTimestamp = new Date();
@@ -28,6 +30,14 @@ public class Message implements Cloneable {
     private ArrayList<SharedFile> sharedFiles = new ArrayList<>();
     private ArrayList<Contact> contacts = new ArrayList<>();
     private Message replyMessage = null;
+
+    public UploadStatus getUploadStatus() {
+        return uploadStatus;
+    }
+
+    public void setUploadStatus(UploadStatus uploadStatus) {
+        this.uploadStatus = uploadStatus;
+    }
 
     public String getMessageId() {
         return messageId;

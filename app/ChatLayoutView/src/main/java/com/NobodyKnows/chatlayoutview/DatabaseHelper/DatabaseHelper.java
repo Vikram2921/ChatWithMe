@@ -9,12 +9,15 @@ import androidx.annotation.Nullable;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Constants.UploadStatus;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.ContactDB;
+import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.FilestDB;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.LinkDB;
 import com.NobodyKnows.chatlayoutview.DatabaseHelper.Models.MessageDB;
 import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(MessageDB.getCreateTableQuery(roomId));
         db.execSQL(ContactDB.getCreateTableQuery());
         db.execSQL(LinkDB.getCreateTableQuery());
+        db.execSQL(FilestDB.getCreateTableQuery());
     }
 
     @Override
@@ -66,6 +70,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         delete(db, MessageDB.getTableName(roomId));
         delete(db, ContactDB.getTableName());
         delete(db, LinkDB.getTableName());
+        delete(db, FilestDB.getTableName());
     }
 
     public void clearAll(String roomId) {
@@ -73,6 +78,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         clear(db, MessageDB.getTableName(roomId));
         clear(db, ContactDB.getTableName());
         clear(db, LinkDB.getTableName());
+        clear(db, FilestDB.getTableName());
     }
 
     /**
@@ -88,6 +94,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             id = db.insert(MessageDB.getTableName(roomId),null, getMessageContentValue(message));
             if(message.getMessageType() == MessageType.CONTACT_MULTIPLE || message.getMessageType() == MessageType.CONTACT_SINGLE) {
                 insertInContacts(message.getContacts(),message.getRoomId(),message.getMessageId());
+            } else if(message.getMessageType() == MessageType.IMAGE || message.getMessageType() == MessageType.VIDEO || message.getMessageType() == MessageType.DOCUMENT || message.getMessageType() == MessageType.AUDIO) {
+                insertInFiles(message.getSharedFiles(),message.getMessageId(),message.getRoomId());
             }
         }
         db.close();
@@ -112,6 +120,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(MessageDB.COLUMN_MESSAGE_ID,message.getMessageId());
         values.put(MessageDB.COLUMN_SENDER,message.getSender());
         values.put(MessageDB.COLUMN_RECEIVER,message.getReceiver());
+        values.put(MessageDB.COLUMN_UPLOAD_STATUS,message.getUploadStatus().ordinal());
         values.put(MessageDB.COLUMN_MESSAGE,message.getMessage());
         values.put(MessageDB.COLUMN_ROOM_ID,message.getRoomId());
         values.put(MessageDB.COLUMN_MESSAGE_TYPE,message.getMessageType().ordinal());
@@ -133,6 +142,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         message.setReceiver(cursor.getString(cursor.getColumnIndex(MessageDB.COLUMN_RECEIVER)));
         message.setMessage(cursor.getString(cursor.getColumnIndex(MessageDB.COLUMN_MESSAGE)));
         message.setRoomId(cursor.getString(cursor.getColumnIndex(MessageDB.COLUMN_ROOM_ID)));
+        message.setUploadStatus(UploadStatus.values()[cursor.getInt(cursor.getColumnIndex(MessageDB.COLUMN_UPLOAD_STATUS))]);
         message.setMessageType(MessageType.values()[cursor.getInt(cursor.getColumnIndex(MessageDB.COLUMN_MESSAGE_TYPE))]);
         message.setCreatedTimestamp(LayoutService.getConvertedDate(cursor.getString(cursor.getColumnIndex(MessageDB.COLUMN_CREATED_TIME))));
         message.setUpdateTimestamp(LayoutService.getConvertedDate(cursor.getString(cursor.getColumnIndex(MessageDB.COLUMN_UPDATED_TIME))));
@@ -144,6 +154,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         message.setMessageStatus(MessageStatus.values()[cursor.getInt(cursor.getColumnIndex(MessageDB.COLUMN_MESSAGE_STATUS))]);
         if(message.getMessageType() == MessageType.CONTACT_MULTIPLE || message.getMessageType() == MessageType.CONTACT_SINGLE) {
             message.setContacts(getContactListFor(message.getRoomId(),message.getMessageId()));
+        } else if(message.getMessageType() == MessageType.IMAGE
+                || message.getMessageType() == MessageType.VIDEO
+                || message.getMessageType() == MessageType.DOCUMENT
+                || message.getMessageType() == MessageType.AUDIO) {
+            message.setSharedFiles(getSharedFileList(message.getMessageId(),message.getRoomId()));
         }
         return message;
     }
@@ -165,6 +180,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 +"',"+MessageDB.COLUMN_SEENAT+" = '"+LayoutService.getConvertedDate(message.getSeenAt())
                 +"',"+MessageDB.COLUMN_MESSAGE_STATUS+" = '"+message.getMessageStatus().ordinal()
                 +"' WHERE "+MessageDB.COLUMN_MESSAGE_ID+" = "+ message.getMessageId();
+        db.execSQL(strSQL);
+        db.close();
+    }
+
+    public void updateMessageUploadStatus(String roomId,String messageId,UploadStatus status) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+MessageDB.getTableName(roomId)
+                +" SET "+MessageDB.COLUMN_UPLOAD_STATUS+" = '"+status.ordinal()+"' WHERE "+MessageDB.COLUMN_MESSAGE_ID+" = "+ messageId;
         db.execSQL(strSQL);
         db.close();
     }
@@ -323,4 +346,103 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return true;
     }
+
+
+
+    public long insertInFiles(ArrayList<SharedFile> sharedFiles,String messageId,String roomId) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        long id = 0;
+        for(SharedFile sharedFile:sharedFiles) {
+            if(!isFileExists(sharedFile.getFileId(),messageId,roomId,db)) {
+                id = db.insert(FilestDB.getTableName(),null, getFileContentValue(sharedFile,messageId,roomId));
+            }
+        }
+        db.close();
+        return id;
+    }
+
+    private ContentValues getFileContentValue(SharedFile sharedFile,String messageId,String roomid) {
+        ContentValues values = new ContentValues();
+        values.put(FilestDB.COLUMN_MESSAGE_ID,messageId);
+        values.put(FilestDB.COLUMN_ROOM_ID,roomid);
+        values.put(FilestDB.COLUMN_FILE_ID,sharedFile.getFileId());
+        values.put(FilestDB.COLUMN_URL,sharedFile.getUrl());
+        values.put(FilestDB.COLUMN_LOCALPATH,sharedFile.getLocalPath());
+        values.put(FilestDB.COLUMN_PREVIEW_URL,sharedFile.getPreviewUrl());
+        values.put(FilestDB.COLUMN_NAME,sharedFile.getName());
+        values.put(FilestDB.COLUMN_EXTENSION,sharedFile.getExtension());
+        values.put(FilestDB.COLUMN_FILEINFO,sharedFile.getFileInfo());
+        values.put(FilestDB.COLUMN_SIZE,sharedFile.getSize());
+        values.put(FilestDB.COLUMN_DURATION,sharedFile.getDuration());
+        return values;
+    }
+
+    private SharedFile convertToSharedFiles(Cursor cursor) {
+        SharedFile sharedFile = new SharedFile();
+        sharedFile.setFileId(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_FILE_ID)));
+        sharedFile.setUrl(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_URL)));
+        sharedFile.setLocalPath(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_LOCALPATH)));
+        sharedFile.setPreviewUrl(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_PREVIEW_URL)));
+        sharedFile.setName(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_NAME)));
+        sharedFile.setExtension(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_EXTENSION)));
+        sharedFile.setFileInfo(cursor.getString(cursor.getColumnIndex(FilestDB.COLUMN_FILEINFO)));
+        sharedFile.setSize(cursor.getLong(cursor.getColumnIndex(FilestDB.COLUMN_SIZE)));
+        sharedFile.setDuration(cursor.getLong(cursor.getColumnIndex(FilestDB.COLUMN_DURATION)));
+        return sharedFile;
+    }
+
+    private boolean isFileExists(String fileid,String messageId,String roomid, SQLiteDatabase db) {
+        String selectQuery = "SELECT  * FROM " + FilestDB.getTableName() + " WHERE " +
+                FilestDB.COLUMN_FILE_ID + " = '"+fileid+"' AND "+FilestDB.COLUMN_MESSAGE_ID+" = '"+messageId+"' AND "+FilestDB.COLUMN_ROOM_ID+" = '"+roomid+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.getCount() <=0) {
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
+    private ArrayList<SharedFile> getSharedFileList(String messageId, String roomId) {
+        ArrayList<SharedFile> sharedFiles = new ArrayList<>();
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String selectQuery = "SELECT  * FROM " + FilestDB.getTableName() + " WHERE " +
+                FilestDB.COLUMN_MESSAGE_ID+" = '"+messageId+"' AND "+FilestDB.COLUMN_ROOM_ID+" = '"+roomId+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.moveToFirst()) {
+            do{
+                sharedFiles.add(convertToSharedFiles(cursor));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return sharedFiles;
+    }
+
+    public SharedFile getSharedFile(String fileid, String messageId, String roomid) {
+        SharedFile sharedFile = null;
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String selectQuery = "SELECT  * FROM " + FilestDB.getTableName() + " WHERE " +
+                FilestDB.COLUMN_FILE_ID + " = '"+fileid+"' AND "+FilestDB.COLUMN_MESSAGE_ID+" = '"+messageId+"' AND "+FilestDB.COLUMN_ROOM_ID+" = '"+roomid+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(cursor.moveToFirst()) {
+            do{
+                sharedFile = convertToSharedFiles(cursor);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return sharedFile;
+    }
+
+    public void updateSharedFileUrls(String fileId,String messageId,String roomid,String url,String previewUrl) {
+        SQLiteDatabase db  = this.getWritableDatabase();
+        String strSQL = "UPDATE "+FilestDB.getTableName()+" SET "
+                +FilestDB.COLUMN_PREVIEW_URL+" = '"+previewUrl+"',"
+                +FilestDB.COLUMN_URL+"='"+url+"' WHERE " +
+                FilestDB.COLUMN_FILE_ID + " = '"+fileId+"' AND "+FilestDB.COLUMN_MESSAGE_ID+" = '"+messageId+"' AND "+FilestDB.COLUMN_ROOM_ID+" = '"+roomid+"'";
+        db.execSQL(strSQL);
+        db.close();
+    }
+
 }

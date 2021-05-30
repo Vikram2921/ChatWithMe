@@ -104,6 +104,7 @@ public class Dashboard extends AppCompatActivity {
             }
         });
         databaseHelper.createTable();
+        LayoutService.initUploadList();
         EmojiManager.install(new GoogleEmojiProvider());
         setupSecuritySetup();
         Giphy.INSTANCE.configure(getApplicationContext(),GIPHY_KEY,true,null);
