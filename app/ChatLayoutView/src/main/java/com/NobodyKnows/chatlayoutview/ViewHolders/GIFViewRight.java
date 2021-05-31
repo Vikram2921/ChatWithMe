@@ -30,7 +30,7 @@ public class GIFViewRight extends RecyclerView.ViewHolder {
     public void initalize(Message message, Context context) {
         ImageView imageView = view.findViewById(R.id.gif);
         TextView status = view.findViewById(R.id.status);
-        Glide.with(context).load(message.getMessage()).apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC)).into(imageView);
+        LayoutService.loadGifAndSticker(context,message.getMessage(),imageView);
         LayoutService.updateMessageStatus(message,status);
         view.setOnClickListener(new View.OnClickListener() {
             @Override

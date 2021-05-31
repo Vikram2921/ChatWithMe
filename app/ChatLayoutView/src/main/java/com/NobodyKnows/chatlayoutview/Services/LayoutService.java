@@ -19,6 +19,9 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -95,6 +98,12 @@ public class LayoutService {
         } else if(status == MessageStatus.SENDING) {
             textView.setText("Sending");
         }
+    }
+
+    public static void loadGifAndSticker(Context context,String url,ImageView imageView) {
+        Glide.with(context).load(url)
+                .placeholder(R.drawable.loading)
+                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC)).into(imageView);
     }
 
     public static void updateReplyView(Message message,View view) {

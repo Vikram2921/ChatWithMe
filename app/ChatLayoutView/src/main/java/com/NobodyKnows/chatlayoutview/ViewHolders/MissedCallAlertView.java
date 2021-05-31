@@ -37,9 +37,9 @@ public class MissedCallAlertView extends RecyclerView.ViewHolder {
         } else {
             icon = R.drawable.ic_baseline_call_missed_24;
             if(message.getMessageType() == MessageType.MISSED_AUDIO_CALL) {
-                info = "You missed audio call from "+userMap.get(message.getReceiver()).getName()+".";
+                info = "You missed audio call from "+userMap.get(message.getSender()).getName()+".";
             } else if(message.getMessageType() == MessageType.MISSED_VIDEO_CALL) {
-                info ="You missed video call from "+userMap.get(message.getReceiver()).getName()+".";
+                info ="You missed video call from "+userMap.get(message.getSender()).getName()+".";
             }
         }
         textView.setCompoundDrawablesRelativeWithIntrinsicBounds(icon,0,0,0);

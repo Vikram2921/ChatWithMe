@@ -42,6 +42,7 @@ import com.nobodyknows.chatwithme.Fragments.Interfaces.FreindsOptionListener;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -201,7 +202,22 @@ public class FreindsFragment extends Fragment {
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             if(documentSnapshot != null) {
                                 SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
-                                databaseHelper.insertInSecurity(roomid,securityDTO);
+                                if(securityDTO != null) {
+                                    databaseHelper.insertInSecurity(roomid,securityDTO);
+                                    Alerter.create(getActivity())
+                                            .setTitle("New Freind Added")
+                                            .setIcon(R.drawable.freinds)
+                                            .setText(users.getName()+ " accepted your freind request. Now you can chat and call "+users.getName())
+                                            .addButton("Chat Now", R.style.AlertButton, new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    MessageMaker.startChatroom(getContext(),users.getContactNumber());
+                                                }
+                                            })
+                                            .setDuration(10000)
+                                            .setBackgroundColorRes(R.color.purple_500)
+                                            .show();
+                                }
                             }
                         }
                     });
