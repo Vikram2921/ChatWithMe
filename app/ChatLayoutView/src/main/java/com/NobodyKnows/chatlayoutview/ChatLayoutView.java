@@ -102,6 +102,10 @@ public class ChatLayoutView extends RelativeLayout {
         }
     }
 
+    public DatabaseHelper getDatabaseHelper() {
+        return databaseHelper;
+    }
+
     private void logError(String message) {
         Log.d("LOGCHATLAYOUT", "Chat Layout Log : "+message);
     }

@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import com.NobodyKnows.chatlayoutview.ChatLayoutView;
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Constants.UploadStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
@@ -47,7 +49,9 @@ import com.giphy.sdk.ui.GPHContentType;
 import com.giphy.sdk.ui.GPHSettings;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
@@ -57,6 +61,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.UploadTask;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.kaopiz.kprogresshud.KProgressHUD;
@@ -580,14 +586,14 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessageType(MessageType.GIF);
         message.setMessage(uri);
-        sendNow(message);
+        sendNow(message,true);
     }
 
     private void sendSticker(String uri) {
         Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
         message.setMessageType(MessageType.STICKER);
         message.setMessage(uri);
-        sendNow(message);
+        sendNow(message,true);
     }
 
     private void sendContacts(List<ContactResult> results) {
@@ -597,7 +603,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         for(ContactResult contactResult:results) {
             message.addContact(convertToContact(contactResult));
         }
-        sendNow(message);
+        sendNow(message,true);
     }
 
     private Contact convertToContact(ContactResult contactResult) {
@@ -640,6 +646,17 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     }
 
 
+    private void toggleAttachmentPanel() {
+        if(attachemntPane.getVisibility() == View.GONE) {
+            attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
+            attachemntPane.setVisibility(View.VISIBLE);
+        } else {
+            attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24);
+            attachemntPane.setVisibility(View.GONE);
+        }
+    }
+
+
     private void init() {
         attachemntPane = findViewById(R.id.attachmentpane);
         attachment = findViewById(R.id.attachment);
@@ -651,6 +668,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         imagebutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                toggleAttachmentPanel();
                 Options options = Options.init()
                         .setRequestCode(12345)                                           //Request code for activity results
                         .setCount(30)//Number of images to restict selection count
@@ -669,6 +687,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         videobutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                toggleAttachmentPanel();
                 Options options = Options.init()
                         .setRequestCode(12346)//Request code for activity results
                         .setCount(30)//Number of images to restict selection count
@@ -701,26 +720,20 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         attachment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(attachemntPane.getVisibility() == View.GONE) {
-                    attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_down_24);
-                    attachemntPane.setVisibility(View.VISIBLE);
-                } else {
-                    attachment.setImageResource(R.drawable.ic_baseline_keyboard_arrow_up_24);
-                    attachemntPane.setVisibility(View.GONE);
-                }
+                toggleAttachmentPanel();
             }
         });
         gif.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                attachemntPane.setVisibility(View.GONE);
+                toggleAttachmentPanel();
                 openGiphymenu();
             }
         });
         contacts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                attachemntPane.setVisibility(View.GONE);
+                toggleAttachmentPanel();
                 PermissionListener permissionlistener = new PermissionListener() {
                     @Override
                     public void onPermissionGranted() {
@@ -908,11 +921,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         if(isWithLink) {
             message.setMessageType(MessageType.LINK);
         }
-        sendNow(message);
+        sendNow(message,true);
     }
 
 
-    private void sendNow(Message message) {
+    private void sendNow(Message message,Boolean addInLayout) {
         if(message.getMessageType() == MessageType.TEXT || message.getMessageType() == MessageType.LINK) {
             messageBox.setText("");
         }
@@ -921,8 +934,10 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             message.setReplyMessage(repliedMessage);
             message.setRepliedMessageId(repliedMessage.getMessageId());
         }
-        Message message1 = message.clone();
-        chatLayoutView.addMessage(message1);
+        if(addInLayout) {
+            Message message1 = message.clone();
+            chatLayoutView.addMessage(message1);
+        }
         repliedMessage = null;
         replyview.setVisibility(View.GONE);
         cancel.setVisibility(View.GONE);
@@ -932,7 +947,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                     message.setMessage(AESCrypt.encrypt(roomSecurityKey,message.getMessage()));
                 }
                 message.setMessageStatus(MessageStatus.SENT);
-                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message1.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         decryptMessage(message,true);
@@ -959,7 +974,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
 
             @Override
             public void onUpload(Message message, ProgressButton progressButton) {
-
+                startUploading(message,progressButton);
             }
 
             @Override
@@ -1017,6 +1032,73 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         chatLayoutView.loadSavedChat();
         loadBackgroundImage();
         addInfoMessage();
+    }
+
+    private void startUploading(Message message, ProgressButton progressButton) {
+        for(int i=0;i<message.getSharedFiles().size();i++) {
+            UploadTask uploadTask = firebaseService.uploadFromUri(message.getSharedFiles().get(i).getFileId(),message.getRoomId(),message.getSharedFiles().get(i).getLocalPath());
+            int finalI = i;
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return firebaseService.getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                SharedFile sharedFile = message.getSharedFiles().get(finalI);
+                                sharedFile.setUrl(downloadUri.toString());
+                                message.getSharedFiles().remove(finalI);
+                                message.getSharedFiles().add(finalI,sharedFile);
+                                chatLayoutView.getDatabaseHelper().updateSharedFileUrls(sharedFile.getFileId(),message.getMessageId(),message.getRoomId(),sharedFile.getUrl(),sharedFile.getPreviewUrl());
+                                checkCompleted(message,progressButton);
+                            }
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    chatLayoutView.getDatabaseHelper().updateMessageUploadStatus(message.getRoomId(),message.getMessageId(), UploadStatus.FAILED);
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                    if(message.getSharedFiles().size() == 1) {
+                        double progress = ((double) snapshot.getBytesTransferred() /(double) snapshot.getTotalByteCount()) * 100;
+                        progressButton.setProgress(progress);
+                    }
+                }
+            });
+        }
+    }
+
+    private void checkCompleted(Message message,ProgressButton progressButton) {
+        Boolean isCompleted = true;
+        int total = message.getSharedFiles().size();
+        int completed = 0;
+        double progress = 0;
+        for(SharedFile sharedFile:message.getSharedFiles()) {
+            if(sharedFile.getUrl() == null || sharedFile.getUrl().length() == 0) {
+                isCompleted = false;
+            } else {
+                completed ++;
+                progress = ((double) completed / (double) total) * 100;
+                progressButton.setProgress(progress);
+                sharedFile.setLocalPath("");
+            }
+        }
+        if(isCompleted) {
+            sendNow(message,false);
+        }
     }
 
     private void addContactLocal(Contact contact) {

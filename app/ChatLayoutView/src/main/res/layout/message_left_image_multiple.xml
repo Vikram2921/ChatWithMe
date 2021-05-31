@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginRight="5dp"
-    android:layout_marginBottom="3dp"
-    android:animateLayoutChanges="true"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:elevation="2dp"
-    android:orientation="vertical"
-    android:paddingLeft="25dp">
-
+    android:layout_marginLeft="5dp"
+    android:layout_marginBottom="3dp"
+    android:layout_marginRight="25dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/sendername"
+        android:visibility="visible"
+        android:background="@drawable/left_message_background"
+        android:text="Vikram Singh Rawat"
+        android:padding="5dp"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:textSize="@dimen/sendernametextsize"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image1"
         android:layout_width="@dimen/midiasuaresize"
@@ -20,21 +32,20 @@
         android:src="@drawable/profile"
         app:layout_constraintBottom_toTopOf="@id/image3"
         app:layout_constraintRight_toLeftOf="@id/image2"
-        app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius_top_left="10dp"></com.makeramen.roundedimageview.RoundedImageView>
+        app:layout_constraintTop_toBottomOf="@id/sendername"></com.makeramen.roundedimageview.RoundedImageView>
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image2"
         android:layout_width="@dimen/midiasuaresize"
         android:layout_height="@dimen/midiasuaresize"
-        android:layout_marginTop="5dp"
         android:scaleType="centerCrop"
         android:src="@drawable/profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toRightOf="@id/image1"
         app:layout_constraintBottom_toTopOf="@id/image4"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></com.makeramen.roundedimageview.RoundedImageView>
+        app:layout_constraintTop_toTopOf="@id/image1"
+        app:riv_corner_radius_top_right="10dp"></com.makeramen.roundedimageview.RoundedImageView>
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image3"
@@ -57,7 +68,7 @@
         android:layout_marginTop="1dp"
         android:scaleType="centerCrop"
         android:src="@drawable/profile"
-        app:layout_constraintBottom_toTopOf="@id/status"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/image3"
         app:layout_constraintRight_toRightOf="@id/image2"
         app:layout_constraintTop_toBottomOf="@id/image2"
@@ -79,6 +90,7 @@
         app:layout_constraintLeft_toRightOf="@id/image3"
         app:layout_constraintRight_toRightOf="@id/image2"
         app:layout_constraintTop_toBottomOf="@id/image2"></TextView>
+
     <com.NobodyKnows.chatlayoutview.ProgressButton
         android:id="@+id/progressbutton"
         android:layout_width="wrap_content"
@@ -87,14 +99,4 @@
         app:layout_constraintLeft_toLeftOf="@id/image1"
         app:layout_constraintRight_toRightOf="@id/image2"
         app:layout_constraintTop_toTopOf="@id/image2"></com.NobodyKnows.chatlayoutview.ProgressButton>
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sent"
-        android:textColor="#ECECEC"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="@id/image4"
-        app:layout_constraintTop_toBottomOf="@id/image3"></TextView>
 </androidx.constraintlayout.widget.ConstraintLayout>

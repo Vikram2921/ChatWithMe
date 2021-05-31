@@ -29,46 +29,8 @@ public class MultipleImageViewRight extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
-    public void initalize(Message message, Context context, ChatLayoutListener chatLayoutListener) {
-        RoundedImageView image1 = view.findViewById(R.id.image1);
-        RoundedImageView image2 = view.findViewById(R.id.image2);
-        RoundedImageView image3 = view.findViewById(R.id.image3);
-        RoundedImageView image4 = view.findViewById(R.id.image4);
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
-        if(message.getMessageStatus() == MessageStatus.SENDING) {
-            progressButton.initalize();
-            progressButton.setUploadType();
-            Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(image1);
-            Glide.with(context).load(message.getSharedFiles().get(1).getLocalPath()).into(image2);
-            Glide.with(context).load(message.getSharedFiles().get(2).getLocalPath()).into(image3);
-            Glide.with(context).load(message.getSharedFiles().get(3).getLocalPath()).into(image4);
-            if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                chatLayoutListener.onUpload(message,progressButton);
-                LayoutService.addUploadView(message.getMessageId(),message.getRoomId(),view);
-                progressButton.setProgress(0);
-            } else {
-                if(message.getUploadStatus() == UploadStatus.FAILED) {
-                    progressButton.setLabel("Retry");
-                }
-            }
-            progressButton.setProgressClickListener(new ProgressClickListener() {
-                @Override
-                public void onStart() {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    LayoutService.addUploadView(message.getMessageId(),message.getRoomId(),view);
-                }
-
-                @Override
-                public void onCancel() {
-                    databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                }
-            });
-        } else {
-            Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(image1);
-            Glide.with(context).load(message.getSharedFiles().get(1).getLocalPath()).into(image2);
-            Glide.with(context).load(message.getSharedFiles().get(2).getLocalPath()).into(image3);
-            Glide.with(context).load(message.getSharedFiles().get(3).getLocalPath()).into(image4);
-        }
+    public void initalize(Message message, Context context,String mynumber, ChatLayoutListener chatLayoutListener) {
+       LayoutService.loadMediaViewMultiple(context,message,chatLayoutListener,view,mynumber);
         TextView status = view.findViewById(R.id.status);
         LayoutService.updateMessageStatus(message,status);
         view.setOnClickListener(new View.OnClickListener() {

@@ -32,37 +32,8 @@ public class SingleImageViewRight extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
-    public void initalize(Message message, Context context, ChatLayoutListener chatLayoutListener) {
-        RoundedImageView roundedImageView = view.findViewById(R.id.image);
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
-        if(message.getMessageStatus() == MessageStatus.SENDING) {
-            progressButton.initalize();
-            progressButton.setUploadType();
-            Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(roundedImageView);
-            if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                chatLayoutListener.onUpload(message,progressButton);
-                LayoutService.addUploadView(message.getMessageId(),message.getRoomId(),view);
-                progressButton.setProgress(0);
-            } else {
-                if(message.getUploadStatus() == UploadStatus.FAILED) {
-                    progressButton.setLabel("Retry");
-                }
-            }
-            progressButton.setProgressClickListener(new ProgressClickListener() {
-                @Override
-                public void onStart() {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    LayoutService.addUploadView(message.getMessageId(),message.getRoomId(),view);
-                }
-
-                @Override
-                public void onCancel() {
-                    databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                }
-            });
-        } else {
-            Glide.with(context).load(message.getSharedFiles().get(0).getUrl()).into(roundedImageView);
-        }
+    public void initalize(Message message, Context context,String mynumber, ChatLayoutListener chatLayoutListener) {
+        LayoutService.loadMediaViewSingle(context,message,chatLayoutListener,view,mynumber);
         TextView status = view.findViewById(R.id.status);
         LayoutService.updateMessageStatus(message,status);
         view.setOnClickListener(new View.OnClickListener() {

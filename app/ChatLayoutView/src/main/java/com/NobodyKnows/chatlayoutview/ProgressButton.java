@@ -127,16 +127,20 @@ public class ProgressButton extends RelativeLayout {
         this.label.setText("Download");
     }
 
+    public void setMediaMissing() {
+
+    }
+
     public CircularProgressBar getProgressBar() {
         return progressBar;
     }
 
-    public void setProgress(float value) {
+    public void setProgress(double value) {
         label.setVisibility(GONE);
         icon.setVisibility(GONE);
         progressBar.setVisibility(VISIBLE);
         close.setVisibility(VISIBLE);
-        progressBar.setProgress(value);
+        progressBar.setProgress((float) value);
     }
 
     public float getProgress() {

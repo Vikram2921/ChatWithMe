@@ -24,7 +24,9 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.GifViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.InfoView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MissedCallAlertView;
+import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeftReply;
@@ -207,6 +209,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_right_image_multiple,parent,false);
                 viewHolder = new MultipleImageViewRight(item);
                 break;
+            case RECEIVE_SINGLE_IMAGE:
+                item = layoutInflater.inflate(R.layout.message_left_image_single,parent,false);
+                viewHolder = new SingleImageViewLeft(item);
+                break;
+            case RECEIVE_MULTIPLE_IMAGES:
+                item = layoutInflater.inflate(R.layout.message_left_image_multiple,parent,false);
+                viewHolder = new MultipleImageViewLeft(item);
+                break;
             default:
                 break;
         }
@@ -282,10 +292,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 ((TextMessageLinkViewLeft) holder).initalize(message,userMap.get(message.getSender()),chatLayoutListener);
                 break;
             case SENT_SINGLE_IMAGE:
-                ((SingleImageViewRight) holder).initalize(message,context,chatLayoutListener);
+                ((SingleImageViewRight) holder).initalize(message,context,myId,chatLayoutListener);
                 break;
             case SENT_MULTIPLE_IMAGES:
-                ((MultipleImageViewRight) holder).initalize(message,context,chatLayoutListener);
+                ((MultipleImageViewRight) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_SINGLE_IMAGE:
+                ((SingleImageViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_MULTIPLE_IMAGES:
+                ((MultipleImageViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
                 break;
             default:
                 break;

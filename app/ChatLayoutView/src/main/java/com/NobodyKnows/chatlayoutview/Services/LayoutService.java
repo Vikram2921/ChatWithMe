@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -12,16 +13,20 @@ import android.widget.TextView;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Constants.UploadStatus;
 import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
+import com.NobodyKnows.chatlayoutview.Interfaces.ProgressClickListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.ContactParceable;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
+import com.NobodyKnows.chatlayoutview.ProgressButton;
 import com.NobodyKnows.chatlayoutview.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -500,5 +505,159 @@ public class LayoutService {
         }
 
         return containedUrls;
+    }
+
+    public static void loadMediaViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
+        RoundedImageView roundedImageView = view.findViewById(R.id.image);
+        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
+            progressButton.initalize();
+            progressButton.setUploadType();
+            Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(roundedImageView);
+            if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
+                chatLayoutListener.onUpload(message,progressButton);
+                addUploadView(message.getMessageId(),message.getRoomId(),view);
+                progressButton.setProgress(0);
+            } else {
+                if(message.getUploadStatus() == UploadStatus.FAILED) {
+                    progressButton.setLabel("Retry");
+                }
+            }
+            progressButton.setProgressClickListener(new ProgressClickListener() {
+                @Override
+                public void onStart() {
+                    chatLayoutListener.onUpload(message,progressButton);
+                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                }
+
+                @Override
+                public void onCancel() {
+                    databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                }
+            });
+        } else {
+            File file = new File(message.getSharedFiles().get(0).getLocalPath());
+            if(file.exists()) {
+                progressButton.setVisibility(View.GONE);
+                loadPreview(context,roundedImageView,message.getSharedFiles().get(0),true);
+            } else {
+                progressButton.initalize();
+                if(message.getSender().equals(mynumber)) {
+                    progressButton.setMediaMissing();
+                } else {
+                    progressButton.setDownloadType();
+                    loadPreview(context,roundedImageView,message.getSharedFiles().get(0),false);
+                    progressButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            downloadFile(message.getSharedFiles());
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    public static void loadMediaViewMultiple(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
+        Log.d("TAGPATH", "loadPreview IL : "+message.getSender());
+        RoundedImageView image1 = view.findViewById(R.id.image1);
+        RoundedImageView image2 = view.findViewById(R.id.image2);
+        RoundedImageView image3 = view.findViewById(R.id.image3);
+        RoundedImageView image4 = view.findViewById(R.id.image4);
+        TextView moretext = view.findViewById(R.id.moretext);
+        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        if(message.getSharedFiles().size() > 4) {
+            moretext.setVisibility(View.VISIBLE);
+            moretext.setText("+ "+(message.getSharedFiles().size() - 3));
+        }
+        if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
+            progressButton.initalize();
+            progressButton.setUploadType();
+            Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(image1);
+            Glide.with(context).load(message.getSharedFiles().get(1).getLocalPath()).into(image2);
+            Glide.with(context).load(message.getSharedFiles().get(2).getLocalPath()).into(image3);
+            Glide.with(context).load(message.getSharedFiles().get(3).getLocalPath()).into(image4);
+            if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
+                chatLayoutListener.onUpload(message,progressButton);
+                addUploadView(message.getMessageId(),message.getRoomId(),view);
+                progressButton.setProgress(0);
+            } else {
+                if(message.getUploadStatus() == UploadStatus.FAILED) {
+                    progressButton.setLabel("Retry");
+                }
+            }
+            progressButton.setProgressClickListener(new ProgressClickListener() {
+                @Override
+                public void onStart() {
+                    chatLayoutListener.onUpload(message,progressButton);
+                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                }
+
+                @Override
+                public void onCancel() {
+                    databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                }
+            });
+        } else {
+            File file = null;
+            int i=0;
+            progressButton.initalize();
+            for(SharedFile sharedFile:message.getSharedFiles()) {
+                file = new File(sharedFile.getLocalPath());
+                if(file.exists()) {
+                    progressButton.setVisibility(View.GONE);
+                    if(i==0) {
+                        loadPreview(context,image1,sharedFile,true);
+                    } else if(i==1) {
+                        loadPreview(context,image2,sharedFile,true);
+                    } else if(i==2) {
+                        loadPreview(context,image3,sharedFile,true);
+                    } else if(i==3) {
+                        loadPreview(context,image4,sharedFile,true);
+                    }
+                } else {
+                    if(message.getSender().equals(mynumber)) {
+                        progressButton.setMediaMissing();
+                    } else {
+                        progressButton.setDownloadType();
+                        if(i==0) {
+                            loadPreview(context,image1,sharedFile,false);
+                        } else if(i==1) {
+                            loadPreview(context,image2,sharedFile,false);
+                        } else if(i==2) {
+                            loadPreview(context,image3,sharedFile,false);
+                        } else if(i==3) {
+                            loadPreview(context,image4,sharedFile,false);
+                        }
+                        progressButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                downloadFile(message.getSharedFiles());
+                            }
+                        });
+                    }
+                }
+                i++;
+            }
+
+        }
+    }
+
+    private static void loadPreview(Context context,RoundedImageView roundedImageView,SharedFile sharedFile,Boolean isExist) {
+        if(isExist) {
+            Log.d("TAGPATH", "loadPreview L : "+sharedFile.getLocalPath());
+            Glide.with(context).load(sharedFile.getLocalPath()).into(roundedImageView);
+        } else {
+            if(sharedFile.getPreviewUrl() != null && sharedFile.getPreviewUrl().length() > 0) {
+                Log.d("TAGPATH", "loadPreview P : "+sharedFile.getLocalPath());
+                Glide.with(context).load(sharedFile.getPreviewUrl()).into(roundedImageView);
+            } else {
+                Log.d("TAGPATH", "loadPreview U : "+sharedFile.getLocalPath());
+                Glide.with(context).load(sharedFile.getUrl()).into(roundedImageView);
+            }
+        }
+    }
+
+    private static void downloadFile(ArrayList<SharedFile> sharedFiles) {
     }
 }

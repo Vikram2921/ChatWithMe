@@ -190,40 +190,42 @@ public class FreindsFragment extends Fragment {
     }
 
     private void updateInDatabase(String username) {
-        firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if(documentSnapshot != null) {
-                    User users = documentSnapshot.toObject(User.class);
-                    databaseHelper.insertInUser(users);
-                    String roomid = MessageMaker.createRoomId(users.getContactNumber());
-                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            if(documentSnapshot != null) {
-                                SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
-                                if(securityDTO != null) {
-                                    databaseHelper.insertInSecurity(roomid,securityDTO);
-                                    Alerter.create(getActivity())
-                                            .setTitle("New Freind Added")
-                                            .setIcon(R.drawable.freinds)
-                                            .setText(users.getName()+ " accepted your freind request. Now you can chat and call "+users.getName())
-                                            .addButton("Chat Now", R.style.AlertButton, new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    MessageMaker.startChatroom(getContext(),users.getContactNumber());
-                                                }
-                                            })
-                                            .setDuration(10000)
-                                            .setBackgroundColorRes(R.color.purple_500)
-                                            .show();
+        if(!databaseHelper.isUserExist(username)) {
+            firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(documentSnapshot != null) {
+                        User users = documentSnapshot.toObject(User.class);
+                        databaseHelper.insertInUser(users);
+                        String roomid = MessageMaker.createRoomId(users.getContactNumber());
+                        firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                if(documentSnapshot != null) {
+                                    SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
+                                    if(securityDTO != null) {
+                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        Alerter.create(getActivity())
+                                                .setTitle("New Freind Added")
+                                                .setIcon(R.drawable.freinds)
+                                                .setText(users.getName()+ " accepted your freind request. Now you can chat and call "+users.getName())
+                                                .addButton("Chat Now", R.style.AlertButton, new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        MessageMaker.startChatroom(getContext(),users.getContactNumber());
+                                                    }
+                                                })
+                                                .setDuration(10000)
+                                                .setBackgroundColorRes(R.color.purple_500)
+                                                .show();
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void loadPrevious() {
