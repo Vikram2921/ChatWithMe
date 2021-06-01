@@ -35,7 +35,6 @@ import java.util.List;
 
 import me.mutasem.slidetoanswer.SwipeToAnswerView;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.sinchClient;
 
 public class AudioCall extends AppCompatActivity {
@@ -58,7 +57,7 @@ public class AudioCall extends AppCompatActivity {
         username = getIntent().getStringExtra("username");
         making = getIntent().getBooleanExtra("making",false);
         isVideoCall = getIntent().getBooleanExtra("video",false);
-        user = databaseHelper.getUser(username);
+        user = MessageMaker.getDatabaseHelper().getUser(username);
         if(isVideoCall) {
             PermissionListener permissionlistener = new PermissionListener() {
                 @Override

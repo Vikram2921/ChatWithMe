@@ -507,9 +507,19 @@ public class LayoutService {
         return containedUrls;
     }
 
+    private static String getLocalPathForSharedFile(SharedFile sharedFile,String sender,String myid) {
+        if(sender.equals(myid)) {
+            return sharedFile.getLocalPath();
+        } else {
+            return sharedFile.getFileId()+"."+sharedFile.getExtension();
+        }
+    }
+
     public static void loadMediaViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
         RoundedImageView roundedImageView = view.findViewById(R.id.image);
         ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        TextView info = view.findViewById(R.id.info);
+        info.setText(getSize(message.getSharedFiles().get(0).getSize()));
         if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
             progressButton.initalize();
             progressButton.setUploadType();
@@ -533,24 +543,34 @@ public class LayoutService {
                 @Override
                 public void onCancel() {
                     databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                    chatLayoutListener.onUploadCanceled(message,progressButton);
                 }
             });
         } else {
-            File file = new File(message.getSharedFiles().get(0).getLocalPath());
+            String path = getLocalPathForSharedFile(message.getSharedFiles().get(0),message.getSender(),mynumber);
+            File file = new File(path);
             if(file.exists()) {
+                if(message.getMessageType() == MessageType.VIDEO) {
+                    view.findViewById(R.id.playicon).setVisibility(View.VISIBLE);
+                }
                 progressButton.setVisibility(View.GONE);
                 loadPreview(context,roundedImageView,message.getSharedFiles().get(0),true);
             } else {
-                progressButton.initalize();
                 if(message.getSender().equals(mynumber)) {
-                    progressButton.setMediaMissing();
+                    progressButton.setVisibility(View.GONE);
                 } else {
+                    progressButton.initalize();
                     progressButton.setDownloadType();
                     loadPreview(context,roundedImageView,message.getSharedFiles().get(0),false);
-                    progressButton.setOnClickListener(new View.OnClickListener() {
+                    progressButton.setProgressClickListener(new ProgressClickListener() {
                         @Override
-                        public void onClick(View v) {
+                        public void onStart() {
                             downloadFile(message.getSharedFiles());
+                        }
+
+                        @Override
+                        public void onCancel() {
+
                         }
                     });
                 }
@@ -559,12 +579,19 @@ public class LayoutService {
     }
 
     public static void loadMediaViewMultiple(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
-        Log.d("TAGPATH", "loadPreview IL : "+message.getSender());
         RoundedImageView image1 = view.findViewById(R.id.image1);
         RoundedImageView image2 = view.findViewById(R.id.image2);
         RoundedImageView image3 = view.findViewById(R.id.image3);
         RoundedImageView image4 = view.findViewById(R.id.image4);
         TextView moretext = view.findViewById(R.id.moretext);
+        TextView info1 = view.findViewById(R.id.info1);
+        TextView info2 = view.findViewById(R.id.info2);
+        TextView info3 = view.findViewById(R.id.info3);
+        TextView info4 = view.findViewById(R.id.info4);
+        info1.setText(getSize(message.getSharedFiles().get(0).getSize()));
+        info2.setText(getSize(message.getSharedFiles().get(1).getSize()));
+        info3.setText(getSize(message.getSharedFiles().get(2).getSize()));
+        info4.setText(getSize(message.getSharedFiles().get(3).getSize()));
         ProgressButton progressButton = view.findViewById(R.id.progressbutton);
         if(message.getSharedFiles().size() > 4) {
             moretext.setVisibility(View.VISIBLE);
@@ -596,14 +623,26 @@ public class LayoutService {
                 @Override
                 public void onCancel() {
                     databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                    chatLayoutListener.onUploadCanceled(message,progressButton);
                 }
             });
         } else {
             File file = null;
             int i=0;
             progressButton.initalize();
+            progressButton.setProgressClickListener(new ProgressClickListener() {
+                @Override
+                public void onStart() {
+                    downloadFile(message.getSharedFiles());
+                }
+
+                @Override
+                public void onCancel() {
+
+                }
+            });
             for(SharedFile sharedFile:message.getSharedFiles()) {
-                file = new File(sharedFile.getLocalPath());
+                file = new File(getLocalPathForSharedFile(sharedFile,message.getSender(),mynumber));
                 if(file.exists()) {
                     progressButton.setVisibility(View.GONE);
                     if(i==0) {
@@ -617,7 +656,7 @@ public class LayoutService {
                     }
                 } else {
                     if(message.getSender().equals(mynumber)) {
-                        progressButton.setMediaMissing();
+                        progressButton.setVisibility(View.GONE);
                     } else {
                         progressButton.setDownloadType();
                         if(i==0) {
@@ -645,16 +684,9 @@ public class LayoutService {
 
     private static void loadPreview(Context context,RoundedImageView roundedImageView,SharedFile sharedFile,Boolean isExist) {
         if(isExist) {
-            Log.d("TAGPATH", "loadPreview L : "+sharedFile.getLocalPath());
             Glide.with(context).load(sharedFile.getLocalPath()).into(roundedImageView);
         } else {
-            if(sharedFile.getPreviewUrl() != null && sharedFile.getPreviewUrl().length() > 0) {
-                Log.d("TAGPATH", "loadPreview P : "+sharedFile.getLocalPath());
-                Glide.with(context).load(sharedFile.getPreviewUrl()).into(roundedImageView);
-            } else {
-                Log.d("TAGPATH", "loadPreview U : "+sharedFile.getLocalPath());
-                Glide.with(context).load(sharedFile.getUrl()).into(roundedImageView);
-            }
+            Glide.with(context).load(sharedFile.getPreviewUrl()).into(roundedImageView);
         }
     }
 

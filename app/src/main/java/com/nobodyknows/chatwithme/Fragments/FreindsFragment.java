@@ -46,12 +46,7 @@ import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class FreindsFragment extends Fragment {
 
@@ -139,7 +134,7 @@ public class FreindsFragment extends Fragment {
         fdto.setRequestSentAt(freindRequestDTO.getRequestSentAt());
         fdto.setRequestSentBy(freindRequestDTO.getContactNumber());
         fdto.setRequestAcceptedAt(new Date());
-        firebaseService.saveToFireStore("Users").document(mynumber).collection("Freinds").document(freindRequestDTO.getContactNumber()).set(fdto).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().saveToFireStore("Users").document(mynumber).collection("Freinds").document(freindRequestDTO.getContactNumber()).set(fdto).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
@@ -148,7 +143,7 @@ public class FreindsFragment extends Fragment {
                     myDto.setRequestSentAt(freindRequestDTO.getRequestSentAt());
                     myDto.setRequestSentBy(freindRequestDTO.getContactNumber());
                     myDto.setRequestAcceptedAt(new Date());
-                    firebaseService.saveToFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("Freinds").document(mynumber).set(myDto).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    MessageMaker.getFirebaseService().saveToFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("Freinds").document(mynumber).set(myDto).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             String roomid= MessageMaker.createRoomId(freindRequestDTO.getContactNumber());
@@ -156,11 +151,11 @@ public class FreindsFragment extends Fragment {
                             SecurityDTO securityDTO = new SecurityDTO();
                             securityDTO.setLastChangedBy(mynumber);
                             securityDTO.setSecurityKey(key);
-                            firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").set(securityDTO).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").set(securityDTO).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     if(task.isSuccessful()) {
-                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        MessageMaker.getDatabaseHelper().insertInSecurity(roomid,securityDTO);
                                         deleteRequest(freindRequestDTO,true);
                                         popup.dismiss();
                                     }
@@ -174,10 +169,10 @@ public class FreindsFragment extends Fragment {
     }
 
     private void deleteRequest(FreindRequestDTO freindRequestDTO,Boolean updateInDatabase) {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").document(freindRequestDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").document(freindRequestDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                firebaseService.readFromFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("FreindRequests").document("Sent").collection("List").document(MessageMaker.getMyNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                MessageMaker.getFirebaseService().readFromFireStore("Users").document(freindRequestDTO.getContactNumber()).collection("FreindRequests").document("Sent").collection("List").document(MessageMaker.getMyNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if(updateInDatabase) {
@@ -190,21 +185,21 @@ public class FreindsFragment extends Fragment {
     }
 
     private void updateInDatabase(String username) {
-        if(!databaseHelper.isUserExist(username)) {
-            firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        if(!MessageMaker.getDatabaseHelper().isUserExist(username)) {
+            MessageMaker.getFirebaseService().readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if(documentSnapshot != null) {
                         User users = documentSnapshot.toObject(User.class);
-                        databaseHelper.insertInUser(users);
+                        MessageMaker.getDatabaseHelper().insertInUser(users);
                         String roomid = MessageMaker.createRoomId(users.getContactNumber());
-                        firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 if(documentSnapshot != null) {
                                     SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
                                     if(securityDTO != null) {
-                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        MessageMaker.getDatabaseHelper().insertInSecurity(roomid,securityDTO);
                                         Alerter.create(getActivity())
                                                 .setTitle("New Freind Added")
                                                 .setIcon(R.drawable.freinds)
@@ -243,7 +238,7 @@ public class FreindsFragment extends Fragment {
 
     private void syncOnline() {
         updateCount();
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Receive").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -278,7 +273,7 @@ public class FreindsFragment extends Fragment {
             FreindRequestDTO freindRequestDTO = new FreindRequestDTO();
             freindRequestDTO.setContactNumber(freindRequestSaveDTO.getContactNumber());
             freindRequestDTO.setRequestSentAt(freindRequestSaveDTO.getRequestSentAt());
-            firebaseService.readFromFireStore("Users").document(freindRequestSaveDTO.getContactNumber()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            MessageMaker.getFirebaseService().readFromFireStore("Users").document(freindRequestSaveDTO.getContactNumber()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if(task.isSuccessful()) {
@@ -300,7 +295,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void readSent() {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Sent").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("FreindRequests").document("Sent").collection("List").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -320,7 +315,7 @@ public class FreindsFragment extends Fragment {
     }
 
     private void syncFreindList() {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -343,16 +338,16 @@ public class FreindsFragment extends Fragment {
     }
 
     private void removeFreind(FreindRequestSaveDTO freindRequestSaveDTO) {
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("RecentChats").collection("History").document(freindRequestSaveDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("RecentChats").collection("History").document(freindRequestSaveDTO.getContactNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                firebaseService.saveToFireStore("Chats").document(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber())).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                MessageMaker.getFirebaseService().saveToFireStore("Chats").document(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber())).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        databaseHelperChat.deleteMessagesOf(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
-                        databaseHelper.deleteRecentChat(freindRequestSaveDTO.getContactNumber());
-                        databaseHelper.deleteUser(freindRequestSaveDTO.getContactNumber());
-                        databaseHelper.deleteSecurityInfo(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
+                        MessageMaker.getDatabaseHelperChat().deleteMessagesOf(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
+                        MessageMaker.getDatabaseHelper().deleteRecentChat(freindRequestSaveDTO.getContactNumber());
+                        MessageMaker.getDatabaseHelper().deleteUser(freindRequestSaveDTO.getContactNumber());
+                        MessageMaker.getDatabaseHelper().deleteSecurityInfo(MessageMaker.createRoomId(freindRequestSaveDTO.getContactNumber()));
                         MessageMaker.removeFromRecentChatUI(freindRequestSaveDTO.getContactNumber());
                     }
                 });

@@ -19,9 +19,6 @@ import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 import com.vistrav.pop.Pop;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
-
 public class ViewContact extends AppCompatActivity {
 
     private ImageView back,verified,profile,chat,audio,video;
@@ -65,7 +62,7 @@ public class ViewContact extends AppCompatActivity {
     }
 
     private void load() {
-        User user = databaseHelper.getUser(username);
+        User user = MessageMaker.getDatabaseHelper().getUser(username);
         isBlocked = user.getBlocked();
         if(isBlocked && user.getBlockedBy().equalsIgnoreCase(MessageMaker.getMyNumber())) {
             blocktext.setText("Unblock");
@@ -118,7 +115,7 @@ public class ViewContact extends AppCompatActivity {
                         .when(R.string.unfreind,new Pop.Yah() {
                             @Override
                             public void clicked(DialogInterface dialog, @Nullable View view) {
-                                firebaseService.unfreind(username,ViewContact.this);
+                                MessageMaker.getFirebaseService().unfreind(username,ViewContact.this);
                             }
                         }).when(new Pop.Nah() {
                                 @Override
@@ -137,7 +134,7 @@ public class ViewContact extends AppCompatActivity {
                             .when(R.string.unblockstring,new Pop.Yah() {
                                 @Override
                                 public void clicked(DialogInterface dialog, @Nullable View view) {
-                                    firebaseService.unblock(username, MessageMaker.createRoomId(username));
+                                    MessageMaker.getFirebaseService().unblock(username, MessageMaker.createRoomId(username));
                                     blocktext.setText("Block");
                                 }
                             }).when(new Pop.Nah() {
@@ -152,7 +149,7 @@ public class ViewContact extends AppCompatActivity {
                             .when(R.string.blockstring,new Pop.Yah() {
                                 @Override
                                 public void clicked(DialogInterface dialog, @Nullable View view) {
-                                    firebaseService.block(username, MessageMaker.createRoomId(username));
+                                    MessageMaker.getFirebaseService().block(username, MessageMaker.createRoomId(username));
                                     blocktext.setText("Unblock");
                                 }
                             }).when(new Pop.Nah() {

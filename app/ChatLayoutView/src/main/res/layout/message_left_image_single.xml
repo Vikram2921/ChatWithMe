@@ -35,6 +35,20 @@
         android:layout_width="@dimen/midiasuaresizesingle"
         android:layout_height="@dimen/midiasuaresizesingle">
     </com.makeramen.roundedimageview.RoundedImageView>
+    <TextView
+        app:layout_constraintLeft_toLeftOf="@id/image"
+        app:layout_constraintRight_toRightOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        android:text="32.5 MB"
+        android:id="@+id/info"
+        android:textColor="#fff"
+        android:drawablePadding="10dp"
+        android:drawableTint="#fff"
+        android:background="@drawable/mediainfoback"
+        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
     <com.NobodyKnows.chatlayoutview.ProgressButton
         app:layout_constraintLeft_toLeftOf="@id/image"
         app:layout_constraintRight_toRightOf="@id/image"

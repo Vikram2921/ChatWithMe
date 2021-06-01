@@ -23,7 +23,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -34,6 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context= context;
+        createTable();
     }
 
     public void setRoomId(String roomId) {
@@ -153,7 +153,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 userListItemDTO.setBlocked(user.getBlocked());
                 userListItemDTO.setCurrentStatus(user.getCurrentStatus());
                 String lastMessageId = cursor.getString(cursor.getColumnIndex(RecentChats.COLUMN_LAST_MESSAGE_ID));
-                userListItemDTO.setLastMessage(databaseHelperChat.getMessage(lastMessageId,MessageMaker.createRoomId(userListItemDTO.getContactNumber())));
+                userListItemDTO.setLastMessage(MessageMaker.getDatabaseHelperChat().getMessage(lastMessageId,MessageMaker.createRoomId(userListItemDTO.getContactNumber())));
                 recentChatList.add(userListItemDTO);
 
             } while (cursor.moveToNext());

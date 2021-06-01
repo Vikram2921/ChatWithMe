@@ -14,9 +14,12 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -72,7 +75,9 @@ import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 import com.scottyab.aescrypt.AESCrypt;
 import com.vanniktech.emoji.EmojiEditText;
+import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.EmojiPopup;
+import com.vanniktech.emoji.google.GoogleEmojiProvider;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardCloseListener;
 import com.vistrav.pop.Pop;
 import com.wafflecopter.multicontactpicker.ContactResult;
@@ -95,9 +100,6 @@ import at.markushi.ui.CircleButton;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.GIPHY_KEY;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.GifSelectionListener {
 
     private static final int CONTACT_PICKER_REQUEST = 2921;
@@ -155,7 +157,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         blockedBy = getIntent().getStringExtra("blockedBy");
         SharedPreferences sharedPreferences = getSharedPreferences("ChatWithMe",MODE_PRIVATE);
         myUsername = sharedPreferences.getString("number","0000000000");
-        roomSecurityKey = databaseHelper.getSecurityKey(roomid);
+        roomSecurityKey = MessageMaker.getDatabaseHelper().getSecurityKey(roomid);
         init();
         updateUserInfoSync();
     }
@@ -177,7 +179,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     }
 
     private void updateUserInfoSync() {
-        listneruseraccount = firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        listneruseraccount = MessageMaker.getFirebaseService().readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 User user = value.toObject(User.class);
@@ -192,7 +194,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                     if(isVerfied) {
                         verified.setVisibility(View.VISIBLE);
                     }
-                    databaseHelper.updateUserInfo(user);
+                    MessageMaker.getDatabaseHelper().updateUserInfo(user);
                 }
             }
         });
@@ -229,7 +231,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         if(istyping) {
             newstatus = "typing]-]"+username;
         }
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update("currentStatus",newstatus).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update("currentStatus",newstatus).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 
@@ -258,7 +260,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     @Override
     protected void onResume() {
         super.onResume();
-        User user = databaseHelper.getUser(username);
+        User user = MessageMaker.getDatabaseHelper().getUser(username);
         if(user == null) {
             finish();
         } else {
@@ -354,7 +356,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.mute,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                       firebaseService.muteChat(username);
+                       MessageMaker.getFirebaseService().muteChat(username);
                        isMuted = true;
                        setMuteStatus();
                     }
@@ -372,7 +374,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.unmute,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.unmuteChat(username);
+                        MessageMaker.getFirebaseService().unmuteChat(username);
                         isMuted = false;
                         setMuteStatus();
                     }
@@ -390,8 +392,8 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.clear,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        databaseHelperChat.clearAll(roomid);
-                        databaseHelper.clearLastMessage(username);
+                        MessageMaker.getDatabaseHelperChat().clearAll(roomid);
+                        MessageMaker.getDatabaseHelper().clearLastMessage(username);
                         chatLayoutView.reload();
                         addInfoMessage();
                     }
@@ -416,7 +418,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.blockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.block(username,roomid);
+                        MessageMaker.getFirebaseService().block(username,roomid);
                         isBlocked = true;
                         blockedBy = myUsername;
                         setBlockStatus();
@@ -435,7 +437,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.unfreind,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.unfreind(username,ChatRoom.this);
+                        MessageMaker.getFirebaseService().unfreind(username,ChatRoom.this);
                     }
                 }).when(new Pop.Nah() {
             @Override
@@ -451,10 +453,10 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 .when(R.string.unblockstring,new Pop.Yah() {
                     @Override
                     public void clicked(DialogInterface dialog, @Nullable View view) {
-                        firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document("BLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document("BLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                firebaseService.unblock(username,roomid);
+                                MessageMaker.getFirebaseService().unblock(username,roomid);
                                 isBlocked = false;
                                 blockedBy = myUsername;
                                 if(listner == null) {
@@ -555,6 +557,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 chatLayoutView.addMessage(message);
             }
         }
+        selectedUrls.clear();
     }
 
     private SharedFile getSharedFileObject(String filepath,String type) {
@@ -612,7 +615,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         User user = null;
         for(PhoneNumber phoneNumber:contactResult.getPhoneNumbers()) {
             contact.setContactNumbers(MessageMaker.getNormalizedPhoneNumber(phoneNumber.getNumber()));
-            user = databaseHelper.getUser(contact.getContactNumbers());
+            user = MessageMaker.getDatabaseHelper().getUser(contact.getContactNumbers());
             if(user != null) {
                 contact.setProfileUrl(user.getProfileUrl());
             }
@@ -844,7 +847,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
 
     private void startListening() {
         if(listner == null && (!isBlocked || (isBlocked && !blockedBy.equalsIgnoreCase(myUsername)))) {
-            listner = firebaseService.readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            listner = MessageMaker.getFirebaseService().readFromFireStore("Chats").document(roomid).collection("Messages").orderBy("messageId", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                     if(error == null) {
@@ -871,7 +874,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                                     isBlocked = false;
                                     blockedBy = message.getSender();
                                     setBlockStatus();
-                                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document("UNBLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document("UNBLOCKED_"+username).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
 
@@ -947,11 +950,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                     message.setMessage(AESCrypt.encrypt(roomSecurityKey,message.getMessage()));
                 }
                 message.setMessageStatus(MessageStatus.SENT);
-                firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+                MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         decryptMessage(message,true);
-                        firebaseService.updateLastMessage(myUsername,username,message);
+                        MessageMaker.getFirebaseService().updateLastMessage(myUsername,username,message);
                     }
                 });
             }
@@ -961,7 +964,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     }
 
     private void setupChatLayoutView() {
-        chatLayoutView.setup(myUsername, roomid, true,databaseHelperChat, new ChatLayoutListener() {
+        chatLayoutView.setup(myUsername, roomid, true,MessageMaker.getDatabaseHelperChat(), new ChatLayoutListener() {
             @Override
             public void onSwipeToReply(Message message, View replyView) {
                 if(replyview != null) {
@@ -975,6 +978,16 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             @Override
             public void onUpload(Message message, ProgressButton progressButton) {
                 startUploading(message,progressButton);
+            }
+
+            @Override
+            public void onDownload(Message message, ProgressButton progressButton) {
+
+            }
+
+            @Override
+            public void onUploadCanceled(Message message, ProgressButton progressButton) {
+
             }
 
             @Override
@@ -995,7 +1008,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             @Override
             public void onMessageSeenConfirmed(Message message) {
                 if(!isBlocked) {
-                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
 
@@ -1013,7 +1026,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                     }
                     mapToUpdate.put("messageStatus",MessageStatus.SEEN);
                     mapToUpdate.put("seenAt",new Date());
-                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).update(mapToUpdate).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).update(mapToUpdate).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             chatLayoutView.updateMessage(message);
@@ -1027,16 +1040,72 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         myUser.setContactNumber(myUsername);
         myUser.setColorCode(MessageMaker.getFromSharedPrefrencesInt(getApplicationContext(),"colorCode"));
         chatLayoutView.addUser(myUser);
-        User freinduser = databaseHelper.getUser(username);
+        User freinduser = MessageMaker.getDatabaseHelper().getUser(username);
         chatLayoutView.addUser(freinduser);
         chatLayoutView.loadSavedChat();
         loadBackgroundImage();
         addInfoMessage();
     }
 
+    private void uploadPreview(Message message, SharedFile sharedFileWithUrl, ProgressButton progressButton,int finalI) {
+        Bitmap thumb = null;
+        if(message.getMessageType() == MessageType.VIDEO) {
+            MediaMetadataRetriever m = new MediaMetadataRetriever();
+            m.setDataSource(sharedFileWithUrl.getLocalPath());
+            thumb = m.getFrameAtTime();
+        } else if(message.getMessageType() == MessageType.IMAGE) {
+            thumb = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(sharedFileWithUrl.getLocalPath()),50,50);
+        }
+        if(thumb != null) {
+             UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromBitmap(sharedFileWithUrl.getFileId(),message.getRoomId()+"_Previews",thumb);
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return MessageMaker.getFirebaseService().getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                SharedFile sharedFile = message.getSharedFiles().get(finalI);
+                                sharedFile.setUrl(sharedFileWithUrl.getUrl());
+                                sharedFile.setPreviewUrl(downloadUri.toString());
+                                message.getSharedFiles().remove(finalI);
+                                message.getSharedFiles().add(finalI,sharedFile);
+                                chatLayoutView.getDatabaseHelper().updateSharedFileUrls(sharedFile.getFileId(),message.getMessageId(),message.getRoomId(),sharedFile.getUrl(),sharedFile.getPreviewUrl());
+                                checkCompleted(message,progressButton);
+
+                            }
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    chatLayoutView.getDatabaseHelper().updateMessageUploadStatus(message.getRoomId(),message.getMessageId(), UploadStatus.FAILED);
+                }
+            });
+        } else {
+            SharedFile sharedFile = message.getSharedFiles().get(finalI);
+            sharedFile.setUrl(sharedFileWithUrl.getUrl());
+            sharedFile.setPreviewUrl(sharedFileWithUrl.getUrl());
+            message.getSharedFiles().remove(finalI);
+            message.getSharedFiles().add(finalI,sharedFile);
+            chatLayoutView.getDatabaseHelper().updateSharedFileUrls(sharedFile.getFileId(),message.getMessageId(),message.getRoomId(),sharedFile.getUrl(),sharedFile.getPreviewUrl());
+            checkCompleted(message,progressButton);
+        }
+    }
+
     private void startUploading(Message message, ProgressButton progressButton) {
         for(int i=0;i<message.getSharedFiles().size();i++) {
-            UploadTask uploadTask = firebaseService.uploadFromUri(message.getSharedFiles().get(i).getFileId(),message.getRoomId(),message.getSharedFiles().get(i).getLocalPath());
+            UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromUri(message.getSharedFiles().get(i).getFileId(),message.getRoomId(),message.getSharedFiles().get(i).getLocalPath());
             int finalI = i;
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -1047,7 +1116,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                             if (!task.isSuccessful()) {
                                 throw task.getException();
                             }
-                            return firebaseService.getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
+                            return MessageMaker.getFirebaseService().getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
                         }
                     }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
@@ -1056,10 +1125,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                                 Uri downloadUri = task.getResult();
                                 SharedFile sharedFile = message.getSharedFiles().get(finalI);
                                 sharedFile.setUrl(downloadUri.toString());
-                                message.getSharedFiles().remove(finalI);
-                                message.getSharedFiles().add(finalI,sharedFile);
-                                chatLayoutView.getDatabaseHelper().updateSharedFileUrls(sharedFile.getFileId(),message.getMessageId(),message.getRoomId(),sharedFile.getUrl(),sharedFile.getPreviewUrl());
-                                checkCompleted(message,progressButton);
+                                uploadPreview(message,sharedFile,progressButton,finalI);
                             }
                         }
                     });
@@ -1093,7 +1159,6 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 completed ++;
                 progress = ((double) completed / (double) total) * 100;
                 progressButton.setProgress(progress);
-                sharedFile.setLocalPath("");
             }
         }
         if(isCompleted) {
@@ -1110,11 +1175,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         freindRequestSaveDTO.setRequestSentBy(myUsername);
         freindRequestSaveDTO.setRequestSentAt(new Date());
         freindRequestSaveDTO.setContactNumber(user.getContactNumber());
-        firebaseService.saveToFireStore("Users").document(myUsername).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().saveToFireStore("Users").document(myUsername).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 freindRequestSaveDTO.setContactNumber(myUsername);
-                firebaseService.saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(myUsername).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+                MessageMaker.getFirebaseService().saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(myUsername).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Toast.makeText(getApplicationContext(),"Freind Request Sent to "+user.getName(),Toast.LENGTH_LONG).show();
@@ -1125,7 +1190,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     }
 
     private void OpenInChat(Contact contact) {
-        Boolean userExist = databaseHelper.isUserExist(contact.getContactNumbers());
+        Boolean userExist = MessageMaker.getDatabaseHelper().isUserExist(contact.getContactNumbers());
         if(userExist) {
             MessageMaker.startChatroom(getApplicationContext(),contact.getContactNumbers());
             finish();
@@ -1139,7 +1204,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                         .setDimAmount(0.5f)
                         .show();
                 final AlertDialog[] pop = new AlertDialog[1];
-                firebaseService.readFromFireStore("Users").document(contact.getContactNumbers()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                MessageMaker.getFirebaseService().readFromFireStore("Users").document(contact.getContactNumbers()).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if(task.isSuccessful()) {

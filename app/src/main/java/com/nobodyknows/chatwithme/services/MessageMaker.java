@@ -15,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.NobodyKnows.chatlayoutview.Constants.MessageStatus;
 import com.NobodyKnows.chatlayoutview.Constants.MessageType;
+import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
@@ -26,6 +27,7 @@ import com.nobodyknows.chatwithme.Activities.AudioCall;
 import com.nobodyknows.chatwithme.Activities.ChatRoom;
 import com.nobodyknows.chatwithme.DTOS.CallModel;
 import com.nobodyknows.chatwithme.DTOS.UserListItemDTO;
+import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.R;
 import com.sinch.android.rtc.calling.Call;
 
@@ -39,9 +41,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.callClient;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.sinchClient;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callIds;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.callNotFound;
 import static com.nobodyknows.chatwithme.Fragments.CallsFragment.calls;
@@ -57,12 +56,50 @@ public class MessageMaker {
     private static String myNumber ="";
     private static String mySecurityKey ="";
     private static Call currentCallRef;
+    private static Context context;
     private static View myVideoView,remoteVideoView;
     private static String currentCallId = "";
+    private static FirebaseService firebaseService;
+    private static DatabaseHelper databaseHelper;
+    private static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper databaseHelperChat;
     private static Boolean isCallMuted = false,isOnSpeaker = false,isVideoOn = false,isCallStarted = false,isVideoViewSwitched = false;
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
         return id;
+    }
+
+    public static FirebaseService getFirebaseService() {
+        if(firebaseService == null) {
+            firebaseService = new FirebaseService();
+        }
+        return firebaseService;
+    }
+
+    public static DatabaseHelper getDatabaseHelper() {
+        if(databaseHelper == null) {
+            databaseHelper = new DatabaseHelper(getContext());
+        }
+        return databaseHelper;
+    }
+
+    public static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper getDatabaseHelperChat() {
+        if(databaseHelperChat == null) {
+            databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getContext(), new LastMessageUpdateListener() {
+                @Override
+                public void onLastMessageAdded(Message message, String roomid) {
+                    getDatabaseHelper().updateUserLastMessage(message);
+                }
+            });
+        }
+        return databaseHelperChat;
+    }
+
+    public static Context getContext() {
+        return context;
+    }
+
+    public static void setContext(Context context) {
+        MessageMaker.context = context;
     }
 
     public static void setMySecurityKey(String mySecurityKey) {
@@ -183,12 +220,12 @@ public class MessageMaker {
     public static Message filterMessage(Message message) {
         if(message.getMessageType() == MessageType.BLOCKED) {
             if(!message.getSender().equalsIgnoreCase(myNumber)) {
-                databaseHelper.setBlockStatus(message.getSender(),message.getSender(),true);
+                getDatabaseHelper().setBlockStatus(message.getSender(),message.getSender(),true);
             }
             return null;
         } else if(message.getMessageType() == MessageType.UNBLOCKED) {
             if(!message.getSender().equalsIgnoreCase(myNumber)) {
-                databaseHelper.setBlockStatus(message.getSender(),message.getSender(),false);
+                getDatabaseHelper().setBlockStatus(message.getSender(),message.getSender(),false);
             }
             return null;
         } 
@@ -196,7 +233,7 @@ public class MessageMaker {
     }
 
     public static void startChatroom(Context context, String username) {
-        User user =databaseHelper.getUser(username);
+        User user =getDatabaseHelper().getUser(username);
         Intent intent = new Intent(context, ChatRoom.class);
         intent.putExtra("username",user.getContactNumber());
         intent.putExtra("name",user.getName());
@@ -316,7 +353,7 @@ public class MessageMaker {
                 callModel.setIncomingCall(true);
                 callModel.setUsername(call.getRemoteUserId());
                 updateCallModel(callModel,call);
-                databaseHelper.insertInCalls(callModel);
+                getDatabaseHelper().insertInCalls(callModel);
                 playRingtone(applicationContext);
                 Intent intent = new Intent(applicationContext, AudioCall.class);
                 intent.putExtra("username",call.getRemoteUserId());
@@ -339,9 +376,9 @@ public class MessageMaker {
     }
 
     public static void updateCallInfo(Call call,Boolean updateinlist) {
-        CallModel callModel = databaseHelper.getCallObject(call.getCallId());
+        CallModel callModel = getDatabaseHelper().getCallObject(call.getCallId());
         updateCallModel(callModel,call);
-        databaseHelper.updateCallInfo(callModel);
+        getDatabaseHelper().updateCallInfo(callModel);
         if(updateinlist) {
             if(!callIds.contains(callModel.getCallId())) {
                 calls.add(0,callModel);
@@ -391,7 +428,7 @@ public class MessageMaker {
         callModel.setIncomingCall(false);
         callModel.setUsername(username);
         updateCallModel(callModel,currentCallRef);
-        databaseHelper.insertInCalls(callModel);
+        getDatabaseHelper().insertInCalls(callModel);
     }
 
     public static void audioConferenceCall(String username) {
@@ -400,7 +437,7 @@ public class MessageMaker {
         callModel.setIncomingCall(false);
         callModel.setUsername(username);
         updateCallModel(callModel,currentCallRef);
-        databaseHelper.insertInCalls(callModel);
+        getDatabaseHelper().insertInCalls(callModel);
     }
 
     public static void videoCall(String username) {
@@ -409,7 +446,7 @@ public class MessageMaker {
         callModel.setIncomingCall(false);
         callModel.setUsername(username);
         updateCallModel(callModel,currentCallRef);
-        databaseHelper.insertInCalls(callModel);
+        getDatabaseHelper().insertInCalls(callModel);
     }
 
     public static void hangup() {
@@ -440,13 +477,10 @@ public class MessageMaker {
         mp.start();
     }
 
-    public static void playRingingSound(Context context) {
-
-    }
-
     public static void stopRingtone() {
         if(mp != null) {
             mp.stop();
+            mp.release();
             mp = null;
         }
     }
@@ -545,6 +579,17 @@ public class MessageMaker {
         mp = null;
         mp= MediaPlayer.create(context,R.raw.ringeffect);
         mp.start();
+    }
+
+    public static void initializeDatabase() {
+        firebaseService = new FirebaseService();
+        databaseHelper = new DatabaseHelper(getContext());
+        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getContext(), new LastMessageUpdateListener() {
+            @Override
+            public void onLastMessageAdded(Message message, String roomid) {
+                getDatabaseHelper().updateUserLastMessage(message);
+            }
+        });
     }
 
 }

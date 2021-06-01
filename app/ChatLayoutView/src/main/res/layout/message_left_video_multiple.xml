@@ -100,7 +100,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_videocam_24"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -114,7 +114,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_videocam_24"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -128,7 +128,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_left_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_videocam_24"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -142,10 +142,54 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_right_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_videocam_24"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
+    <ImageView
+        android:src="@drawable/ic_baseline_play_circle_outline_24"
+        app:layout_constraintLeft_toLeftOf="@id/image1"
+        app:layout_constraintRight_toRightOf="@id/image1"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/image1"
+        app:layout_constraintBottom_toBottomOf="@id/image1"
+        android:background="@drawable/ic_round_shape"
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+    </ImageView>
+    <ImageView
+        android:src="@drawable/ic_baseline_play_circle_outline_24"
+        app:layout_constraintLeft_toLeftOf="@id/image2"
+        app:layout_constraintRight_toRightOf="@id/image2"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/image2"
+        app:layout_constraintBottom_toBottomOf="@id/image2"
+        android:background="@drawable/ic_round_shape"
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+    </ImageView>
+    <ImageView
+        android:src="@drawable/ic_baseline_play_circle_outline_24"
+        app:layout_constraintLeft_toLeftOf="@id/image3"
+        app:layout_constraintRight_toRightOf="@id/image3"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/image3"
+        app:layout_constraintBottom_toBottomOf="@id/image3"
+        android:background="@drawable/ic_round_shape"
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+    </ImageView>
+    <ImageView
+        android:src="@drawable/ic_baseline_play_circle_outline_24"
+        app:layout_constraintLeft_toLeftOf="@id/image4"
+        app:layout_constraintRight_toRightOf="@id/image4"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/image4"
+        app:layout_constraintBottom_toBottomOf="@id/image4"
+        android:background="@drawable/ic_round_shape"
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+    </ImageView>
     <com.NobodyKnows.chatlayoutview.ProgressButton
         android:id="@+id/progressbutton"
         android:layout_width="wrap_content"

@@ -11,6 +11,8 @@ import com.NobodyKnows.chatlayoutview.ProgressButton;
 public interface ChatLayoutListener {
     public void onSwipeToReply(Message message, View replyView);
     public void onUpload(Message message, ProgressButton progressButton);
+    public void onDownload(Message message, ProgressButton progressButton);
+    public void onUploadCanceled(Message message, ProgressButton progressButton);
     public void onMessageSeen(Message message);
     public void onMessageSeenConfirmed(Message message);
     public void onSenderNameClicked(User user, Message message);

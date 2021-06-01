@@ -15,12 +15,12 @@ public class DashboardFragment extends FragmentPagerAdapter {
         switch (position) {
             case 0: // Fragment # 0 - This will show FirstFragment
                 return new ChatFragment();
-            case 1: // Fragment # 0 - This will show FirstFragment different title
-                return new StoriesFragment();
-            case 2: // Fragment # 1 - This will show SecondFragment
+//            case 1: // Fragment # 0 - This will show FirstFragment different title
+//                return new StoriesFragment();
+            case 1: // Fragment # 1 - This will show SecondFragment
                 return new FreindsFragment();
-            case 3: // Fragment # 1 - This will show SecondFragment
-                return new CallsFragment();
+//            case 3: // Fragment # 1 - This will show SecondFragment
+//                return new CallsFragment();
 
             default:
                 return null;
@@ -29,7 +29,7 @@ public class DashboardFragment extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 2;
     }
 
     @Override
@@ -37,12 +37,12 @@ public class DashboardFragment extends FragmentPagerAdapter {
         switch (position) {
             case 0: // Fragment # 0 - This will show FirstFragment
                 return "Chat";
-            case 1: // Fragment # 0 - This will show FirstFragment different title
-                return "Stories";
-            case 2: // Fragment # 1 - This will show SecondFragment
+//            case 1: // Fragment # 0 - This will show FirstFragment different title
+//                return "Stories";
+            case 1: // Fragment # 1 - This will show SecondFragment
                 return "Freinds";
-            case 3: // Fragment # 1 - This will show SecondFragment
-                return "Calls";
+//            case 3: // Fragment # 1 - This will show SecondFragment
+//                return "Calls";
             default:
                 return null;
         }

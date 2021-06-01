@@ -3,15 +3,11 @@ package com.nobodyknows.chatwithme.Activities.Dashboard;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,26 +16,18 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.NobodyKnows.chatlayoutview.Interfaces.LastMessageUpdateListener;
-import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.bumptech.glide.Glide;
-import com.giphy.sdk.ui.GPHSettings;
 import com.giphy.sdk.ui.Giphy;
-import com.giphy.sdk.ui.themes.GPHTheme;
-import com.giphy.sdk.ui.themes.GridType;
-import com.giphy.sdk.ui.views.GiphyDialogFragment;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Activities.BookVaccine;
 import com.nobodyknows.chatwithme.Activities.SearchFreinds;
-import com.nobodyknows.chatwithme.Database.DatabaseHelper;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
-import com.nobodyknows.chatwithme.services.FirebaseService;
 import com.nobodyknows.chatwithme.services.MessageMaker;
 import com.sinch.android.rtc.ClientRegistration;
 import com.sinch.android.rtc.Sinch;
@@ -53,10 +41,8 @@ import com.sinch.android.rtc.video.VideoScalingType;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -73,15 +59,13 @@ public class Dashboard extends AppCompatActivity {
     private ImageView addChat,addConnection;
     private TabLayout tabLayout;
     private View actionbarview;
-    public static FirebaseService firebaseService;
-    public static DatabaseHelper databaseHelper;
-    public static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper databaseHelperChat;
     private Bluetooth bluetooth;
     private String sinchApplicationKey = "4f4a2900-a600-45ef-9e35-d2d20b6b2e93";
     private String sinchApplicationSecret = "ML6bBC1ri0GvMuNfI93sWw==";
     public static SinchClient sinchClient;
     public static String GIPHY_KEY = "xEH0o5bSCOBYPjXj7tjqmV2YuTML8FjN";
     public static CallClient callClient;
+    private SinchClientListener sinchClientListener;
     private CallClientListener callClientListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,37 +76,43 @@ public class Dashboard extends AppCompatActivity {
         getSupportActionBar().setCustomView(R.layout.dashboard_toolbar_view);
         actionbarview = getSupportActionBar().getCustomView();
         getSupportActionBar().setElevation(0);
+        MessageMaker.setContext(getApplicationContext());
+        MessageMaker.initializeDatabase();
         MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
         MessageMaker.setMySecurityKey(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"securityKey"));
-        firebaseService = new FirebaseService();
         updateOnlineStatus("Online",false);
-        databaseHelper = new DatabaseHelper(getApplicationContext());
-        databaseHelperChat = new com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper(getApplicationContext(), new LastMessageUpdateListener() {
-            @Override
-            public void onLastMessageAdded(Message message, String roomid) {
-                databaseHelper.updateUserLastMessage(message);
-            }
-        });
-        databaseHelper.createTable();
         LayoutService.initUploadList();
-        EmojiManager.install(new GoogleEmojiProvider());
-        setupSecuritySetup();
         Giphy.INSTANCE.configure(getApplicationContext(),GIPHY_KEY,true,null);
-      //  setupBlueTooth();
         Contacts.initialize(getApplicationContext());
+        EmojiManager.install(new GoogleEmojiProvider());
         init();
         setupSinch();
+        //  setupBlueTooth();
     }
 
-    private void setupSecuritySetup() {
-        //KeyStoreManager.init(getApplicationContext());
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(MessageMaker.getContext() == null) {
+            MessageMaker.setContext(getApplicationContext());
+            EmojiManager.install(new GoogleEmojiProvider());
+        }
+        if(sinchClient == null) {
+            setupSinch();
+        }
+//        bluetooth.onStart();
+//        if(bluetooth.isEnabled()){
+//            startScanning();
+//        } else {
+//            bluetooth.enable();
+//        }
     }
 
     private void updateOnlineStatus(String status,Boolean canFinish) {
         Map<String,Object> update = new HashMap<>();
         update.put("currentStatus",status);
         update.put("lastOnline",new Date());
-        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update(update).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("PersonalInfo").update(update).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(canFinish) {
@@ -167,17 +157,6 @@ public class Dashboard extends AppCompatActivity {
                 Log.d("TAGCON", "error: "+errorCode);
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        bluetooth.onStart();
-//        if(bluetooth.isEnabled()){
-//            startScanning();
-//        } else {
-//            bluetooth.enable();
-//        }
     }
 
     private void startScanning() {
@@ -259,8 +238,8 @@ public class Dashboard extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
-        databaseHelper.deleteDatabase();
-        databaseHelperChat.deleteDatabase();
+        MessageMaker.getDatabaseHelper().deleteDatabase();
+        MessageMaker.getDatabaseHelperChat().deleteDatabase();
         if(sinchClient != null) {
             sinchClient.stop();
             callClient.removeCallClientListener(callClientListener);
@@ -336,7 +315,10 @@ public class Dashboard extends AppCompatActivity {
                 .callerIdentifier(MessageMaker.getMyNumber())
                 .build();
         sinchClient.setSupportCalling(true);
-        sinchClient.addSinchClientListener(new SinchClientListener() {
+        if(sinchClientListener != null) {
+            sinchClient.removeSinchClientListener(sinchClientListener);
+        }
+        sinchClientListener = new SinchClientListener() {
             @Override
             public void onClientStarted(SinchClient sinchClient) {
                 setupApptoAppCall();
@@ -359,7 +341,8 @@ public class Dashboard extends AppCompatActivity {
             public void onLogMessage(int i, String s, String s1) {
 
             }
-        });
+        };
+        sinchClient.addSinchClientListener(sinchClientListener);
         sinchClient.getVideoController().setResizeBehaviour(VideoScalingType.ASPECT_BALANCED);
         sinchClient.startListeningOnActiveConnection();
         sinchClient.start();

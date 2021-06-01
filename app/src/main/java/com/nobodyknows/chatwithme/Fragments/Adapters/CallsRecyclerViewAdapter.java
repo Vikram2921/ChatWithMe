@@ -26,8 +26,6 @@ import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-
 public class CallsRecyclerViewAdapter extends RecyclerView.Adapter<CallsRecyclerViewAdapter.ViewHolder> {
 
     private ArrayList<CallModel> callModels;
@@ -53,7 +51,7 @@ public class CallsRecyclerViewAdapter extends RecyclerView.Adapter<CallsRecycler
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CallModel callModel = callModels.get(position);
-        User user = databaseHelper.getUser(callModel.getUsername());
+        User user = MessageMaker.getDatabaseHelper().getUser(callModel.getUsername());
         if(user != null) {
             MessageMaker.loadProfile(context,user.getProfileUrl(),holder.profile);
             holder.name.setText(user.getName());

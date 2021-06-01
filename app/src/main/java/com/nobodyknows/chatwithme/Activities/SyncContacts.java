@@ -35,8 +35,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class SyncContacts extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -132,11 +130,11 @@ public class SyncContacts extends AppCompatActivity {
         freindRequestSaveDTO.setRequestSentBy(mynumber);
         freindRequestSaveDTO.setRequestSentAt(new Date());
         freindRequestSaveDTO.setContactNumber(user.getContactNumber());
-        firebaseService.saveToFireStore("Users").document(mynumber).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().saveToFireStore("Users").document(mynumber).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 freindRequestSaveDTO.setContactNumber(mynumber);
-                firebaseService.saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(mynumber).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+                MessageMaker.getFirebaseService().saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(mynumber).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Toast.makeText(getApplicationContext(),"Freind Request Sent to "+user.getName(),Toast.LENGTH_LONG).show();
@@ -158,7 +156,7 @@ public class SyncContacts extends AppCompatActivity {
                     if(number != null && number.charAt(0) == '+') {
                         number = number.replace("+91","");
                     }
-                    if(number != null && number.length() > 0 && !databaseHelper.isUserExist(number) && !mynumber.equals(number) && !contactsToSearch.contains(number)) {
+                    if(number != null && number.length() > 0 && !MessageMaker.getDatabaseHelper().isUserExist(number) && !mynumber.equals(number) && !contactsToSearch.contains(number)) {
                         contactsToSearch.add(number);
                     }
                 }
@@ -170,11 +168,11 @@ public class SyncContacts extends AppCompatActivity {
     }
 
     private void checkAndAdd(String number) {
-        firebaseService.getDatabaseRef("Users").child(number).addListenerForSingleValueEvent(new ValueEventListener() {
+        MessageMaker.getFirebaseService().getDatabaseRef("Users").child(number).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.exists()) {
-                    firebaseService.readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    MessageMaker.getFirebaseService().readFromFireStore("Users").document(number).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if(task.isSuccessful()) {

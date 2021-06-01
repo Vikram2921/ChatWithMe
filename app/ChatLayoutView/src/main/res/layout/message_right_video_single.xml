@@ -23,6 +23,18 @@
         android:layout_width="@dimen/midiasuaresizesingle"
         android:layout_height="@dimen/midiasuaresizesingle">
     </com.makeramen.roundedimageview.RoundedImageView>
+    <ImageView
+        android:src="@drawable/ic_baseline_play_circle_outline_24"
+        app:layout_constraintLeft_toLeftOf="@id/image"
+        app:layout_constraintRight_toRightOf="@id/image"
+        android:id="@+id/playicon"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        android:background="@drawable/ic_round_shape"
+        android:layout_width="80dp"
+        android:layout_height="80dp">
+    </ImageView>
     <TextView
         app:layout_constraintLeft_toLeftOf="@id/image"
         app:layout_constraintRight_toRightOf="@id/image"
@@ -33,7 +45,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/mediainfoback"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_videocam_24"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>

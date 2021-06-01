@@ -26,8 +26,12 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.DateView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MissedCallAlertView;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleVideoViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleVideoViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SingleVideoViewLeft;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SingleVideoViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewLeftReply;
 import com.NobodyKnows.chatlayoutview.ViewHolders.StickerViewRight;
@@ -217,6 +221,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_left_image_multiple,parent,false);
                 viewHolder = new MultipleImageViewLeft(item);
                 break;
+            case SENT_SINGLE_VIDEO:
+                item = layoutInflater.inflate(R.layout.message_right_video_single,parent,false);
+                viewHolder = new SingleVideoViewRight(item);
+                break;
+            case SENT_MULTIPLE_VIDEOS:
+                item = layoutInflater.inflate(R.layout.message_right_video_multiple,parent,false);
+                viewHolder = new MultipleVideoViewRight(item);
+                break;
+            case RECEIVE_SINGLE_VIDEO:
+                item = layoutInflater.inflate(R.layout.message_left_video_single,parent,false);
+                viewHolder = new SingleVideoViewLeft(item);
+                break;
+            case RECEIVE_MULTIPLE_VIDEOS:
+                item = layoutInflater.inflate(R.layout.message_left_video_multiple,parent,false);
+                viewHolder = new MultipleVideoViewLeft(item);
+                break;
             default:
                 break;
         }
@@ -302,6 +322,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 break;
             case RECEIVE_MULTIPLE_IMAGES:
                 ((MultipleImageViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case SENT_SINGLE_VIDEO:
+                ((SingleVideoViewRight) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case SENT_MULTIPLE_VIDEOS:
+                ((MultipleVideoViewRight) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_SINGLE_VIDEO:
+                ((SingleVideoViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_MULTIPLE_VIDEOS:
+                ((MultipleVideoViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
                 break;
             default:
                 break;

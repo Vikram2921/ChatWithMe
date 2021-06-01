@@ -42,9 +42,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class ChatFragment extends Fragment {
 
     private View view;
@@ -99,7 +96,7 @@ public class ChatFragment extends Fragment {
 
     private void startListener() {
         loadPrevioudUsers();
-        firebaseService.readFromFireStore("Users").document(myNumber).collection("AccountInfo").document("RecentChats").collection("History").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(myNumber).collection("AccountInfo").document("RecentChats").collection("History").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -126,7 +123,7 @@ public class ChatFragment extends Fragment {
                                     number = message.getReceiver();
                                 }
                                 String finalNumber = number;
-                                firebaseService.readFromFireStore("Users").document(myNumber).collection("AccountInfo").document("RecentChats").collection("History").document(number).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                MessageMaker.getFirebaseService().readFromFireStore("Users").document(myNumber).collection("AccountInfo").document("RecentChats").collection("History").document(number).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         int index = userListItems.indexOf(userListItemDTOMap.get(finalNumber));
@@ -146,7 +143,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void loadPrevioudUsers() {
-        ArrayList<UserListItemDTO> list = databaseHelper.getRecentChatUsers(getContext());
+        ArrayList<UserListItemDTO> list = MessageMaker.getDatabaseHelper().getRecentChatUsers(getContext());
         for(UserListItemDTO userListItemDTO:list) {
             addNewChat(userListItemDTO);
         }
@@ -163,7 +160,7 @@ public class ChatFragment extends Fragment {
             if(message.getMessageStatus() == MessageStatus.SENT && !message.getSender().equalsIgnoreCase(myNumber)) {
                 message.setMessageStatus(MessageStatus.RECEIVED);
                 message.setReceivedAt(new Date());
-//                firebaseService.saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                MessageMaker.getFirebaseService().saveToFireStore("Chats").document(message.getRoomId()).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
 //                    @Override
 //                    public void onSuccess(Void aVoid) {
 //                    }
@@ -176,21 +173,21 @@ public class ChatFragment extends Fragment {
         UserListItemDTO userListItemDTO = new UserListItemDTO();
         userListItemDTO.setContactNumber(username);
         userListItemDTO.setLastMessage(lastMessage);
-        User user = databaseHelper.getUser(username);
+        User user = MessageMaker.getDatabaseHelper().getUser(username);
         if(user == null) {
-            firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            MessageMaker.getFirebaseService().readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     if(task.isSuccessful()) {
                         if(task.getResult().exists()) {
                             User user = task.getResult().toObject(User.class);
                             String roomid = MessageMaker.createRoomId(user.getContactNumber());
-                            firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     if(documentSnapshot != null) {
                                         SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
-                                        databaseHelper.insertInSecurity(roomid,securityDTO);
+                                        MessageMaker.getDatabaseHelper().insertInSecurity(roomid,securityDTO);
                                         userListItemDTO.setCurrentStatus(user.getCurrentStatus());
                                         userListItemDTO.setName(user.getName());
                                         userListItemDTO.setProfileUrl(user.getProfileUrl());
@@ -198,8 +195,8 @@ public class ChatFragment extends Fragment {
                                         userListItemDTO.setVerified(user.getVerified());
                                         userListItemDTO.setLastOnline(user.getLastOnline());
                                         userListItemDTO.setBlocked(user.getBlocked());
-                                        databaseHelper.insertInUser(user);
-                                        databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
+                                        MessageMaker.getDatabaseHelper().insertInUser(user);
+                                        MessageMaker.getDatabaseHelperChat().insertInMessage(lastMessage,lastMessage.getRoomId());
                                         addNewChat(userListItemDTO);
                                     }
                                 }
@@ -217,7 +214,7 @@ public class ChatFragment extends Fragment {
             userListItemDTO.setLastOnline(user.getLastOnline());
             userListItemDTO.setBlocked(user.getBlocked());
             userListItemDTO.setMuted(user.getMuted());
-            databaseHelperChat.insertInMessage(lastMessage,lastMessage.getRoomId());
+            MessageMaker.getDatabaseHelperChat().insertInMessage(lastMessage,lastMessage.getRoomId());
             addNewChat(userListItemDTO);
         }
     }
@@ -231,14 +228,14 @@ public class ChatFragment extends Fragment {
             userListenerHolder.setUserListItemDTO(userListItem);
             userListItemDTOMap.put(userListItem.getContactNumber(),userListenerHolder);
             if(userListItem.getLastMessage() != null) {
-                databaseHelper.insertInRecentChats(userListItem.getContactNumber(),userListItem.getLastMessage().getMessageId(),userListItem.getLastMessage().getSentAt());
+                MessageMaker.getDatabaseHelper().insertInRecentChats(userListItem.getContactNumber(),userListItem.getLastMessage().getMessageId(),userListItem.getLastMessage().getSentAt());
             }
             attachListener(userListItem.getContactNumber());
         }
     }
 
     private void attachListener(String username) {
-//        ListenerRegistration listenerRegistration = firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+//        ListenerRegistration listenerRegistration = MessageMaker.getFirebaseService().readFromFireStore("Users").document(username).collection("AccountInfo").document("PersonalInfo").addSnapshotListener(new EventListener<DocumentSnapshot>() {
 //            @Override
 //            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
 //                User user = value.toObject(User.class);
@@ -255,7 +252,7 @@ public class ChatFragment extends Fragment {
 //                userListItems.remove(index);
 //                userListItems.add(index,userListItemDTO);
 //                recyclerViewAdapter.notifyItemChanged(index);
-//                databaseHelper.updateUserInfo(user);
+//                MessageMaker.getDatabaseHelper().updateUserInfo(user);
 //            }
 //        });
 //        userListItemDTOMap.get(username).setListenerRegistration(listenerRegistration);

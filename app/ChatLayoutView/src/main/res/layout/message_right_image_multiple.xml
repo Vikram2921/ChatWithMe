@@ -75,10 +75,66 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@drawable/more_text_left"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/status"
         app:layout_constraintLeft_toRightOf="@id/image3"
         app:layout_constraintRight_toRightOf="@id/image2"
         app:layout_constraintTop_toBottomOf="@id/image2"></TextView>
+    <TextView
+        app:layout_constraintLeft_toLeftOf="@id/image1"
+        app:layout_constraintRight_toRightOf="@id/image1"
+        app:layout_constraintBottom_toBottomOf="@id/image1"
+        android:text="32.5 MB"
+        android:id="@+id/info1"
+        android:textColor="#fff"
+        android:drawablePadding="10dp"
+        android:drawableTint="#fff"
+        android:background="@drawable/media_info_rect"
+        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
+    <TextView
+        app:layout_constraintLeft_toLeftOf="@id/image2"
+        app:layout_constraintRight_toRightOf="@id/image2"
+        app:layout_constraintBottom_toBottomOf="@id/image2"
+        android:text="32.5 MB"
+        android:id="@+id/info2"
+        android:textColor="#fff"
+        android:drawablePadding="10dp"
+        android:drawableTint="#fff"
+        android:background="@drawable/media_info_rect"
+        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
+    <TextView
+        app:layout_constraintLeft_toLeftOf="@id/image3"
+        app:layout_constraintRight_toRightOf="@id/image3"
+        app:layout_constraintBottom_toBottomOf="@id/image3"
+        android:text="32.5 MB"
+        android:id="@+id/info3"
+        android:textColor="#fff"
+        android:drawablePadding="10dp"
+        android:drawableTint="#fff"
+        android:background="@drawable/media_info_left_rect"
+        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
+    <TextView
+        app:layout_constraintLeft_toLeftOf="@id/image4"
+        app:layout_constraintRight_toRightOf="@id/image4"
+        app:layout_constraintBottom_toBottomOf="@id/image4"
+        android:text="32.5 MB"
+        android:id="@+id/info4"
+        android:textColor="#fff"
+        android:drawablePadding="10dp"
+        android:drawableTint="#fff"
+        android:background="@drawable/media_info_right_rect"
+        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
     <com.NobodyKnows.chatlayoutview.ProgressButton
         android:id="@+id/progressbutton"
         android:layout_width="wrap_content"

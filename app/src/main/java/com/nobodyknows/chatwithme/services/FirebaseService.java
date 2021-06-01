@@ -39,13 +39,6 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelperChat;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
-import static com.nobodyknows.chatwithme.Fragments.ChatFragment.recyclerViewAdapter;
-import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItemDTOMap;
-import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItems;
-
 public class FirebaseService {
     private FirebaseFirestore firebaseFirestore;
     private FirebaseStorage firebaseStorage;
@@ -97,6 +90,13 @@ public class FirebaseService {
         return storageReference.child(folder).child(filename).putFile(uri);
     }
 
+    public UploadTask uploadFromBitmap(String filename, String folder, Bitmap bitmap)  {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+        return storageReference.child(folder).child(filename).putBytes(data);
+    }
+
     public StorageReference getStorageRef(String filename, String folder) {
         return storageReference.child(folder).child(filename);
     }
@@ -128,7 +128,7 @@ public class FirebaseService {
 
     public void unfreind(String username, Activity activity) {
         String mynumber = MessageMaker.getMyNumber();
-        User user = databaseHelper.getUser(username);
+        User user = MessageMaker.getDatabaseHelper().getUser(username);
         KProgressHUD pop = KProgressHUD.create(activity)
                 .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
                 .setLabel("Please wait")
@@ -143,19 +143,19 @@ public class FirebaseService {
                 saveToFireStore("Users").document(username).collection("Freinds").document(mynumber).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("RecentChats").collection("History").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("AccountInfo").document("RecentChats").collection("History").document(username).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                firebaseService.readFromFireStore("Users").document(username).collection("AccountInfo").document("RecentChats").collection("History").document(MessageMaker.getMyNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                MessageMaker.getFirebaseService().readFromFireStore("Users").document(username).collection("AccountInfo").document("RecentChats").collection("History").document(MessageMaker.getMyNumber()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        firebaseService.saveToFireStore("Chats").document(MessageMaker.createRoomId(username)).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        MessageMaker.getFirebaseService().saveToFireStore("Chats").document(MessageMaker.createRoomId(username)).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
-                                                databaseHelperChat.deleteMessagesOf(MessageMaker.createRoomId(username));
-                                                databaseHelper.deleteRecentChat(username);
-                                                databaseHelper.deleteUser(username);
-                                                databaseHelper.deleteSecurityInfo(MessageMaker.createRoomId(username));
+                                                MessageMaker.getDatabaseHelperChat().deleteMessagesOf(MessageMaker.createRoomId(username));
+                                                MessageMaker.getDatabaseHelper().deleteRecentChat(username);
+                                                MessageMaker.getDatabaseHelper().deleteUser(username);
+                                                MessageMaker.getDatabaseHelper().deleteSecurityInfo(MessageMaker.createRoomId(username));
                                                 MessageMaker.removeFromRecentChatUI(username);
                                                 pop.dismiss();
                                                 activity.finish();
@@ -187,8 +187,8 @@ public class FirebaseService {
                 saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        databaseHelper.setBlockStatus(username,mynumber,true);
-                        firebaseService.updateLastMessage(mynumber,username,message);
+                        MessageMaker.getDatabaseHelper().setBlockStatus(username,mynumber,true);
+                        MessageMaker.getFirebaseService().updateLastMessage(mynumber,username,message);
                     }
                 });
             }
@@ -210,8 +210,8 @@ public class FirebaseService {
                 saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).set(message).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        databaseHelper.setBlockStatus(username,mynumber,false);
-                        firebaseService.updateLastMessage(mynumber,username,message);
+                        MessageMaker.getDatabaseHelper().setBlockStatus(username,mynumber,false);
+                        MessageMaker.getFirebaseService().updateLastMessage(mynumber,username,message);
                     }
                 });
             }
@@ -219,10 +219,10 @@ public class FirebaseService {
     }
 
     public void muteChat(String username) {
-        databaseHelper.setMuteStatus(username,true);
+        MessageMaker.getDatabaseHelper().setMuteStatus(username,true);
     }
 
     public void unmuteChat(String username) {
-        databaseHelper.setMuteStatus(username,false);
+        MessageMaker.getDatabaseHelper().setMuteStatus(username,false);
     }
 }

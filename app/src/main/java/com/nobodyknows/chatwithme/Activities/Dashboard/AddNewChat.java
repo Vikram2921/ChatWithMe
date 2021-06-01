@@ -45,8 +45,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 
 public class AddNewChat extends AppCompatActivity {
 
@@ -92,7 +90,7 @@ public class AddNewChat extends AppCompatActivity {
     }
 
     private void syncOnline() {
-        listener = firebaseService.readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        listener = MessageMaker.getFirebaseService().readFromFireStore("Users").document(MessageMaker.getMyNumber()).collection("Freinds").addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error == null) {
@@ -122,19 +120,19 @@ public class AddNewChat extends AppCompatActivity {
     }
 
     private void addFreind(FreindRequestSaveDTO freindRequestSaveDTO) {
-        firebaseService.readFromFireStore("Users").document(freindRequestSaveDTO.getContactNumber()).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        MessageMaker.getFirebaseService().readFromFireStore("Users").document(freindRequestSaveDTO.getContactNumber()).collection("AccountInfo").document("PersonalInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if(documentSnapshot != null) {
                     User user = documentSnapshot.toObject(User.class);
-                    databaseHelper.insertInUser(user);
+                    MessageMaker.getDatabaseHelper().insertInUser(user);
                     String roomid = MessageMaker.createRoomId(user.getContactNumber());
-                    firebaseService.saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Infos").document("SecurityInfo").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             if(documentSnapshot != null) {
                                 SecurityDTO securityDTO = documentSnapshot.toObject(SecurityDTO.class);
-                                databaseHelper.insertInSecurity(roomid,securityDTO);
+                                MessageMaker.getDatabaseHelper().insertInSecurity(roomid,securityDTO);
                                 if (!contactsAdded.contains(user.getContactNumber())) {
                                     MessageMaker.hideNotFound(notfound);
                                     contacts.add(user);
@@ -213,7 +211,7 @@ public class AddNewChat extends AppCompatActivity {
 
     private void loadUsers() {
         contacts.clear();
-        ArrayList<User> contactsTemp = databaseHelper.getAllUsers();
+        ArrayList<User> contactsTemp = MessageMaker.getDatabaseHelper().getAllUsers();
         if(contactsTemp.size() > 0) {
             MessageMaker.hideNotFound(notfound);
             for (User user : contactsTemp) {

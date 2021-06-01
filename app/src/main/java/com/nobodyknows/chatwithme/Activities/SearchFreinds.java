@@ -44,8 +44,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.firebaseService;
 public class SearchFreinds extends AppCompatActivity {
 
     private EditText searchbox;
@@ -135,11 +133,11 @@ public class SearchFreinds extends AppCompatActivity {
         freindRequestSaveDTO.setRequestSentBy(mynumber);
         freindRequestSaveDTO.setRequestSentAt(new Date());
         freindRequestSaveDTO.setContactNumber(user.getContactNumber());
-        firebaseService.saveToFireStore("Users").document(mynumber).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+        MessageMaker.getFirebaseService().saveToFireStore("Users").document(mynumber).collection("FreindRequests").document("Sent").collection("List").document(user.getContactNumber()).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 freindRequestSaveDTO.setContactNumber(mynumber);
-                firebaseService.saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(mynumber).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
+                MessageMaker.getFirebaseService().saveToFireStore("Users").document(user.getContactNumber()).collection("FreindRequests").document("Receive").collection("List").document(mynumber).set(freindRequestSaveDTO).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Toast.makeText(getApplicationContext(),"Freind Request Sent to "+user.getName(),Toast.LENGTH_LONG).show();
@@ -157,15 +155,15 @@ public class SearchFreinds extends AppCompatActivity {
         icon.setVisibility(View.GONE);
         text.setText("Searching for '"+name+"'");
         recyclerViewAdapter.notifyDataSetChanged();
-        firebaseService.getDatabaseRef("Users").addListenerForSingleValueEvent(new ValueEventListener() {
+        MessageMaker.getFirebaseService().getDatabaseRef("Users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot:dataSnapshot.getChildren()) {
                     if(snapshot.getValue().toString().toLowerCase().contains(name.toLowerCase())) {
                         String key = snapshot.getKey();
-                        if(!key.equals(mynumber) && !databaseHelper.isUserExist(key) && !added.contains(key)) {
+                        if(!key.equals(mynumber) && !MessageMaker.getDatabaseHelper().isUserExist(key) && !added.contains(key)) {
                             added.add(key);
-                            firebaseService.readFromFireStore("Users").document(key).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            MessageMaker.getFirebaseService().readFromFireStore("Users").document(key).collection("AccountInfo").document("PersonalInfo").get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     if(task.isSuccessful()) {

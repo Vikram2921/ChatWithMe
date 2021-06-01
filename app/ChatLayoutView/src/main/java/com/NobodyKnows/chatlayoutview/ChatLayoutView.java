@@ -233,6 +233,8 @@ public class ChatLayoutView extends RelativeLayout {
             }
         } else {
             if(message.getMessageStatus() != MessageStatus.SEEN) {
+                message.setMessageStatus(MessageStatus.SEEN);
+                updateMessage(message);
                 chatLayoutListener.onMessageSeen(message);
             }
         }
@@ -255,7 +257,6 @@ public class ChatLayoutView extends RelativeLayout {
 
     public void updateMessage(Message message) {
         if(helper.messageIdExists(message.getMessageId())) {
-
             int index = helper.getMessageIdPositon(message.getMessageId());
             Message messageOld = messages.get(index);
             messages.remove(index);

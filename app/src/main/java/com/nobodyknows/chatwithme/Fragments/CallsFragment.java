@@ -22,7 +22,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.util.ArrayList;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
 
 public class CallsFragment extends Fragment {
 
@@ -68,7 +67,7 @@ public class CallsFragment extends Fragment {
     private void loadList() {
         calls.clear();
         callsRecyclerViewAdapter.notifyDataSetChanged();
-        ArrayList<CallModel> allCalls = databaseHelper.getAllCalls();
+        ArrayList<CallModel> allCalls = MessageMaker.getDatabaseHelper().getAllCalls();
         for(CallModel callModel:allCalls) {
             addCall(callModel);
         }

@@ -30,8 +30,6 @@ import com.nobodyknows.chatwithme.services.MessageMaker;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nobodyknows.chatwithme.Activities.Dashboard.Dashboard.databaseHelper;
-
 public class AddNewCall extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -86,7 +84,7 @@ public class AddNewCall extends AppCompatActivity {
 
     private void loadUsers() {
         contacts.clear();
-        ArrayList<User> contactsTemp = databaseHelper.getAllUsers();
+        ArrayList<User> contactsTemp = MessageMaker.getDatabaseHelper().getAllUsers();
         if(contactsTemp.size() > 0) {
             MessageMaker.hideNotFound(notfound);
             for (User user : contactsTemp) {
