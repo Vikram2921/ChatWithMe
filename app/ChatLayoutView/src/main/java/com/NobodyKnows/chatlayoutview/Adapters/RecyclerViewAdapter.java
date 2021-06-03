@@ -13,6 +13,7 @@ import com.NobodyKnows.chatlayoutview.Interfaces.ChatLayoutListener;
 import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.R;
+import com.NobodyKnows.chatlayoutview.Services.LayoutService;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactMultipleLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactMultipleRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.ContactSingleLeft;
@@ -28,6 +29,10 @@ import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleImageViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleVideoViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.MultipleVideoViewRight;
+import com.NobodyKnows.chatlayoutview.ViewHolders.ReceiveAudio;
+import com.NobodyKnows.chatlayoutview.ViewHolders.ReceiveDocument;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SentAudio;
+import com.NobodyKnows.chatlayoutview.ViewHolders.SentDocument;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewLeft;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleImageViewRight;
 import com.NobodyKnows.chatlayoutview.ViewHolders.SingleVideoViewLeft;
@@ -237,6 +242,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 item = layoutInflater.inflate(R.layout.message_left_video_multiple,parent,false);
                 viewHolder = new MultipleVideoViewLeft(item);
                 break;
+            case SENT_DOCUMENT:
+                item = layoutInflater.inflate(R.layout.message_right_document,parent,false);
+                viewHolder = new SentDocument(item);
+                break;
+            case RECEIVE_DOCUMENT:
+                item = layoutInflater.inflate(R.layout.message_left_document,parent,false);
+                viewHolder = new ReceiveDocument(item);
+                break;
+            case SENT_AUDIO:
+                item = layoutInflater.inflate(R.layout.message_right_audio,parent,false);
+                viewHolder = new SentAudio(item);
+                break;
+            case RECEIVE_AUDIO:
+                item = layoutInflater.inflate(R.layout.message_left_audio,parent,false);
+                viewHolder = new ReceiveAudio(item);
+                break;
             default:
                 break;
         }
@@ -335,6 +356,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             case RECEIVE_MULTIPLE_VIDEOS:
                 ((MultipleVideoViewLeft) holder).initalize(message,context,myId,chatLayoutListener);
                 break;
+            case SENT_DOCUMENT:
+                ((SentDocument) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_DOCUMENT:
+                ((ReceiveDocument) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case SENT_AUDIO:
+                ((SentAudio) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
+            case RECEIVE_AUDIO:
+                ((ReceiveAudio) holder).initalize(message,context,myId,chatLayoutListener);
+                break;
             default:
                 break;
         }
@@ -398,6 +431,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                        break;
                    case LINK:
                        type = SENT_LINK_TEXT_MESSAGE;
+                       break;
+                   case DOCUMENT:
+                       type = SENT_DOCUMENT;
+                       break;
+                   case AUDIO:
+                       type = SENT_AUDIO;
+                       break;
                    default:
                        break;
                }
@@ -444,8 +484,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                            type =  RECEIVE_MULTIPLE_VIDEOS;
                        }
                        break;
+                   case DOCUMENT:
+                       type = RECEIVE_DOCUMENT;
+                       break;
+                   case AUDIO:
+                       type = RECEIVE_AUDIO;
+                       break;
                    case LINK:
                        type = RECEIVE_LINK_TEXT_MESSAGE;
+                       break;
                    default:
                        break;
                }

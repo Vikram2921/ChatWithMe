@@ -1,5 +1,6 @@
 package com.NobodyKnows.chatlayoutview.Services;
 
+import android.Manifest;
 import android.content.Context;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -26,6 +27,12 @@ import com.NobodyKnows.chatlayoutview.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
+import com.ixuea.android.downloader.DownloadService;
+import com.ixuea.android.downloader.callback.DownloadListener;
+import com.ixuea.android.downloader.domain.DownloadInfo;
+import com.ixuea.android.downloader.exception.DownloadException;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.io.File;
@@ -47,7 +54,9 @@ import io.github.ponnamkarthik.richlinkpreview.RichLinkView;
 import io.github.ponnamkarthik.richlinkpreview.RichPreview;
 
 import static com.NobodyKnows.chatlayoutview.ChatLayoutView.databaseHelper;
+import static com.NobodyKnows.chatlayoutview.ChatLayoutView.downloadPaths;
 import static com.NobodyKnows.chatlayoutview.ChatLayoutView.helper;
+import static com.ixuea.android.downloader.DownloadService.downloadManager;
 
 public class LayoutService {
     private static SeekBar LseekBar;
@@ -55,9 +64,12 @@ public class LayoutService {
     private static String LmessageId;
     private static MediaPlayer mediaPlayer;
     private static Map<String,View> uploadView;
+    private static Map<String,ArrayList<DownloadInfo>> downloadInfos;
 
-    public static void initUploadList() {
+    public static void initializeHelper(Context context) {
         uploadView = new HashMap<>();
+        downloadManager = DownloadService.getDownloadManager(context);
+        downloadInfos = new HashMap<>();
     }
 
     public static void addUploadView(String messageId,String roomid,View view) {
@@ -107,7 +119,6 @@ public class LayoutService {
 
     public static void loadGifAndSticker(Context context,String url,ImageView imageView) {
         Glide.with(context).load(url)
-                .placeholder(R.drawable.loading)
                 .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.AUTOMATIC)).into(imageView);
     }
 
@@ -131,10 +142,6 @@ public class LayoutService {
             messageTimeReply.setVisibility(View.GONE);
             messageReply.setText("This message was deleted from this chat.");
         }
-//        if(message.getMessageType() == MessageType.GIF || message.getMessageType() == MessageType.STICKER) {
-//            ImageView previewReply = view.findViewById(R.id.previewreply);
-//           // Glide.with(view).load(message.getMessage()).into(previewReply);
-//        }
     }
 
     public static boolean containsURL(String content){
@@ -167,7 +174,7 @@ public class LayoutService {
         } else {
             hrSize = dec.format(b).concat(" B");
         }
-        return "Size : "+hrSize;
+        return hrSize;
     }
 
     public static String getDuration(Double timeInMillis) {
@@ -183,220 +190,12 @@ public class LayoutService {
         return time;
     }
 
-    public static Boolean canShowDownloadButton(MessageType messageType, ArrayList<SharedFile> sharedFiles) {
-        String envPath = Environment.getExternalStorageDirectory().getPath();
-        Boolean canShow = false;
-//        for(SharedFile sharedFile:sharedFiles) {
-//            if(!new File(envPath+downloadPaths.get(messageType)+"/"+sharedFile.getName()+"."+sharedFile.getExtension()).exists()) {
-//                canShow = true;
-//                break;
-//            }
-//        }
-        return canShow;
-    }
-
-    public static String getFullFileUrl(String downloadPath,SharedFile sharedFile) {
-        return Environment.getExternalStorageDirectory().getPath()+downloadPath+"/"+sharedFile.getName()+"."+sharedFile.getExtension();
-    }
-
-    public static ArrayList<ContactParceable> getParceableList(ArrayList<Contact> contacts) {
-        ContactParceable contactParceable;
-        ArrayList<ContactParceable> parceableArrayList = new ArrayList<>();
-        for(Contact contact:contacts) {
-            contactParceable = new ContactParceable(contact.getName(),contact.getContactNumbers());
-            parceableArrayList.add(contactParceable);
-        }
-        return parceableArrayList;
-    }
-
-//    public static void downloadFiles(Context context,ArrayList<SharedFile> sharedFiles, MessageType messageType, ProgressBar progressButton,String messageId) {
-//        downloadInfos.put(messageId,new ArrayList());
-//        if(sharedFiles.size() == 1) {
-//            downloadSingle(sharedFiles.get(0),messageType,progressButton,messageId,context);
-//        } else {
-//            downloadAll(sharedFiles,messageType,progressButton,messageId,context);
-//        }
-//    }
-
-    private static void downloadAll(ArrayList<SharedFile> urls, MessageType messageType, ProgressBar progressBar, String messageId, Context context) {
-//        String dirPath = downloadPaths.get(messageType);
-//        PermissionListener permissionlistener = new PermissionListener() {
-//            @Override
-//            public void onPermissionGranted() {
-//                String envPath = Environment.getExternalStorageDirectory().getPath();
-//                if (!new File(envPath +dirPath).exists()) {
-//                    new File(envPath + dirPath).mkdirs();
-//                }
-//                int totalDownloads = urls.size();
-//                final int[] downloadCompleted = {0};
-//                for(int i=0;i<urls.size();i++) {
-//                    String partialUrl = envPath+dirPath+"/"+urls.get(i).getName()+"_PARTIALLY."+urls.get(i).getExtension();
-//                    String realname = envPath+dirPath+"/"+urls.get(i).getName()+"."+urls.get(i).getExtension();
-//                    if (new File(partialUrl).exists()) {
-//                        new File(partialUrl).delete();
-//                    }
-//                    if(!new File(envPath+dirPath+"/"+urls.get(i).getName()+"."+urls.get(i).getExtension()).exists()) {
-//                        DownloadInfo downloadInfo  = new DownloadInfo.Builder().setUrl(urls.get(i).getUrl()).setPath(partialUrl).build();
-//                        int finalTotalDownloads = totalDownloads;
-//                        int finalI = i;
-//                        downloadInfo.setDownloadListener(new DownloadListener() {
-//                            @Override
-//                            public void onStart() {
-//                            }
-//
-//                            @Override
-//                            public void onWaited() {
-//
-//                            }
-//
-//                            @Override
-//                            public void onPaused() {
-//
-//                            }
-//
-//                            @Override
-//                            public void onDownloading(long progress, long size) {
-//                            }
-//
-//                            @Override
-//                            public void onRemoved() {
-//
-//                            }
-//
-//                            @Override
-//                            public void onDownloadSuccess() {
-//                                downloadCompleted[0]++;
-//                                double progress = (((double)downloadCompleted[0]/(double)finalTotalDownloads)*100);
-//                                if(progress > 0) {
-//                                    progressBar.setIndeterminateMode(false);
-//                                    progressBar.setProgress((float) progress);
-//                                }
-//                                if(progress == 100.0) {
-//                                    progressBar.setVisibility(View.GONE);
-//                                    downloadInfos.remove(messageId);
-//                                }
-//                                renameFile(partialUrl,realname);
-//                            }
-//
-//                            @Override
-//                            public void onDownloadFailed(DownloadException e) {
-//                                downloadManager.remove(downloadInfo);
-//                                downloadInfos.get(messageId).remove(finalI);
-//                                downloadInfos.get(messageId).add(finalI,null);
-//                            }
-//                        });
-//                        downloadInfos.get(messageId).add(i,downloadInfo);
-//                        downloadManager.download(downloadInfo);
-//                    } else {
-//                        downloadCompleted[0]++;
-//                        double progress = (((double)downloadCompleted[0]/(double)totalDownloads)*100);
-//                        progressBar.setProgress((float) progress);
-//                        downloadInfos.get(messageId).add(i,null);
-//                        if(progress == 100.0) {
-//                            progressBar.setVisibility(View.GONE);
-//                        }
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onPermissionDenied(List<String> deniedPermissions) {
-//            }
-//        };
-//        TedPermission.with(context)
-//                .setPermissionListener(permissionlistener)
-//                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
-//                .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                .check();
-    }
-
-    private static void downloadSingle(SharedFile sharedFile, MessageType messageType, ProgressBar progressBar, String messageId, Context context) {
-//        String dirPath = downloadPaths.get(messageType);
-//        PermissionListener permissionlistener = new PermissionListener() {
-//            @Override
-//            public void onPermissionGranted() {
-//                String envPath = Environment.getExternalStorageDirectory().getPath();
-//                String partialUrl = envPath+dirPath+"/"+sharedFile.getName()+"_PARTIALLY."+sharedFile.getExtension();
-//                if (new File(partialUrl).exists()) {
-//                    new File(partialUrl).delete();
-//                }
-//                if (!new File(envPath +dirPath).exists()) {
-//                    new File(envPath + dirPath).mkdirs();
-//                }
-//
-//                if(!new File(envPath+dirPath+"/"+sharedFile.getName()+"."+sharedFile.getExtension()).exists()) {
-//                    DownloadInfo downloadInfo  = new DownloadInfo.Builder().setUrl(sharedFile.getUrl()).setPath(partialUrl).build();
-//                    downloadInfo.setDownloadListener(new DownloadListener() {
-//                        @Override
-//                        public void onStart() {
-//                        }
-//
-//                        @Override
-//                        public void onWaited() {
-//
-//                        }
-//
-//                        @Override
-//                        public void onPaused() {
-//
-//                        }
-//
-//                        @Override
-//                        public void onDownloading(long progress, long size) {
-//                            int progressDone = calculateProgress(progress,size);
-//                            if(progressDone > 0) {
-//                                progressBar.setIndeterminateMode(false);
-//                                progressBar.setProgress(progressDone);
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onRemoved() {
-//
-//                        }
-//
-//                        @Override
-//                        public void onDownloadSuccess() {
-//                            renameFile(partialUrl,envPath+dirPath+"/"+sharedFile.getName()+"."+sharedFile.getExtension());
-//                            progressBar.setVisibility(View.GONE);
-//                            downloadInfos.remove(messageId);
-//                        }
-//
-//                        @Override
-//                        public void onDownloadFailed(DownloadException e) {
-//                            downloadManager.remove(downloadInfo);
-//                            downloadInfos.remove(messageId);
-//                            progressBar.resetProgressButton();
-//                        }
-//                    });
-//                    downloadInfos.get(messageId).add(downloadInfo);
-//                    downloadManager.download(downloadInfo);
-//                } else {
-//                    progressBar.setVisibility(View.GONE);
-//                }
-//            }
-//
-//            @Override
-//            public void onPermissionDenied(List<String> deniedPermissions) {
-//            }
-//        };
-//        TedPermission.with(context)
-//                .setPermissionListener(permissionlistener)
-//                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
-//                .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                .check();
-    }
-
     private static void renameFile(String partialUrl, String newUrl) {
         File from = new File(partialUrl);
         File to = new File(newUrl);
         if(from.exists()) {
             from.renameTo(to);
         }
-    }
-
-    private static int calculateProgress(long progress, long size) {
-        return (int) (((double) progress / (double) size) * 100);
     }
 
 
@@ -507,12 +306,18 @@ public class LayoutService {
         return containedUrls;
     }
 
-    private static String getLocalPathForSharedFile(SharedFile sharedFile,String sender,String myid) {
+    private static String getLocalPathForSharedFile(SharedFile sharedFile,String sender,String myid,MessageType messageType) {
         if(sender.equals(myid)) {
             return sharedFile.getLocalPath();
         } else {
-            return sharedFile.getFileId()+"."+sharedFile.getExtension();
+            String envPath = Environment.getExternalStorageDirectory().getPath();
+            String dirPath = downloadPaths.get(messageType);
+            return envPath+dirPath+"/"+sharedFile.getFileId()+"."+sharedFile.getExtension();
         }
+    }
+
+    private static String getLocalPathForSharedFileForDownload(SharedFile sharedFile,String divider) {
+        return sharedFile.getFileId()+divider+"."+sharedFile.getExtension();
     }
 
     public static void loadMediaViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
@@ -547,7 +352,7 @@ public class LayoutService {
                 }
             });
         } else {
-            String path = getLocalPathForSharedFile(message.getSharedFiles().get(0),message.getSender(),mynumber);
+            String path = getLocalPathForSharedFile(message.getSharedFiles().get(0),message.getSender(),mynumber,message.getMessageType());
             File file = new File(path);
             if(file.exists()) {
                 if(message.getMessageType() == MessageType.VIDEO) {
@@ -565,7 +370,7 @@ public class LayoutService {
                     progressButton.setProgressClickListener(new ProgressClickListener() {
                         @Override
                         public void onStart() {
-                            downloadFile(message.getSharedFiles());
+                            downloadFile(context,progressButton,message,mynumber);
                         }
 
                         @Override
@@ -633,7 +438,7 @@ public class LayoutService {
             progressButton.setProgressClickListener(new ProgressClickListener() {
                 @Override
                 public void onStart() {
-                    downloadFile(message.getSharedFiles());
+                    downloadFile(context,progressButton,message,mynumber);
                 }
 
                 @Override
@@ -642,7 +447,7 @@ public class LayoutService {
                 }
             });
             for(SharedFile sharedFile:message.getSharedFiles()) {
-                file = new File(getLocalPathForSharedFile(sharedFile,message.getSender(),mynumber));
+                file = new File(getLocalPathForSharedFile(sharedFile,message.getSender(),mynumber,message.getMessageType()));
                 if(file.exists()) {
                     progressButton.setVisibility(View.GONE);
                     if(i==0) {
@@ -671,7 +476,7 @@ public class LayoutService {
                         progressButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                downloadFile(message.getSharedFiles());
+                                downloadFile(context,progressButton,message,mynumber);
                             }
                         });
                     }
@@ -690,6 +495,334 @@ public class LayoutService {
         }
     }
 
-    private static void downloadFile(ArrayList<SharedFile> sharedFiles) {
+    public static void downloadFile(Context context,ProgressButton progressBar,Message message,String mynumber) {
+        downloadInfos.put(message.getMessageId(),new ArrayList<>());
+        if(message.getSharedFiles().size() == 1) {
+            downloadSingle(context, progressBar, message, mynumber);
+        } else {
+            downloadFileMultiple(context, progressBar, message, mynumber);
+        }
+    }
+
+    private static void downloadSingle(Context context,ProgressButton progressBar,Message message,String mynumber) {
+        String dirPath = downloadPaths.get(message.getMessageType());
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                SharedFile sharedFile = message.getSharedFiles().get(0);
+                String envPath = Environment.getExternalStorageDirectory().getPath();
+                String partialUrl = envPath+dirPath+"/"+getLocalPathForSharedFileForDownload(sharedFile,"_PARTIALLY");
+                if (new File(partialUrl).exists()) {
+                    new File(partialUrl).delete();
+                }
+                if (!new File(envPath +dirPath).exists()) {
+                    new File(envPath + dirPath).mkdirs();
+                }
+
+                if(!new File(envPath+dirPath+"/"+getLocalPathForSharedFileForDownload(sharedFile,"")).exists()) {
+                    DownloadInfo downloadInfo  = new DownloadInfo.Builder().setUrl(sharedFile.getUrl()).setPath(partialUrl).build();
+                    downloadInfo.setDownloadListener(new DownloadListener() {
+                        @Override
+                        public void onStart() {
+                        }
+
+                        @Override
+                        public void onWaited() {
+
+                        }
+
+                        @Override
+                        public void onPaused() {
+
+                        }
+
+                        @Override
+                        public void onDownloading(long progress, long size) {
+                            int progressDone = calculateProgress(progress,size);
+                            if(progressDone > 0) {
+                                progressBar.setIndeterminateMode(false);
+                                progressBar.setProgress(progressDone);
+                            }
+                        }
+
+                        @Override
+                        public void onRemoved() {
+
+                        }
+
+                        @Override
+                        public void onDownloadSuccess() {
+                            renameFile(partialUrl,envPath+dirPath+"/"+getLocalPathForSharedFileForDownload(sharedFile,""));
+                            progressBar.setVisibility(View.GONE);
+                            downloadInfos.remove(message.getMessageId());
+                        }
+
+                        @Override
+                        public void onDownloadFailed(DownloadException e) {
+                            downloadManager.remove(downloadInfo);
+                            downloadInfos.remove(message.getMessageId());
+                            progressBar.resetProgressButton();
+                        }
+                    });
+                    downloadInfos.get(message.getMessageId()).add(downloadInfo);
+                    downloadManager.download(downloadInfo);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+            }
+        };
+        TedPermission.with(context)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .check();
+    }
+
+    private static void downloadFileMultiple(Context context,ProgressButton progressBar,Message message,String mynumber) {
+        String dirPath = downloadPaths.get(message.getMessageType());
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                downloadInfos.put(message.getMessageId(),new ArrayList<>());
+                String envPath = Environment.getExternalStorageDirectory().getPath();
+                if (!new File(envPath +dirPath).exists()) {
+                    new File(envPath + dirPath).mkdirs();
+                }
+                int totalDownloads = message.getSharedFiles().size();
+                List<SharedFile> urls = message.getSharedFiles();
+                final int[] downloadCompleted = {0};
+                for(int i=0;i<urls.size();i++) {
+                    String partialUrl = envPath+dirPath+"/"+getLocalPathForSharedFileForDownload(urls.get(i),"_PARTIALLY");
+                    String realname = envPath+dirPath+"/"+getLocalPathForSharedFileForDownload(urls.get(i),"");
+                    if (new File(partialUrl).exists()) {
+                        new File(partialUrl).delete();
+                    }
+                    if(!new File(envPath+dirPath+"/"+urls.get(i).getName()+"."+urls.get(i).getExtension()).exists()) {
+                        DownloadInfo downloadInfo  = new DownloadInfo.Builder().setUrl(urls.get(i).getUrl()).setPath(partialUrl).build();
+                        int finalTotalDownloads = totalDownloads;
+                        int finalI = i;
+                        downloadInfo.setDownloadListener(new DownloadListener() {
+                            @Override
+                            public void onStart() {
+                            }
+
+                            @Override
+                            public void onWaited() {
+
+                            }
+
+                            @Override
+                            public void onPaused() {
+
+                            }
+
+                            @Override
+                            public void onDownloading(long progress, long size) {
+                            }
+
+                            @Override
+                            public void onRemoved() {
+
+                            }
+
+                            @Override
+                            public void onDownloadSuccess() {
+                                downloadCompleted[0]++;
+                                double progress = (((double)downloadCompleted[0]/(double)finalTotalDownloads)*100);
+                                if(progress > 0) {
+                                    progressBar.setIndeterminateMode(false);
+                                    progressBar.setProgress((float) progress);
+                                }
+                                if(progress == 100.0) {
+                                    progressBar.setVisibility(View.GONE);
+                                    downloadInfos.remove(message.getMessageId());
+                                }
+                                renameFile(partialUrl,realname);
+                            }
+
+
+                            @Override
+                            public void onDownloadFailed(DownloadException e) {
+                                downloadManager.remove(downloadInfo);
+                                downloadInfos.get(message.getMessageId()).remove(finalI);
+                                downloadInfos.get(message.getMessageId()).add(finalI,null);
+                            }
+                        });
+                        downloadInfos.get(message.getMessageId()).add(i,downloadInfo);
+                        downloadManager.download(downloadInfo);
+                    } else {
+                        downloadCompleted[0]++;
+                        double progress = (((double)downloadCompleted[0]/(double)totalDownloads)*100);
+                        progressBar.setProgress((float) progress);
+                        downloadInfos.get(message.getMessageId()).add(i,null);
+                        if(progress == 100.0) {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+            }
+        };
+        TedPermission.with(context)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .check();
+    }
+
+    public static void loadDocumentViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
+        TextView filename = view.findViewById(R.id.filename);
+        TextView size = view.findViewById(R.id.size);
+        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        SharedFile sharedFile = message.getSharedFiles().get(0);
+        if(sharedFile != null) {
+            filename.setText(sharedFile.getName());
+            size.setText(LayoutService.getSize(sharedFile.getSize()));
+            if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
+                progressButton.initalize();
+                progressButton.setUploadType();
+                if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
+                    chatLayoutListener.onUpload(message,progressButton);
+                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    progressButton.setProgress(0);
+                } else {
+                    if(message.getUploadStatus() == UploadStatus.FAILED) {
+                        progressButton.setLabel("Retry");
+                    }
+                }
+                progressButton.setProgressClickListener(new ProgressClickListener() {
+                    @Override
+                    public void onStart() {
+                        chatLayoutListener.onUpload(message,progressButton);
+                        addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                        chatLayoutListener.onUploadCanceled(message,progressButton);
+                    }
+                });
+            } else {
+                String path = getLocalPathForSharedFile(message.getSharedFiles().get(0),message.getSender(),mynumber,message.getMessageType());
+                File file = new File(path);
+                if(file.exists()) {
+                    progressButton.setVisibility(View.GONE);
+                } else {
+                    if(message.getSender().equals(mynumber)) {
+                        progressButton.setVisibility(View.GONE);
+                    } else {
+                        progressButton.initalize();
+                        progressButton.setDownloadType();
+                        progressButton.setProgressClickListener(new ProgressClickListener() {
+                            @Override
+                            public void onStart() {
+                                downloadFile(context,progressButton,message,mynumber);
+                            }
+
+                            @Override
+                            public void onCancel() {
+
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    public static void loadAudioViewSingle(Context context, Message message, ChatLayoutListener chatLayoutListener, View view, String mynumber) {
+        TextView filename = view.findViewById(R.id.filename);
+        TextView size = view.findViewById(R.id.size);
+        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        ImageView playAudio  = view.findViewById(R.id.playicon);
+        SharedFile sharedFile = message.getSharedFiles().get(0);
+        if(sharedFile != null) {
+            filename.setText(sharedFile.getName());
+            size.setText(LayoutService.getSize(sharedFile.getSize()));
+            if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
+                progressButton.initalize();
+                progressButton.setUploadType();
+                playAudio.setVisibility(View.VISIBLE);
+                playAudio.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        chatLayoutListener.onPlayAudio(sharedFile);
+                    }
+                });
+                if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
+                    chatLayoutListener.onUpload(message,progressButton);
+                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    progressButton.setProgress(0);
+                } else {
+                    if(message.getUploadStatus() == UploadStatus.FAILED) {
+                        progressButton.setLabel("Retry");
+                    }
+                }
+                progressButton.setProgressClickListener(new ProgressClickListener() {
+                    @Override
+                    public void onStart() {
+                        chatLayoutListener.onUpload(message,progressButton);
+                        addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
+                        chatLayoutListener.onUploadCanceled(message,progressButton);
+                    }
+                });
+            } else {
+                String path = getLocalPathForSharedFile(message.getSharedFiles().get(0),message.getSender(),mynumber,message.getMessageType());
+                File file = new File(path);
+                if(file.exists()) {
+                    progressButton.setVisibility(View.GONE);
+                    playAudio.setVisibility(View.VISIBLE);
+                    playAudio.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            chatLayoutListener.onPlayAudio(sharedFile);
+                        }
+                    });
+                } else {
+                    if(message.getSender().equals(mynumber)) {
+                        progressButton.setVisibility(View.GONE);
+                        playAudio.setVisibility(View.VISIBLE);
+                        playAudio.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                chatLayoutListener.onPlayAudio(sharedFile);
+                            }
+                        });
+                    } else {
+                        progressButton.initalize();
+                        progressButton.setDownloadType();
+                        playAudio.setVisibility(View.GONE);
+                        progressButton.setProgressClickListener(new ProgressClickListener() {
+                            @Override
+                            public void onStart() {
+                                downloadFile(context,progressButton,message,mynumber);
+                            }
+
+                            @Override
+                            public void onCancel() {
+
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    private static int calculateProgress(long progress, long size) {
+        return (int) (((double) progress / (double) size) * 100);
     }
 }

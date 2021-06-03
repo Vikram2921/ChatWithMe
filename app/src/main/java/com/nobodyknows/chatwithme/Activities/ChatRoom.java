@@ -69,6 +69,13 @@ import com.google.firebase.storage.UploadTask;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.kaopiz.kprogresshud.KProgressHUD;
+import com.kbeanie.multipicker.api.AudioPicker;
+import com.kbeanie.multipicker.api.FilePicker;
+import com.kbeanie.multipicker.api.Picker;
+import com.kbeanie.multipicker.api.callbacks.AudioPickerCallback;
+import com.kbeanie.multipicker.api.callbacks.FilePickerCallback;
+import com.kbeanie.multipicker.api.entity.ChosenAudio;
+import com.kbeanie.multipicker.api.entity.ChosenFile;
 import com.nobodyknows.chatwithme.Activities.Dashboard.ViewContact;
 import com.nobodyknows.chatwithme.DTOS.FreindRequestSaveDTO;
 import com.nobodyknows.chatwithme.R;
@@ -122,13 +129,15 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     private View rootView;
     private String blockedBy = "";
     private boolean isMuted = false;
-    private CircleButton contacts,gif,imagebutton,videobutton;
+    private CircleButton contacts,gif,imagebutton,videobutton,audioButton,documentButton;
     private Boolean isIamTyping = false;
     private Message repliedMessage = null;
     private String roomSecurityKey = "";
     private View replyview;
     private ImageView cancel;
     private Boolean isWithLink = false;
+    private AudioPicker audioPicker;
+    private FilePicker filePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -498,6 +507,14 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             } else if (resultCode == Activity.RESULT_OK && requestCode == 12346) {
                 selectedUrls = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
                 sendMediaMessage(selectedUrls,"VIDEO");
+            } else if (resultCode == Activity.RESULT_OK && requestCode == Picker.PICK_AUDIO) {
+                if(audioPicker != null) {
+                    audioPicker.submit(data);
+                }
+            } else if (resultCode == Activity.RESULT_OK && requestCode == Picker.PICK_FILE) {
+                if(filePicker != null) {
+                    filePicker.submit(data);
+                }
             } else if(requestCode==299221) {
                 String url=data.getStringExtra("url");
                 String type=data.getStringExtra("type");
@@ -517,6 +534,20 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 loadBackgroundImage();
             }
         }
+    }
+
+    private void sendAudioFile(ChosenAudio uri) {
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+        message.setMessageType(MessageType.AUDIO);
+        message.addSharedFile(getSharedFileObject(uri.getOriginalPath(),"AUDIO"));
+        chatLayoutView.addMessage(message);
+    }
+
+    private void sendDocumentFile(ChosenFile chosenFile) {
+        Message message = MessageMaker.getDefaultObject(myUsername,username,roomid);
+        message.setMessageType(MessageType.DOCUMENT);
+        message.addSharedFile(getSharedFileObject(chosenFile.getOriginalPath(),"DOCUMENT"));
+        chatLayoutView.addMessage(message);
     }
 
     private void sendMediaMessage(ArrayList<String> selectedUrls, String type) {
@@ -563,7 +594,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
     private SharedFile getSharedFileObject(String filepath,String type) {
         SharedFile sharedFile = new SharedFile();
         File file = new File(filepath);
-        sharedFile.setFileId(MessageMaker.createMessageId(myUsername));
+        sharedFile.setFileId(MessageMaker.createFileId());
         sharedFile.setLocalPath(filepath);
         sharedFile.setName(file.getName());
         int index = sharedFile.getName().lastIndexOf('.');
@@ -668,6 +699,52 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         gif = findViewById(R.id.gif);
         cancel = findViewById(R.id.cancel_reply);
         imagebutton = findViewById(R.id.image);
+        audioButton = findViewById(R.id.audio);
+        audioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleAttachmentPanel();
+                audioPicker = new AudioPicker(ChatRoom.this);
+                audioPicker.allowMultiple();
+                audioPicker.setAudioPickerCallback(new AudioPickerCallback() {
+                    @Override
+                    public void onAudiosChosen(List<ChosenAudio> list) {
+                        for(ChosenAudio chosenAudio:list) {
+                            sendAudioFile(chosenAudio);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String s) {
+
+                    }
+                });
+                audioPicker.pickAudio();
+            }
+        });
+         documentButton = findViewById(R.id.document);
+        documentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleAttachmentPanel();
+                filePicker = new FilePicker(ChatRoom.this);
+                filePicker.allowMultiple();
+                filePicker.setFilePickerCallback(new FilePickerCallback() {
+                    @Override
+                    public void onError(String s) {
+
+                    }
+
+                    @Override
+                    public void onFilesChosen(List<ChosenFile> list) {
+                        for(ChosenFile chosenFile:list) {
+                            sendDocumentFile(chosenFile);
+                        }
+                    }
+                });
+                filePicker.pickFile();
+            }
+        });
         imagebutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -836,6 +913,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         setupMessageBoxWork();
         startListening();
     }
+
 
     private void dismissKeyboard() {
         if(emojiPopup.isShowing()) {
@@ -1006,6 +1084,11 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
             }
 
             @Override
+            public void onPlayAudio(SharedFile sharedFile) {
+
+            }
+
+            @Override
             public void onMessageSeenConfirmed(Message message) {
                 if(!isBlocked) {
                     MessageMaker.getFirebaseService().saveToFireStore("Chats").document(roomid).collection("Messages").document(message.getMessageId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -1134,6 +1217,8 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     chatLayoutView.getDatabaseHelper().updateMessageUploadStatus(message.getRoomId(),message.getMessageId(), UploadStatus.FAILED);
+                    progressButton.setUploadType();
+                    progressButton.setLabel("Retry");
                 }
             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override

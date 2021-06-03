@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:elevation="2dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginBottom="3dp"
+    android:layout_marginRight="25dp"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/left_message_background"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:id="@+id/sendername"
+        android:visibility="gone"
+        android:text="Vikram Singh Rawat"
+        android:background="@drawable/sendernameback"
+        android:textStyle="bold"
+        android:textSize="@dimen/sendernametextsize"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </TextView>
+    <ImageView
+        app:layout_constraintTop_toBottomOf="@id/sendername"
+        android:id="@+id/icon"
+        android:tint="#FFFFFF"
+        android:padding="5dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:src="@drawable/ic_baseline_insert_drive_file_24"
+        android:layout_width="50dp"
+        android:layout_height="50dp">
+    </ImageView>
+    <TextView
+        app:layout_constraintLeft_toRightOf="@id/icon"
+        app:layout_constraintTop_toTopOf="@id/icon"
+        app:layout_constraintRight_toLeftOf="@id/progressbutton"
+        app:layout_constraintBottom_toTopOf="@id/size"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:id="@+id/filename"
+        android:layout_marginLeft="10dp"
+        android:textSize="14dp"
+        android:text="Document File Name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
+    <TextView
+        app:layout_constraintLeft_toRightOf="@id/icon"
+        android:id="@+id/size"
+        app:layout_constraintTop_toBottomOf="@id/filename"
+        app:layout_constraintBottom_toBottomOf="@id/icon"
+        android:textColor="#FFFFFF"
+        android:layout_marginLeft="10dp"
+        android:textSize="14dp"
+        android:text="30.34 MB"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+    </TextView>
+    <com.NobodyKnows.chatlayoutview.ProgressButton
+        app:layout_constraintLeft_toRightOf="@id/filename"
+        app:layout_constraintTop_toTopOf="@id/icon"
+        android:layout_marginRight="8dp"
+        app:layout_constraintBottom_toBottomOf="@id/icon"
+        android:id="@+id/progressbutton"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </com.NobodyKnows.chatlayoutview.ProgressButton>
+</androidx.constraintlayout.widget.ConstraintLayout>

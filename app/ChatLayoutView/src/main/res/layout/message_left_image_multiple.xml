@@ -28,6 +28,7 @@
         android:layout_height="@dimen/midiasuaresize"
         android:layout_marginTop="5dp"
         android:layout_marginRight="1dp"
+        app:riv_corner_radius_top_left="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/profile"
         app:layout_constraintBottom_toTopOf="@id/image3"
@@ -86,10 +87,10 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@drawable/more_text_left"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/image3"
-        app:layout_constraintRight_toRightOf="@id/image2"
-        app:layout_constraintTop_toBottomOf="@id/image2"></TextView>
+        app:layout_constraintBottom_toBottomOf="@id/image4"
+        app:layout_constraintLeft_toLeftOf="@id/image4"
+        app:layout_constraintRight_toRightOf="@id/image4"
+        app:layout_constraintTop_toTopOf="@id/image4"></TextView>
     <TextView
         app:layout_constraintLeft_toLeftOf="@id/image1"
         app:layout_constraintRight_toRightOf="@id/image1"
@@ -100,7 +101,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_image_14"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -114,7 +115,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_image_14"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -128,7 +129,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_left_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_image_14"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>
@@ -142,7 +143,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/media_info_right_rect"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_image_14"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>

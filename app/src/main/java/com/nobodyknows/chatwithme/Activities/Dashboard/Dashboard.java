@@ -81,7 +81,7 @@ public class Dashboard extends AppCompatActivity {
         MessageMaker.setMyNumber(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"number"));
         MessageMaker.setMySecurityKey(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"securityKey"));
         updateOnlineStatus("Online",false);
-        LayoutService.initUploadList();
+        LayoutService.initializeHelper(getApplicationContext());
         Giphy.INSTANCE.configure(getApplicationContext(),GIPHY_KEY,true,null);
         Contacts.initialize(getApplicationContext());
         EmojiManager.install(new GoogleEmojiProvider());

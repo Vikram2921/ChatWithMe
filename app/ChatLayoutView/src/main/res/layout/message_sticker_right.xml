@@ -13,7 +13,6 @@
     <ImageView
         app:layout_constraintRight_toRightOf="parent"
         android:id="@+id/gif"
-        android:src="@drawable/loading"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_width="150dp"
         android:layout_height="150dp">

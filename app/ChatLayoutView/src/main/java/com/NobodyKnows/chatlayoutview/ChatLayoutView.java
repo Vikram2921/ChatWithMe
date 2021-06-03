@@ -43,8 +43,9 @@ public class ChatLayoutView extends RelativeLayout {
     private String myUsername = "",roomId= "";
     public static Helper helper;
     private Context context;
+    private String appNameWithoutSpace = "Chat With Me";
     private ArrayList<String> dates =new ArrayList<>();
-    private Map<MessageType,String> downloadPaths = new HashMap<>();
+    public static Map<MessageType,String> downloadPaths = new HashMap<>();
     public static ChatLayoutListener chatLayoutListener;
     private Boolean playSentAndReceivedSoundEffect = false,saveToDatabase = false;
     private MessageConfiguration leftMessageConfiguration;
@@ -70,6 +71,16 @@ public class ChatLayoutView extends RelativeLayout {
         init(attrs,defStyleAttr,context);
     }
 
+    private void setupDefaultDownloadPath() {
+        downloadPaths = new HashMap<>();
+        setDownloadPath(MessageType.IMAGE,"/"+appNameWithoutSpace+"/Images");
+        setDownloadPath(MessageType.VIDEO,"/"+appNameWithoutSpace+"/Videos");
+        setDownloadPath(MessageType.AUDIO,"/"+appNameWithoutSpace+"/Audios");
+        setDownloadPath(MessageType.RECORDING,"/"+appNameWithoutSpace+"/Recordings");
+        setDownloadPath(MessageType.GIF,"/"+appNameWithoutSpace+"/Gif");
+        setDownloadPath(MessageType.DOCUMENT,"/"+appNameWithoutSpace+"/Documents");
+    }
+
     private void init(AttributeSet attrs, int defStyleAttr,Context context) {
         this.context = context;
         layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -91,6 +102,7 @@ public class ChatLayoutView extends RelativeLayout {
         this.chatLayoutListener = chatLayoutListener;
         helper = new Helper(context);
         setupRecyclerView();
+        setupDefaultDownloadPath();
     }
 
     public void loadSavedChat() {
@@ -346,5 +358,13 @@ public class ChatLayoutView extends RelativeLayout {
             databaseHelper.createTable(roomId);
             loadPreviousChatMessages();
         }
+    }
+
+    public String getAppNameWithoutSpace() {
+        return appNameWithoutSpace;
+    }
+
+    public void setAppNameWithoutSpace(String appNameWithoutSpace) {
+        this.appNameWithoutSpace = appNameWithoutSpace;
     }
 }

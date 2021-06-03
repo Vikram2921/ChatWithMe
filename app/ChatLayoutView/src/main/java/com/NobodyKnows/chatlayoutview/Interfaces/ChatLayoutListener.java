@@ -4,6 +4,7 @@ import android.view.View;
 
 import com.NobodyKnows.chatlayoutview.Model.Contact;
 import com.NobodyKnows.chatlayoutview.Model.Message;
+import com.NobodyKnows.chatlayoutview.Model.SharedFile;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.NobodyKnows.chatlayoutview.ProgressButton;
 
@@ -18,4 +19,5 @@ public interface ChatLayoutListener {
     public void onSenderNameClicked(User user, Message message);
     public void onClickChatFromContactMessage(Contact contact);
     public void onClickAddContactFromContactMessage(Contact contact);
+    public void onPlayAudio(SharedFile sharedFile);
 }

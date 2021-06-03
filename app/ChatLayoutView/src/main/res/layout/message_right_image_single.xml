@@ -16,6 +16,7 @@
         android:layout_marginTop="5dp"
         app:riv_corner_radius_bottom_left="10dp"
         app:riv_corner_radius_bottom_right="10dp"
+        app:riv_corner_radius_top_right="10dp"
         app:riv_corner_radius_top_left="10dp"
         android:src="@drawable/profile"
         app:layout_constraintTop_toTopOf="parent"
@@ -33,7 +34,7 @@
         android:drawablePadding="10dp"
         android:drawableTint="#fff"
         android:background="@drawable/mediainfoback"
-        android:drawableLeft="@drawable/ic_baseline_image_24"
+        android:drawableLeft="@drawable/ic_baseline_image_14"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
     </TextView>

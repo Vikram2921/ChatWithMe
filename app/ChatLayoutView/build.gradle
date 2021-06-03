@@ -36,6 +36,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'jp.wasabeef:glide-transformations:4.+'
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
+    implementation 'com.ixuea:AndroidDownloader:+'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'io.github.ponnamkarthik:richlinkpreview:1.0.9'

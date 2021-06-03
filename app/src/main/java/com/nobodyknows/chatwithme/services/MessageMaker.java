@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -65,6 +66,11 @@ public class MessageMaker {
     private static Boolean isCallMuted = false,isOnSpeaker = false,isVideoOn = false,isCallStarted = false,isVideoViewSwitched = false;
     public static String createMessageId(String myid) {
         String id =""+new Date().getTime();
+        return id;
+    }
+
+    public static String createFileId() {
+        String id = UUID.randomUUID().toString();
         return id;
     }
 
