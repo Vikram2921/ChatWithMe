@@ -18,6 +18,7 @@ public class UsersDB {
     private String username;
     private String bio;
     private String dob;
+    private String statusupdatedate;
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
@@ -34,6 +35,7 @@ public class UsersDB {
     public static final String COLUMN_USERNAME = "username";
     public static final String COLUMN_BIO = "bio";
     public static final String COLUMN_DOB = "dob";
+    public static final String COLUMN_STATUS_UPDATE_DATE = "statusupdatedate";
 
 
     public static final String getTableName() {
@@ -56,6 +58,7 @@ public class UsersDB {
                 + COLUMN_USERNAME +" TEXT,"
                 + COLUMN_BIO +" TEXT,"
                 + COLUMN_DOB +" TEXT,"
+                + COLUMN_STATUS_UPDATE_DATE +" TEXT,"
                 + COLUMN_CURRENT_STATUS +" TEXT"
                 +")";
         return CREATE_TABLE;
@@ -179,5 +182,13 @@ public class UsersDB {
 
     public void setDob(String dob) {
         this.dob = dob;
+    }
+
+    public String getStatusupdatedate() {
+        return statusupdatedate;
+    }
+
+    public void setStatusupdatedate(String statusupdatedate) {
+        this.statusupdatedate = statusupdatedate;
     }
 }

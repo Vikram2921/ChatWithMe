@@ -175,6 +175,7 @@ public class CreateUser extends AppCompatActivity {
                         editor.putString("profile",users.getProfileUrl());
                         editor.putInt("colorCode",users.getColorCode());
                         editor.putString("status",users.getStatus());
+                        editor.putString("statusupdatedate",MessageMaker.formatDate(users.getStatusUpdateDate(),"yyyy-MM-dd"));
                         editor.putBoolean("setupDone",false);
                         editor.apply();
                         Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);

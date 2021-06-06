@@ -61,7 +61,7 @@
                     app:layout_constraintLeft_toLeftOf="@id/name"
                     app:layout_constraintTop_toBottomOf="@id/name"
                     app:layout_constraintRight_toLeftOf="@id/profile"
-                    android:text="@Nobodyknow2921"
+                    android:text=""
                     android:layout_width="0dp"
                     android:layout_height="wrap_content">
                 </TextView>
@@ -246,26 +246,42 @@
                 <TextView
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginTop="15dp"
-                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintRight_toLeftOf="@id/editstatus"
                     android:textColor="#424242"
                     android:textSize="14dp"
                     android:id="@+id/status"
                     app:layout_constraintTop_toBottomOf="@id/title1"
                     android:text="Hi there i am using chatme"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content">
                 </TextView>
                 <TextView
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintRight_toRightOf="@id/status"
                     android:textColor="#6C6C6C"
                     android:textSize="11dp"
                     android:id="@+id/statusupdatedate"
                     app:layout_constraintTop_toBottomOf="@id/status"
                     android:text="11 june 2018"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content">
                 </TextView>
+                <ImageView
+                    app:layout_constraintTop_toTopOf="@id/status"
+                    android:id="@+id/editstatus"
+                    app:layout_constraintBottom_toBottomOf="@id/statusupdatedate"
+                    app:layout_constraintLeft_toRightOf="@id/status"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:src="@drawable/ic_baseline_edit_24"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:padding="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:layout_height="wrap_content"
+                    app:tint="@color/purple_500">
+                </ImageView>
                 <LinearLayout
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:background="#CACACA"

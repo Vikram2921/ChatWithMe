@@ -25,6 +25,7 @@ public class User {
     private String countryName;
     private String countryCode;
     private Date dateOfBirth;
+    private Date statusUpdateDate = new Date();
     private String bio = "";
     private String username ="";
 
@@ -180,5 +181,13 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Date getStatusUpdateDate() {
+        return statusUpdateDate;
+    }
+
+    public void setStatusUpdateDate(Date statusUpdateDate) {
+        this.statusUpdateDate = statusUpdateDate;
     }
 }

@@ -25,10 +25,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.UploadTask;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.text.ParseException;
@@ -74,6 +79,8 @@ public class UpdateProfile extends AppCompatActivity {
         }
         if(usernameOld == null) {
             usernameOld = "";
+        } else {
+            usernameOld = MessageMaker.decryptForFirebaseKey(usernameOld);
         }
         if(bioOld == null) {
             bioOld = "";
@@ -143,6 +150,35 @@ public class UpdateProfile extends AppCompatActivity {
 
     }
 
+    private void checkUsernameAvailability(String oldUsername,String username,String number,String name,String bio) {
+        MessageMaker.getFirebaseService().getDatabaseRef("username").child(username).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot == null || !dataSnapshot.exists()) {
+                    MessageMaker.getFirebaseService().getDatabaseRef("username").child(oldUsername).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull @NotNull Task<Void> task) {
+                            MessageMaker.getFirebaseService().getDatabaseRef("username").child(username).setValue(new Date()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull @NotNull Task<Void> task) {
+                                    skipUsernameCheck(number,username,name,bio);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    pop.dismiss();
+                    Toast.makeText(getApplicationContext(),"Username already taken",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError databaseError) {
+                pop.dismiss();
+            }
+        });
+    }
+
     private void updateInfo() {
         String number = MessageMaker.getMyNumber();
         String newname = name.getText().toString();
@@ -162,41 +198,68 @@ public class UpdateProfile extends AppCompatActivity {
                         .setAnimationSpeed(2)
                         .setDimAmount(0.5f)
                         .show();
-               if(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"profile").equals(profilePath)) {
-                   patch(newusernae,newname,newbio,profilePath);
-               } else {
-                   UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromUri(number+"_profile","Profiles",profilePath);
-                   uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                       @Override
-                       public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                           uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                               @Override
-                               public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                                   if (!task.isSuccessful()) {
-                                       throw task.getException();
-                                   }
-                                   return MessageMaker.getFirebaseService().getStorageRef(number+"_profile","Profiles").getDownloadUrl();
-                               }
-                           }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                               @Override
-                               public void onComplete(@NonNull Task<Uri> task) {
-                                   if (task.isSuccessful()) {
-                                       Uri downloadUri = task.getResult();
-                                       patch(newusernae,newname,newbio,downloadUri.toString());
-                                   } else {
-                                       Toast.makeText(getApplicationContext(),"Failed to upload profile pic",Toast.LENGTH_SHORT).show();
-                                   }
-                               }
-                           });
-                       }
-                   }).addOnFailureListener(new OnFailureListener() {
-                       @Override
-                       public void onFailure(@NonNull Exception e) {
-                           Toast.makeText(getApplicationContext(),"Failed to upload profile pic",Toast.LENGTH_SHORT).show();
-                       }
-                   });
-               }
+                String encryptedUsername = MessageMaker.encryptForFirebaseKey(newusernae);
+                if(!MessageMaker.getFromSharedPrefrences(getApplicationContext(),"username").equals(encryptedUsername)) {
+                    checkUsernameAvailability(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"username"),encryptedUsername,number,newname,newbio);
+                } else {
+                    skipUsernameCheck(number,encryptedUsername,newname,newbio);
+                }
             }
+        }
+    }
+
+    private void skipUsernameCheck(String number,String newusernae,String newname,String newbio) {
+        if(!MessageMaker.getFromSharedPrefrences(getApplicationContext(),"name").equals(newname)) {
+            updateName(number,newusernae,newname,newbio,MessageMaker.getFromSharedPrefrences(getApplicationContext(),"name"));
+        } else {
+            skipName(number,newusernae,newname,newbio);
+        }
+    }
+
+    private void updateName(String number, String newusernae, String newname, String newbio, String name) {
+        MessageMaker.getFirebaseService().getDatabaseRef("Users").child(number).setValue(newname).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull @NotNull Task<Void> task) {
+                skipName(number,newusernae,newname,newbio);
+            }
+        });
+    }
+
+    private void skipName(String number, String newusernae, String newname, String newbio) {
+        if(MessageMaker.getFromSharedPrefrences(getApplicationContext(),"profile").equals(profilePath)) {
+            patch(newusernae,newname,newbio,profilePath);
+        } else {
+            UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromUri(number+"_profile","Profiles",profilePath);
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return MessageMaker.getFirebaseService().getStorageRef(number+"_profile","Profiles").getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                patch(newusernae,newname,newbio,downloadUri.toString());
+                            } else {
+                                Toast.makeText(getApplicationContext(),"Failed to upload profile pic",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    pop.dismiss();
+                    Toast.makeText(getApplicationContext(),"Failed to upload profile pic",Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

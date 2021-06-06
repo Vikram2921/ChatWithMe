@@ -55,6 +55,13 @@ import static com.nobodyknows.chatwithme.Fragments.ChatFragment.userListItems;
 public class MessageMaker {
 
     private static MediaPlayer mp;
+    private static String DOT = "|29DOT21|";
+    private static String DOLLOR = "|29DOLLOR21|";
+    private static String LSQUARE = "|29LSQUARE21|";
+    private static String RSQUARE = "|29RSQUARE21|";
+    private static String HASH = "|29HASH21|";
+    private static String SLASH = "|29SLASH21|";
+    private static String SPACE = "|29SPACE21|";
     private static String myNumber ="";
     private static String mySecurityKey ="";
     private static Call currentCallRef;
@@ -611,6 +618,56 @@ public class MessageMaker {
                 getDatabaseHelper().updateUserLastMessage(message);
             }
         });
+    }
+
+    public static String encryptForFirebaseKey(String value) {
+        if(value.contains(".")) {
+            value = value.replace(".",DOT);
+        }
+        if(value.contains("$")) {
+            value = value.replace("$",DOLLOR);
+        }
+        if(value.contains("[")) {
+            value = value.replace("[",LSQUARE);
+        }
+        if(value.contains("]")) {
+            value = value.replace("]",RSQUARE);
+        }
+        if(value.contains("#")) {
+            value = value.replace("#",HASH);
+        }
+        if(value.contains("/")) {
+            value = value.replace("/",SLASH);
+        }
+        if(value.contains(" ")) {
+            value = value.replace(" ",SPACE);
+        }
+        return value;
+    }
+
+    public static String decryptForFirebaseKey(String value) {
+        if(value.contains(DOT)) {
+            value = value.replace(DOT,".");
+        }
+        if(value.contains(DOLLOR)) {
+            value = value.replace(DOLLOR,"$");
+        }
+        if(value.contains(LSQUARE)) {
+            value = value.replace(LSQUARE,"[");
+        }
+        if(value.contains(RSQUARE)) {
+            value = value.replace(RSQUARE,"]");
+        }
+        if(value.contains(HASH)) {
+            value = value.replace(HASH,"#");
+        }
+        if(value.contains(SLASH)) {
+            value = value.replace(SLASH,"/");
+        }
+        if(value.contains(SPACE)) {
+            value = value.replace(SPACE," ");
+        }
+        return value;
     }
 
 }

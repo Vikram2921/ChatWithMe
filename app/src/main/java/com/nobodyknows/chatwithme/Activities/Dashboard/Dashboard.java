@@ -101,6 +101,7 @@ public class Dashboard extends AppCompatActivity {
         if(sinchClient == null) {
             setupSinch();
         }
+        loadInfo();
 //        bluetooth.onStart();
 //        if(bluetooth.isEnabled()){
 //            startScanning();

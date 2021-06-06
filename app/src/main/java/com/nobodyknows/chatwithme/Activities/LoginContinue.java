@@ -93,6 +93,7 @@ public class LoginContinue extends AppCompatActivity {
                         editor.putString("profile",users.getProfileUrl());
                         editor.putInt("colorCode",users.getColorCode());
                         editor.putString("status",users.getStatus());
+                        editor.putString("statusupdatedate",MessageMaker.formatDate(users.getStatusUpdateDate(),"yyyy-MM-dd"));
                         editor.apply();
                         Intent intent = new Intent(getApplicationContext(), CreatingSetup.class);
                         startActivity(intent);
