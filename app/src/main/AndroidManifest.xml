@@ -29,14 +29,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatWithMe"
         tools:replace="android:theme">
-        <activity android:name=".Activities.Dashboard.UpdateProfile"></activity>
+        <activity android:name=".Activities.Dashboard.UpdateProfile" android:screenOrientation="portrait"></activity>
         <activity
             android:name=".SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/LaunchTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

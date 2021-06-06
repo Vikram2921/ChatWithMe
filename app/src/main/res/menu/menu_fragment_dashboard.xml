@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/chats"
+        android:title="Chats"
+        android:icon="@drawable/ic_baseline_chat_24"/>
+    <item
+        android:id="@+id/freinds"
+        android:title="Freinds"
+        android:icon="@drawable/freinds"/>
+    <item
+        android:id="@+id/notification"
+        android:title="Notifications"
+        android:icon="@drawable/alerter_ic_notifications"/>
+    <item
+        android:id="@+id/calls"
+        android:title="Calls"
+        android:icon="@drawable/audio"/>
+</menu>

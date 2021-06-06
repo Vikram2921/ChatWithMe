@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.bluetooth.BluetoothDevice;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,9 +25,12 @@ import com.giphy.sdk.ui.Giphy;
 import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.nobodyknows.chatwithme.Activities.SearchFreinds;
-import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
+import com.nobodyknows.chatwithme.Fragments.CallsFragment;
+import com.nobodyknows.chatwithme.Fragments.ChatFragment;
+import com.nobodyknows.chatwithme.Fragments.FreindsFragment;
 import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -41,6 +46,8 @@ import com.sinch.android.rtc.video.VideoScalingType;
 import com.vanniktech.emoji.EmojiManager;
 import com.vanniktech.emoji.google.GoogleEmojiProvider;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,8 +62,7 @@ public class Dashboard extends AppCompatActivity {
 
     private CircleImageView profile;
     private TextView name,status;
-    private ViewPager viewPager;
-    private TabLayout tabLayout;
+    private BottomNavigationView bottomNavigationView;
     private View actionbarview;
     private Bluetooth bluetooth;
     private String sinchApplicationKey = "4f4a2900-a600-45ef-9e35-d2d20b6b2e93";
@@ -249,14 +255,14 @@ public class Dashboard extends AppCompatActivity {
     }
 
     private void menuAddChatClick() {
-        if(tabLayout.getSelectedTabPosition() == 0) {
+        if(bottomNavigationView.getSelectedItemId() == R.id.chats) {
             Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
             intent.putExtra("title","Add New Chat");
             startActivity(intent);
-        } else if(tabLayout.getSelectedTabPosition() == 1) {
+        } else if(bottomNavigationView.getSelectedItemId() == R.id.freinds) {
             Intent intent = new Intent(getApplicationContext(), SearchFreinds.class);
             startActivity(intent);
-        } else if(tabLayout.getSelectedTabPosition() == 3) {
+        } else if(bottomNavigationView.getSelectedItemId() == R.id.calls) {
             Intent intent = new Intent(getApplicationContext(),AddNewCall.class);
             startActivity(intent);
         }
@@ -264,15 +270,9 @@ public class Dashboard extends AppCompatActivity {
 
     private void init() {
         profile = actionbarview.findViewById(R.id.profile);
+        bottomNavigationView = findViewById(R.id.bottomnavigation);
         name = actionbarview.findViewById(R.id.name);
         status = actionbarview.findViewById(R.id.status);
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        DashboardFragment dashboardFragment = new DashboardFragment(getSupportFragmentManager());
-        int limit = (dashboardFragment.getCount() > 1 ? dashboardFragment.getCount() - 1 : 1);
-        viewPager.setOffscreenPageLimit(limit);
-        viewPager.setAdapter(dashboardFragment);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
         loadInfo();
         actionbarview.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,6 +284,33 @@ public class Dashboard extends AppCompatActivity {
                 startActivity(intent,activityOptionsCompat.toBundle());
             }
         });
+        setupBottomNavigation();
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
+                Fragment selectedFragment = null;
+                switch (item.getItemId()) {
+                    case R.id.chats:
+                        selectedFragment = new ChatFragment();
+                        break;
+                    case R.id.freinds:
+                        selectedFragment = new FreindsFragment();
+                        break;
+                    case R.id.calls:
+                        selectedFragment = new CallsFragment();
+                        break;
+                }
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.viewpager, selectedFragment)
+                        .commit();
+                return true;
+            }
+        });
+        getSupportFragmentManager().beginTransaction().replace(R.id.viewpager, new ChatFragment()).commit();
     }
 
     private void loadInfo() {
