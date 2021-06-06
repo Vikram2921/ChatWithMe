@@ -27,8 +27,9 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        tools:replace="android:theme"
-        android:theme="@style/Theme.ChatWithMe">
+        android:theme="@style/Theme.ChatWithMe"
+        tools:replace="android:theme">
+        <activity android:name=".Activities.Dashboard.UpdateProfile"></activity>
         <activity
             android:name=".SplashActivity"
             android:screenOrientation="portrait"
@@ -57,7 +58,9 @@
         <activity
             android:name=".Activities.BookVaccine"
             android:screenOrientation="portrait" />
-        <activity android:name=".Activities.Dashboard.ViewContact" />
+        <activity
+            android:name=".Activities.Dashboard.ViewContact"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.SyncContacts"
             android:screenOrientation="portrait" />
@@ -95,7 +98,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

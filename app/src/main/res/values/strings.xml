@@ -6,4 +6,7 @@
     <string name="clear">Clear</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
+    <string name="bio_dummy">We love all animals 🐶 and donate a percentage of sales to marine life 🐠We love all animals 🐶 and donate a percentage of sales to marine life 🐠We love all animals 🐶 and donate a percentage of sales to marine life 🐠We love all animals 🐶 and donate a percentage of sales to marine life 🐠We love all animals 🐶 and donate a percentage of sales to marine life 🐠</string>
+    <string name="no_bio_setup">have not setup bio for his/her profile.</string>
+    <string name="namefield">Name</string>
 </resources>

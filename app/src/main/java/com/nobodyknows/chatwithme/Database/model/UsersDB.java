@@ -15,6 +15,9 @@ public class UsersDB {
     private String muted;
     private String blocked;
     private String blockedBy;
+    private String username;
+    private String bio;
+    private String dob;
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
@@ -28,6 +31,9 @@ public class UsersDB {
     public static final String COLUMN_BLOCKED_BY = "blockedBy";
     public static final String COLUMN_LAST_ONLINE = "lastOnline";
     public static final String COLUMN_CURRENT_STATUS = "currentStatus";
+    public static final String COLUMN_USERNAME = "username";
+    public static final String COLUMN_BIO = "bio";
+    public static final String COLUMN_DOB = "dob";
 
 
     public static final String getTableName() {
@@ -47,6 +53,9 @@ public class UsersDB {
                 + COLUMN_BLOCKED +" TEXT,"
                 + COLUMN_BLOCKED_BY +" TEXT,"
                 + COLUMN_LAST_ONLINE +" TEXT,"
+                + COLUMN_USERNAME +" TEXT,"
+                + COLUMN_BIO +" TEXT,"
+                + COLUMN_DOB +" TEXT,"
                 + COLUMN_CURRENT_STATUS +" TEXT"
                 +")";
         return CREATE_TABLE;
@@ -146,5 +155,29 @@ public class UsersDB {
 
     public void setBlockedBy(String blockedBy) {
         this.blockedBy = blockedBy;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
     }
 }

@@ -3,6 +3,7 @@ package com.nobodyknows.chatwithme.Activities.Dashboard;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import android.bluetooth.BluetoothDevice;
@@ -278,6 +279,16 @@ public class Dashboard extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         loadInfo();
+        actionbarview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ViewContact.class);
+                intent.putExtra("username",MessageMaker.getMyNumber());
+                intent.putExtra("isFromChat",true);
+                ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(Dashboard.this,profile,"profile");
+                startActivity(intent,activityOptionsCompat.toBundle());
+            }
+        });
     }
 
     private void loadInfo() {

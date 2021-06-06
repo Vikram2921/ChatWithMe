@@ -206,6 +206,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(UsersDB.COLUMN_NAME,user.getName());
         values.put(UsersDB.COLUMN_STATUS,user.getStatus());
         values.put(UsersDB.COLUMN_PROFILE_URL,user.getProfileUrl());
+        values.put(UsersDB.COLUMN_USERNAME,user.getUsername());
+        values.put(UsersDB.COLUMN_BIO,user.getBio());
+        values.put(UsersDB.COLUMN_DOB,MessageMaker.formatDate(user.getDateOfBirth(),"yyyy-MM-dd"));
         values.put(UsersDB.COLUMN_COLOR_CODE,user.getColorCode());
         values.put(UsersDB.COLUMN_VERIFIED,MessageMaker.convertBoolean(user.getVerified()));
         values.put(UsersDB.COLUMN_MUTED,MessageMaker.convertBoolean(user.getMuted()));
@@ -255,6 +258,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         user.setStatus(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_STATUS)));
         user.setProfileUrl(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_PROFILE_URL)));
         user.setColorCode(cursor.getInt(cursor.getColumnIndex(UsersDB.COLUMN_COLOR_CODE)));
+        user.setUsername(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_USERNAME)));
+        user.setBio(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_BIO)));
+        user.setDateOfBirth(MessageMaker.StringToDate(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_DOB)),"yyyy-MM-dd"));
         user.setVerified(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_VERIFIED))));
         user.setMuted(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_MUTED))));
         user.setBlocked(MessageMaker.convertBoolean(cursor.getString(cursor.getColumnIndex(UsersDB.COLUMN_BLOCKED))));

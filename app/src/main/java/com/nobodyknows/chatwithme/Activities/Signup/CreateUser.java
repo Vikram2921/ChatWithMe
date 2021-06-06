@@ -28,6 +28,7 @@ import com.google.firebase.storage.UploadTask;
 import com.nobodyknows.chatwithme.Activities.Login;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.FirebaseService;
+import com.nobodyknows.chatwithme.services.MessageMaker;
 
 import java.io.File;
 
@@ -168,7 +169,11 @@ public class CreateUser extends AppCompatActivity {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString("number",users.getContactNumber());
                         editor.putString("name",users.getName());
+                        editor.putString("username",users.getUsername());
+                        editor.putString("bio",users.getBio());
+                        editor.putString("dob", MessageMaker.formatDate(users.getDateOfBirth(),"yyyy-MM-dd"));
                         editor.putString("profile",users.getProfileUrl());
+                        editor.putInt("colorCode",users.getColorCode());
                         editor.putString("status",users.getStatus());
                         editor.putBoolean("setupDone",false);
                         editor.apply();

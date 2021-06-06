@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -548,8 +549,22 @@ public class MessageMaker {
     }
 
     public static String formatDate(Date date,String format) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-        return simpleDateFormat.format(date);
+        if(date != null) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+            return simpleDateFormat.format(date);
+        }
+        return "";
+    }
+
+    public static Date StringToDate(String stringdate,String format) {
+        Date date = new Date();
+        SimpleDateFormat formate = new SimpleDateFormat(format);
+        try {
+            date = formate.parse(stringdate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 
     public static Date longToDate(long longdate) throws ParseException {

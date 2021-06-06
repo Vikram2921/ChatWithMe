@@ -24,6 +24,10 @@ public class User {
     private Date accountCreated = new Date();
     private String countryName;
     private String countryCode;
+    private Date dateOfBirth;
+    private String bio = "";
+    private String username ="";
+
     private List<UserStory> stories = new ArrayList<>();
 
     public String getName() {
@@ -152,5 +156,29 @@ public class User {
 
     public void setBlockedBy(String blockedBy) {
         this.blockedBy = blockedBy;
+    }
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
