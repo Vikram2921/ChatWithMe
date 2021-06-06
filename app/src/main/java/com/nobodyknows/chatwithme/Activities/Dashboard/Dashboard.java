@@ -24,7 +24,6 @@ import com.github.tamir7.contacts.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
-import com.nobodyknows.chatwithme.Activities.BookVaccine;
 import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Fragments.DashboardFragment;
 import com.nobodyknows.chatwithme.MainActivity;
@@ -57,7 +56,6 @@ public class Dashboard extends AppCompatActivity {
     private CircleImageView profile;
     private TextView name,status;
     private ViewPager viewPager;
-    private ImageView addChat,addConnection;
     private TabLayout tabLayout;
     private View actionbarview;
     private Bluetooth bluetooth;
@@ -222,10 +220,6 @@ public class Dashboard extends AppCompatActivity {
                 break;
             case R.id.menu_nearby_chat:
                 break;
-            case R.id.menu_book_vacine:
-                Intent intent = new Intent(getApplicationContext(), BookVaccine.class);
-                startActivity(intent);
-                break;
             case R.id.menu_signout:
                 signout();
                 break;
@@ -259,7 +253,7 @@ public class Dashboard extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(),AddNewChat.class);
             intent.putExtra("title","Add New Chat");
             startActivity(intent);
-        } else if(tabLayout.getSelectedTabPosition() == 2) {
+        } else if(tabLayout.getSelectedTabPosition() == 1) {
             Intent intent = new Intent(getApplicationContext(), SearchFreinds.class);
             startActivity(intent);
         } else if(tabLayout.getSelectedTabPosition() == 3) {

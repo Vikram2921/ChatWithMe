@@ -47,17 +47,11 @@
             android:name=".Activities.AudioCall"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.SetuLogin"
-            android:screenOrientation="portrait" />
 
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <activity
-            android:name=".Activities.BookVaccine"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.Dashboard.ViewContact"
             android:screenOrientation="portrait" />
