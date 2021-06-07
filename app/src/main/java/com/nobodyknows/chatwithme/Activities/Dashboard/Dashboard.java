@@ -31,6 +31,7 @@ import com.nobodyknows.chatwithme.Activities.SearchFreinds;
 import com.nobodyknows.chatwithme.Fragments.CallsFragment;
 import com.nobodyknows.chatwithme.Fragments.ChatFragment;
 import com.nobodyknows.chatwithme.Fragments.FreindsFragment;
+import com.nobodyknows.chatwithme.Fragments.NotificationsFragment;
 import com.nobodyknows.chatwithme.MainActivity;
 import com.nobodyknows.chatwithme.R;
 import com.nobodyknows.chatwithme.services.MessageMaker;
@@ -301,6 +302,9 @@ public class Dashboard extends AppCompatActivity {
                         break;
                     case R.id.calls:
                         selectedFragment = new CallsFragment();
+                        break;
+                    case R.id.notification:
+                        selectedFragment = new NotificationsFragment();
                         break;
                 }
                 getSupportFragmentManager()

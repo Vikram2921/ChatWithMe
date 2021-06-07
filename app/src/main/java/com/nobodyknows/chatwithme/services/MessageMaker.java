@@ -8,7 +8,6 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -22,6 +21,7 @@ import com.NobodyKnows.chatlayoutview.Model.Message;
 import com.NobodyKnows.chatlayoutview.Model.User;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.UploadTask;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 import com.nobodyknows.chatwithme.Activities.AudioCall;
@@ -36,7 +36,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -69,6 +71,7 @@ public class MessageMaker {
     private static View myVideoView,remoteVideoView;
     private static String currentCallId = "";
     private static FirebaseService firebaseService;
+    private static Map<String, UploadTask> uploadTaskMap = new HashMap<>();
     private static DatabaseHelper databaseHelper;
     private static com.NobodyKnows.chatlayoutview.DatabaseHelper.DatabaseHelper databaseHelperChat;
     private static Boolean isCallMuted = false,isOnSpeaker = false,isVideoOn = false,isCallStarted = false,isVideoViewSwitched = false;
@@ -394,23 +397,32 @@ public class MessageMaker {
         updateCallModel(callModel,call);
         getDatabaseHelper().updateCallInfo(callModel);
         if(updateinlist) {
-            if(!callIds.contains(callModel.getCallId())) {
-                calls.add(0,callModel);
-                callIds.add(0,callModel.getCallId());
-                callsRecyclerViewAdapter.notifyItemInserted(0);
-                if(callModel.getEndCause().equalsIgnoreCase("NO_ANSWER") || callModel.getEndCause().equalsIgnoreCase("FAILURE") || callModel.getEndCause().equalsIgnoreCase("CANCELED") || callModel.getEndCause().equalsIgnoreCase("TIMEOUT")) {
-                    Message message = getDefaultObject(myNumber,callModel.getUsername(),createRoomId(callModel.getUsername()));
-                    message.setMessageStatus(MessageStatus.SENT);
-                    message.setMessageType(callModel.getCalltype().equalsIgnoreCase("Video")?MessageType.MISSED_VIDEO_CALL:MessageType.MISSED_AUDIO_CALL);
-                    sendMessageNow(message);
+            if(callsRecyclerViewAdapter != null) {
+                if(!callIds.contains(callModel.getCallId())) {
+                    calls.add(0,callModel);
+                    callIds.add(0,callModel.getCallId());
+                    callsRecyclerViewAdapter.notifyItemInserted(0);
+                    if(callModel.getEndCause().equalsIgnoreCase("NO_ANSWER") || callModel.getEndCause().equalsIgnoreCase("FAILURE") || callModel.getEndCause().equalsIgnoreCase("CANCELED") || callModel.getEndCause().equalsIgnoreCase("TIMEOUT")) {
+                        Message message = getDefaultObject(myNumber,callModel.getUsername(),createRoomId(callModel.getUsername()));
+                        message.setMessageStatus(MessageStatus.SENT);
+                        message.setMessageType(callModel.getCalltype().equalsIgnoreCase("Video")?MessageType.MISSED_VIDEO_CALL:MessageType.MISSED_AUDIO_CALL);
+                        sendMessageNow(message);
+                    }
+                } else {
+                    int index = callIds.indexOf(callModel.getCallId());
+                    calls.remove(index);
+                    calls.add(index,callModel);
+                    callsRecyclerViewAdapter.notifyItemChanged(index);
                 }
-            } else {
-                int index = callIds.indexOf(callModel.getCallId());
-                calls.remove(index);
-                calls.add(index,callModel);
-                callsRecyclerViewAdapter.notifyItemChanged(index);
+                callNotFound.setVisibility(View.GONE);
             }
-            callNotFound.setVisibility(View.GONE);
+        } else {
+            if(callModel.getEndCause().equalsIgnoreCase("NO_ANSWER") || callModel.getEndCause().equalsIgnoreCase("FAILURE") || callModel.getEndCause().equalsIgnoreCase("CANCELED") || callModel.getEndCause().equalsIgnoreCase("TIMEOUT")) {
+                Message message = getDefaultObject(myNumber,callModel.getUsername(),createRoomId(callModel.getUsername()));
+                message.setMessageStatus(MessageStatus.SENT);
+                message.setMessageType(callModel.getCalltype().equalsIgnoreCase("Video")?MessageType.MISSED_VIDEO_CALL:MessageType.MISSED_AUDIO_CALL);
+                sendMessageNow(message);
+            }
         }
     }
 
@@ -670,4 +682,15 @@ public class MessageMaker {
         return value;
     }
 
+    public static UploadTask getUploadTask(String messageId, String roomId, String sharedFileId) {
+        return uploadTaskMap.get(messageId+"]-]"+roomId+"]-]"+sharedFileId);
+    }
+
+    public static void addInUploadTaskMap(String messageId, String roomId,String sharedFileId,UploadTask uploadTask) {
+        uploadTaskMap.put(messageId+"]-]"+roomId+"]-]"+sharedFileId,uploadTask);
+    }
+
+    public static void removeUploadTaskMap(String messageId, String roomId,String sharedFileId) {
+        uploadTaskMap.remove(messageId+"]-]"+roomId+"]-]"+sharedFileId);
+    }
 }

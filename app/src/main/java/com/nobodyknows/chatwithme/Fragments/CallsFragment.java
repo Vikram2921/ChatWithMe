@@ -40,6 +40,12 @@ public class CallsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        loadList();
+    }
+
     private void init() {
         callNotFound = view.findViewById(R.id.notfound);
         recyclerView = view.findViewById(R.id.recyclerview);
@@ -61,7 +67,9 @@ public class CallsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(callsRecyclerViewAdapter);
-        loadList();
+        callIds.clear();
+        calls.clear();
+
     }
 
     private void loadList() {

@@ -1055,7 +1055,7 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
 
             @Override
             public void onUpload(Message message, ProgressButton progressButton) {
-                startUploading(message,progressButton);
+                startUploading(message);
             }
 
             @Override
@@ -1186,49 +1186,54 @@ public class ChatRoom extends AppCompatActivity implements GiphyDialogFragment.G
         }
     }
 
-    private void startUploading(Message message, ProgressButton progressButton) {
+    private void startUploading(Message message) {
         for(int i=0;i<message.getSharedFiles().size();i++) {
-            UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromUri(message.getSharedFiles().get(i).getFileId(),message.getRoomId(),message.getSharedFiles().get(i).getLocalPath());
-            int finalI = i;
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                        @Override
-                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
+            if(MessageMaker.getUploadTask(message.getMessageId(),message.getRoomId(),message.getSharedFiles().get(i).getFileId()) == null && (message.getSharedFiles().get(i).getUrl() == null || message.getSharedFiles().get(i).getUrl().length() == 0)) {
+                UploadTask uploadTask = MessageMaker.getFirebaseService().uploadFromUri(message.getSharedFiles().get(i).getFileId(),message.getRoomId(),message.getSharedFiles().get(i).getLocalPath());
+                int finalI = i;
+                MessageMaker.addInUploadTaskMap(message.getMessageId(),message.getRoomId(),message.getSharedFiles().get(i).getFileId(),uploadTask);
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    throw task.getException();
+                                }
+                                return MessageMaker.getFirebaseService().getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
                             }
-                            return MessageMaker.getFirebaseService().getStorageRef(message.getSharedFiles().get(finalI).getFileId(),message.getRoomId()).getDownloadUrl();
-                        }
-                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Uri> task) {
-                            if (task.isSuccessful()) {
-                                Uri downloadUri = task.getResult();
-                                SharedFile sharedFile = message.getSharedFiles().get(finalI);
-                                sharedFile.setUrl(downloadUri.toString());
-                                uploadPreview(message,sharedFile,progressButton,finalI);
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    Uri downloadUri = task.getResult();
+                                    SharedFile sharedFile = message.getSharedFiles().get(finalI);
+                                    sharedFile.setUrl(downloadUri.toString());
+                                    uploadPreview(message,sharedFile,LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId()),finalI);
+                                }
                             }
-                        }
-                    });
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    chatLayoutView.getDatabaseHelper().updateMessageUploadStatus(message.getRoomId(),message.getMessageId(), UploadStatus.FAILED);
-                    progressButton.setUploadType();
-                    progressButton.setLabel("Retry");
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                    if(message.getSharedFiles().size() == 1) {
-                        double progress = ((double) snapshot.getBytesTransferred() /(double) snapshot.getTotalByteCount()) * 100;
-                        progressButton.setProgress(progress);
+                        });
                     }
-                }
-            });
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        chatLayoutView.getDatabaseHelper().updateMessageUploadStatus(message.getRoomId(),message.getMessageId(), UploadStatus.FAILED);
+                        LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId()).setUploadType();
+                        LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId()).setLabel("Retry");
+                    }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                        if(message.getSharedFiles().size() == 1) {
+                            double progress = ((double) snapshot.getBytesTransferred() /(double) snapshot.getTotalByteCount()) * 100;
+                            LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId()).setProgress(progress);
+                        }
+                    }
+                });
+            } else {
+
+            }
         }
     }
 

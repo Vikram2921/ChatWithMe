@@ -63,7 +63,7 @@ public class LayoutService {
     private static ImageView LplayPause;
     private static String LmessageId;
     private static MediaPlayer mediaPlayer;
-    private static Map<String,View> uploadView;
+    private static Map<String,ProgressButton> uploadView;
     private static Map<String,ArrayList<DownloadInfo>> downloadInfos;
 
     public static void initializeHelper(Context context) {
@@ -72,11 +72,17 @@ public class LayoutService {
         downloadInfos = new HashMap<>();
     }
 
-    public static void addUploadView(String messageId,String roomid,View view) {
-        uploadView.put(messageId+"]-]"+roomid,view);
+    public static void addUploadView(String messageId,String roomid,ProgressButton progressButton) {
+        if(!uploadView.containsKey(messageId+"]-]"+roomid)) {
+            uploadView.put(messageId+"]-]"+roomid,progressButton);
+        }
     }
 
-    public static View getUploadView(String messageId,String roomId) {
+    public static void removeUploadView(String messageId,String roomid) {
+        uploadView.remove(messageId+"]-]"+roomid);
+    }
+
+    public static ProgressButton getUploadViewProgressButton(String messageId,String roomId) {
         return uploadView.get(messageId+"]-]"+roomId);
     }
 
@@ -322,17 +328,21 @@ public class LayoutService {
 
     public static void loadMediaViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
         RoundedImageView roundedImageView = view.findViewById(R.id.image);
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        ProgressButton progressButton =LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId());
+        if(progressButton == null) {
+            progressButton = view.findViewById(R.id.progressbutton);
+        }
         TextView info = view.findViewById(R.id.info);
         info.setText(getSize(message.getSharedFiles().get(0).getSize()));
+        ProgressButton finalProgressButton = progressButton;
         if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
             progressButton.initalize();
             progressButton.setUploadType();
             Glide.with(context).load(message.getSharedFiles().get(0).getLocalPath()).into(roundedImageView);
             if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                chatLayoutListener.onUpload(message,progressButton);
-                addUploadView(message.getMessageId(),message.getRoomId(),view);
+                addUploadView(message.getMessageId(),message.getRoomId(),progressButton);
                 progressButton.setProgress(0);
+                chatLayoutListener.onUpload(message,progressButton);
             } else {
                 if(message.getUploadStatus() == UploadStatus.FAILED) {
                     progressButton.setLabel("Retry");
@@ -341,14 +351,14 @@ public class LayoutService {
             progressButton.setProgressClickListener(new ProgressClickListener() {
                 @Override
                 public void onStart() {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    addUploadView(message.getMessageId(),message.getRoomId(), finalProgressButton);
+                    chatLayoutListener.onUpload(message, finalProgressButton);
                 }
 
                 @Override
                 public void onCancel() {
                     databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                    chatLayoutListener.onUploadCanceled(message,progressButton);
+                    chatLayoutListener.onUploadCanceled(message, finalProgressButton);
                 }
             });
         } else {
@@ -370,7 +380,7 @@ public class LayoutService {
                     progressButton.setProgressClickListener(new ProgressClickListener() {
                         @Override
                         public void onStart() {
-                            downloadFile(context,progressButton,message,mynumber);
+                            downloadFile(context,finalProgressButton,message,mynumber);
                         }
 
                         @Override
@@ -397,11 +407,15 @@ public class LayoutService {
         info2.setText(getSize(message.getSharedFiles().get(1).getSize()));
         info3.setText(getSize(message.getSharedFiles().get(2).getSize()));
         info4.setText(getSize(message.getSharedFiles().get(3).getSize()));
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        ProgressButton progressButton =LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId());
+        if(progressButton == null) {
+            progressButton = view.findViewById(R.id.progressbutton);
+        }
         if(message.getSharedFiles().size() > 4) {
             moretext.setVisibility(View.VISIBLE);
             moretext.setText("+ "+(message.getSharedFiles().size() - 3));
         }
+        ProgressButton finalProgressButton = progressButton;
         if(message.getSender().equals(mynumber) && message.getMessageStatus() == MessageStatus.SENDING) {
             progressButton.initalize();
             progressButton.setUploadType();
@@ -410,9 +424,9 @@ public class LayoutService {
             Glide.with(context).load(message.getSharedFiles().get(2).getLocalPath()).into(image3);
             Glide.with(context).load(message.getSharedFiles().get(3).getLocalPath()).into(image4);
             if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                chatLayoutListener.onUpload(message,progressButton);
-                addUploadView(message.getMessageId(),message.getRoomId(),view);
+                addUploadView(message.getMessageId(),message.getRoomId(),progressButton);
                 progressButton.setProgress(0);
+                chatLayoutListener.onUpload(message,progressButton);
             } else {
                 if(message.getUploadStatus() == UploadStatus.FAILED) {
                     progressButton.setLabel("Retry");
@@ -421,14 +435,14 @@ public class LayoutService {
             progressButton.setProgressClickListener(new ProgressClickListener() {
                 @Override
                 public void onStart() {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    addUploadView(message.getMessageId(),message.getRoomId(), finalProgressButton);
+                    chatLayoutListener.onUpload(message, finalProgressButton);
                 }
 
                 @Override
                 public void onCancel() {
                     databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                    chatLayoutListener.onUploadCanceled(message,progressButton);
+                    chatLayoutListener.onUploadCanceled(message, finalProgressButton);
                 }
             });
         } else {
@@ -438,7 +452,7 @@ public class LayoutService {
             progressButton.setProgressClickListener(new ProgressClickListener() {
                 @Override
                 public void onStart() {
-                    downloadFile(context,progressButton,message,mynumber);
+                    downloadFile(context,finalProgressButton,message,mynumber);
                 }
 
                 @Override
@@ -476,7 +490,7 @@ public class LayoutService {
                         progressButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                downloadFile(context,progressButton,message,mynumber);
+                                downloadFile(context,finalProgressButton,message,mynumber);
                             }
                         });
                     }
@@ -680,8 +694,12 @@ public class LayoutService {
     public static void loadDocumentViewSingle(Context context,Message message,ChatLayoutListener chatLayoutListener,View view,String mynumber) {
         TextView filename = view.findViewById(R.id.filename);
         TextView size = view.findViewById(R.id.size);
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        ProgressButton progressButton =LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId());
+        if(progressButton == null) {
+            progressButton = view.findViewById(R.id.progressbutton);
+        }
         SharedFile sharedFile = message.getSharedFiles().get(0);
+        ProgressButton finalProgressButton = progressButton;
         if(sharedFile != null) {
             filename.setText(sharedFile.getName());
             size.setText(LayoutService.getSize(sharedFile.getSize()));
@@ -689,9 +707,9 @@ public class LayoutService {
                 progressButton.initalize();
                 progressButton.setUploadType();
                 if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    addUploadView(message.getMessageId(),message.getRoomId(),progressButton);
                     progressButton.setProgress(0);
+                    chatLayoutListener.onUpload(message,progressButton);
                 } else {
                     if(message.getUploadStatus() == UploadStatus.FAILED) {
                         progressButton.setLabel("Retry");
@@ -700,14 +718,14 @@ public class LayoutService {
                 progressButton.setProgressClickListener(new ProgressClickListener() {
                     @Override
                     public void onStart() {
-                        chatLayoutListener.onUpload(message,progressButton);
-                        addUploadView(message.getMessageId(),message.getRoomId(),view);
+                        addUploadView(message.getMessageId(),message.getRoomId(), finalProgressButton);
+                        chatLayoutListener.onUpload(message, finalProgressButton);
                     }
 
                     @Override
                     public void onCancel() {
                         databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                        chatLayoutListener.onUploadCanceled(message,progressButton);
+                        chatLayoutListener.onUploadCanceled(message, finalProgressButton);
                     }
                 });
             } else {
@@ -724,7 +742,7 @@ public class LayoutService {
                         progressButton.setProgressClickListener(new ProgressClickListener() {
                             @Override
                             public void onStart() {
-                                downloadFile(context,progressButton,message,mynumber);
+                                downloadFile(context,finalProgressButton,message,mynumber);
                             }
 
                             @Override
@@ -741,9 +759,13 @@ public class LayoutService {
     public static void loadAudioViewSingle(Context context, Message message, ChatLayoutListener chatLayoutListener, View view, String mynumber) {
         TextView filename = view.findViewById(R.id.filename);
         TextView size = view.findViewById(R.id.size);
-        ProgressButton progressButton = view.findViewById(R.id.progressbutton);
+        ProgressButton progressButton =LayoutService.getUploadViewProgressButton(message.getMessageId(),message.getRoomId());
+        if(progressButton == null) {
+          progressButton = view.findViewById(R.id.progressbutton);
+        }
         ImageView playAudio  = view.findViewById(R.id.playicon);
         SharedFile sharedFile = message.getSharedFiles().get(0);
+        ProgressButton finalProgressButton = progressButton;
         if(sharedFile != null) {
             filename.setText(sharedFile.getName());
             size.setText(LayoutService.getSize(sharedFile.getSize()));
@@ -758,9 +780,9 @@ public class LayoutService {
                     }
                 });
                 if(message.getUploadStatus() == UploadStatus.NOT_STARTED) {
-                    chatLayoutListener.onUpload(message,progressButton);
-                    addUploadView(message.getMessageId(),message.getRoomId(),view);
+                    addUploadView(message.getMessageId(),message.getRoomId(),progressButton);
                     progressButton.setProgress(0);
+                    chatLayoutListener.onUpload(message,progressButton);
                 } else {
                     if(message.getUploadStatus() == UploadStatus.FAILED) {
                         progressButton.setLabel("Retry");
@@ -769,14 +791,14 @@ public class LayoutService {
                 progressButton.setProgressClickListener(new ProgressClickListener() {
                     @Override
                     public void onStart() {
-                        chatLayoutListener.onUpload(message,progressButton);
-                        addUploadView(message.getMessageId(),message.getRoomId(),view);
+                        addUploadView(message.getMessageId(),message.getRoomId(), finalProgressButton);
+                        chatLayoutListener.onUpload(message, finalProgressButton);
                     }
 
                     @Override
                     public void onCancel() {
                         databaseHelper.updateMessageUploadStatus(message.getRoomId(),message.getMessageId(),UploadStatus.CANCELED);
-                        chatLayoutListener.onUploadCanceled(message,progressButton);
+                        chatLayoutListener.onUploadCanceled(message, finalProgressButton);
                     }
                 });
             } else {
@@ -808,7 +830,7 @@ public class LayoutService {
                         progressButton.setProgressClickListener(new ProgressClickListener() {
                             @Override
                             public void onStart() {
-                                downloadFile(context,progressButton,message,mynumber);
+                                downloadFile(context,finalProgressButton,message,mynumber);
                             }
 
                             @Override

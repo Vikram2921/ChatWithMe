@@ -144,9 +144,9 @@ public class ChatLayoutView extends RelativeLayout {
         recyclerViewAdapter = new RecyclerViewAdapter(getContext(),messages,helper.getUserMap(),downloadPaths,myUsername,chatLayoutListener);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setReverseLayout(false);
-        layoutManager.setItemPrefetchEnabled(true);
-        layoutManager.setSmoothScrollbarEnabled(true);
-        layoutManager.setInitialPrefetchItemCount(20);
+//        layoutManager.setItemPrefetchEnabled(true);
+//        layoutManager.setSmoothScrollbarEnabled(true);
+//        layoutManager.setInitialPrefetchItemCount(20);
         layoutManager.setRecycleChildrenOnDetach(true);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
